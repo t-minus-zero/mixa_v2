@@ -1,14 +1,16 @@
 "use client"
 
-const MixCard = () => {
+import { number } from "zod";
+
+const MixCard = ( { key, id, mName }: { key: number; id: number; mName: any } ) => {
     return (
       <a 
         style={{ gridTemplateColumns: "1fr", gridTemplateRows: "1fr 1fr" }}
         className="w-full h-80 bg-zinc-50 rounded-xl cursor-pointer overflow-hidden group grid">
         <div className="p-8 flex flex-row justify-between items-start gap-4 group">
           <div className="flex flex-col items-start justify-center">
-            <span className="text-md font-bold text-zinc-700">Component name</span>
-            <p className="text-xs text-zinc-500">Edited 1 Day Ago</p>
+            <span className="text-md font-bold text-zinc-700">{mName}</span>
+            <p className="text-xs text-zinc-500">Edited {id} Day Ago</p>
           </div>
           <div className="text-zinc-900 cursor-pointer leading-5">
             <button className="flex flex-row items-center justify-center rounded-full hover:bg-white border border-zinc-300 font-bold text-sm text-zinc-500 w-10 h-10 leading-5"> &#8942; </button>

@@ -1,5 +1,3 @@
-"use client"
-
 import React from 'react';
 import { DashboardProvider } from '../context/DashboardContext';
 import DashboardLayout from '../layouts/DashboardLayout';

@@ -2,11 +2,15 @@ import Link from "next/link";
 
 import { LatestPost } from "MixaDev/app/_components/post";
 import { api, HydrateClient } from "MixaDev/trpc/server";
+import {db} from '../server/db';
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
 
   void api.post.getLatest.prefetch();
+
+  const posts = await db.query.posts.findMany();
+  console.log(posts);
 
   return (
     <HydrateClient>
@@ -15,6 +19,11 @@ export default async function Home() {
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
             Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
           </h1>
+          {posts.map((post) => (
+            <div key={post.id} className="flex flex-col gap-4">
+              <h2 className="text-3xl font-bold">{post.name}</h2>
+            </div>
+          ))}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
             <Link
               className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
