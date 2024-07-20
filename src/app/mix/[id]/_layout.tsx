@@ -1,4 +1,4 @@
-"use client"
+/*"use client"
 
 import React from 'react';
 import { MixProvider } from '../../context/MixContext';
@@ -12,4 +12,4 @@ export default function MixRootLayout({ children }: { children: React.ReactNode 
       </MixLayout>
     </MixProvider>
   );
-}
+}*/

@@ -1,6 +1,33 @@
 "use client"
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { api } from 'MixaDev/trpc/react';
+
+const DashboardDataContext = createContext(null);
+
+export const DashboardDataProvider = ({ children }) => {
+    const [latestPost, setLatestPost] = useState(null);
+
+    const { data: post } = api.post.getLatest.useQuery();
+
+    useEffect(() => {
+        if (post) {
+            setLatestPost(post);
+        }
+    }, [post]);
+
+    return (
+        <DashboardDataContext.Provider value={{ latestPost }}>
+            {children}
+        </DashboardDataContext.Provider>
+    );
+};
+
+export const useDashboardData = () => {
+    return useContext(DashboardDataContext);
+};
+
+/*---------------------------------*/
 
 interface Project {
   id: string;

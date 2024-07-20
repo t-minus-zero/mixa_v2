@@ -1,8 +1,7 @@
 "use client"
 
-import { number } from "zod";
 
-const MixCard = ( { key, id, mName }: { key: number; id: number; mName: any } ) => {
+const MixCard = ( { id, mName }: { id: number; mName: any } ) => {
     return (
       <a 
         style={{ gridTemplateColumns: "1fr", gridTemplateRows: "1fr 1fr" }}
@@ -21,7 +20,7 @@ const MixCard = ( { key, id, mName }: { key: number; id: number; mName: any } ) 
             className="w-5/6 h-full ">
             <img
               className="rounded-xl object-cover w-full h-full" 
-              src="https://via.placeholder.com/150" 
+              src="https://utfs.io/f/9ff23c88-bd7a-40ce-ab9d-6d25d73d8ccf-n9ys8r.jpg" 
               alt="Component image" />
           </div>
         </div>

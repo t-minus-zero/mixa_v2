@@ -1,19 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { api } from "MixaDev/trpc/react";
+import { useDashboardData  } from '../../context/DashboardContext';
 
 const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
-    const [latestPost] = api.post.getLatest.useSuspenseQuery();
-
-    const utils = api.useUtils();
-    const [name, setName] = useState("string");
-    const createPost = api.post.create.useMutation({
-        onSuccess: async () => {
-            await utils.post.invalidate();
-            setName("");
-        },
-    });
+    const { latestPost } = useDashboardData();
 
     return (
         <nav 
@@ -43,7 +33,7 @@ const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
                         <div className="flex flex-row items-center justify-start">
                             <a className="flex flex-row items-center justify-start gap-2 cursor-pointer">  
                                 <span className="flex flex-row items-center justify-center rounded-md font-bold text-sm text-zinc-50 bg-zinc-900 w-5 h-5 leading-5"> X </span>
-                                <p className="flex flex-row items-center justify-start text-sm text-zinc-900 leading-5"> {"Project"} </p>
+                                <p className="flex flex-row items-center justify-start text-sm text-zinc-900 leading-5"> {latestPost ? latestPost.title : "Untitled"} </p>
                             </a>
                         </div>
                     </li>
@@ -53,7 +43,7 @@ const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
                         </div>
                         <div className="flex flex-row items-center justify-start">
                             <button
-                                onClick={(e) => {e.preventDefault(); createPost.mutate( {name} )}} 
+                                //onClick={(e) => {e.preventDefault(); createPost.mutate( {name} )}} 
                                 className="flex flex-row items-center justify-start py-2 px-4 rounded-full gap-2 border border-zinc-200">
                                 <span className="flex flex-row items-center justify-center text-xl font-thin text-zinc-700 leading-5 -mt-0.5"> + </span>
                                 <p className="flex flex-row items-center justify-start text-sm text-zinc-700 leading-5"> Create Mix </p>

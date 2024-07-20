@@ -1,13 +1,15 @@
+"use client"
+
 import React from 'react';
-import { DashboardProvider } from '../context/DashboardContext';
+import { DashboardDataProvider  } from '../context/DashboardContext';
 import DashboardLayout from '../layouts/DashboardLayout';
 
 export default function DashboardRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardProvider>
+    <DashboardDataProvider>
       <DashboardLayout>
         {children}
       </DashboardLayout>
-    </DashboardProvider>
+    </DashboardDataProvider>
   );
 }
