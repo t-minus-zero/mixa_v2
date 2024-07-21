@@ -1,9 +1,9 @@
 "use client"
-
+import Link from "next/link";
 
 const MixCard = ( { id, mName }: { id: number; mName: any } ) => {
     return (
-      <a 
+      <Link href={`/mix/${id}`} 
         style={{ gridTemplateColumns: "1fr", gridTemplateRows: "1fr 1fr" }}
         className="w-full h-80 bg-zinc-50 rounded-xl cursor-pointer overflow-hidden group grid">
         <div className="p-8 flex flex-row justify-between items-start gap-4 group">
@@ -24,7 +24,7 @@ const MixCard = ( { id, mName }: { id: number; mName: any } ) => {
               alt="Component image" />
           </div>
         </div>
-      </a>
+      </Link>
     );
   }
 

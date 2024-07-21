@@ -1,0 +1,10 @@
+under @modal you can define folders with "(.)foldername"
+the "(.)" means "go up one level"
+The page.tsx inside the "(.)foldername" gets rendered at the position of the modal tag at the parent's page.tsx
+
+outside the @modal you can define a folder with the name "foldername"
+The page.tsx of "foldername" will be rendered when the page is reloaded and will become a child of it's parent's page.tsx
+
+
+
+

@@ -1,16 +1,14 @@
 import MixCard from "./MixCard";
-import Link from "next/link";
 
-const ProjectsGrid = ( {posts} : {posts : any} ) => {
+const ProjectsGrid = ( {mixes} : {mixes : any} ) => {
     return (
         <div
         style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr", gridTemplateRows: "1fr", maxWidth: "1440px" }} 
         className="w-full grid gap-12">
-          {posts.map((post : any, index : number) => (
-            <div key={post.id}
+          {mixes.map((mix : any, index : number) => (
+            <div key={mix.id}
               style={{gridColumn: index === 0 ? "span 2": "span 1" }}>
-              <Link href={`/mix/${post.id}`} >{post.title}</Link>
-              <MixCard id={post.id} mName={post.title}/>
+                <MixCard id={mix.id} mName={mix.id}/>
             </div>
           ))}
       </div>

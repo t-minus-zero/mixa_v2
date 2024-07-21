@@ -1,5 +1,6 @@
 import { postRouter } from "MixaDev/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "MixaDev/server/api/trpc";
+import { mixRouter } from "./routers/mix";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from "MixaDev/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  mixRouter: mixRouter,
 });
 
 // export type definition of API

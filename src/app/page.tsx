@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LatestPost } from "MixaDev/app/_components/post";
+import { LatestMix } from "MixaDev/app/_components/mix";
 import { api, HydrateClient } from "MixaDev/trpc/server";
 import {db} from '../server/db';
 
@@ -12,6 +13,7 @@ export default async function Home() {
   void api.post.getLatest.prefetch();
 
   const posts = await db.query.posts.findMany();
+  
   console.log(posts);
 
   return (
@@ -34,7 +36,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <LatestPost />
+          <LatestMix />
         </div>
       </main>
     </HydrateClient>

@@ -1,27 +1,30 @@
 "use client"
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import RadioList from './RadioList';
+import MenuList from './MenuList';
 
 const TitleMenu: React.FC = () => {
 const [selection, setSelection] = useState<string>('Projects');
 
-  const items = ['Projects', 'Apps', 'Design Systems', 'Components', 'Collections'];
-
   return (
-    <div className="flex flex-row items-center justify-between gap-4 mt-4">
-    <ul className="flex flex-row items-center justify-center gap-4">
-        {items.map((item, index) => (
-        <li
-            key={item}
-            onClick={() => setSelection(item)}
-            className={`flex flex-row items-center justify-start leading-5 transition-all duration-300 ease-in-out cursor-pointer text-sm text-zinc-700 ${
-            selection === item ? 'font-bold' : ''
-            }`}
-        >
-            <a>{item}</a>
-        </li>
-        ))}
-    </ul>
+    <div className="w-full flex flex-col items-start justify-center gap-4">
+      <h1 className="text-5xl font-bold text-zinc-800">
+        Library
+      </h1>
+      <div className="w-full flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center gap-4">
+            <RadioList list={[{name:"Library", url:"dashboard"}, {name:"Collection", url:"dashboard"}]} />
+            <div className="flex flex-row items-center justify-start text-zinc-200 text-xl font-thin leading-5 select-none">
+                /
+            </div>
+            <MenuList list={[{name:"Mix", url:"dashboard"}]} />
+          </div>
+          <div className="flex flex-row items-center gap-4">
+            <MenuList list={[{name:"Last Modified", url:"dashboard/"}, {name:"Deleted", url:"dashboard"},]} />
+            <RadioList list={[{name:"Cards", url:"dashboard"}, {name:"List", url:"dashboard"}]} />
+          </div>
+      </div>
     </div>
   );
 };

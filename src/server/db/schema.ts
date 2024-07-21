@@ -8,6 +8,7 @@ import {
   serial,
   timestamp,
   varchar,
+  jsonb
 } from "drizzle-orm/pg-core";
 
 /**
@@ -36,3 +37,17 @@ export const posts = createTable(
     nameIndex: index("name_idx").on(example.title),
   })
 );
+
+export const mixes = createTable(
+  "mix",
+  {
+    id: serial("id").primaryKey(),
+    jsonContent: jsonb("json_content"),
+  },
+  (element) => ({
+    jsonIndex: index("json_idx").on(element.jsonContent),
+  })
+);
+
+
+
