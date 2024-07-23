@@ -51,7 +51,7 @@ export const mixRouter = createTRPCRouter({
       tag: z.string(),
       title: z.string(),
       classes: z.array(z.string()),
-      css: z.string(),
+      style: z.array(z.any()),
       content: z.string(),
       childrens: z.array(z.any())
     }) }))
@@ -76,7 +76,7 @@ export const mixRouter = createTRPCRouter({
         tag: z.string(),
         title: z.string(),
         classes: z.array(z.string()),
-        css: z.string(),
+        style: z.array(z.any()),
         content: z.string(),
         childrens: z.array(z.any())
       })

@@ -1,0 +1,18 @@
+
+
+
+[] Change the route to create a new mix from /mix to /mix/NewMix and have it only save and create a new mix when changes are made.
+Have the creation of the new mix being called from the dashboard instead of the NewMix page as it creates issues when going back.
+Maybe can be solved differently by jumping mire than one page back?
+For /mix we'll have an easter egg page.
+
+[] Complete the UI for the Mix page.
+    [] Context menu implementation
+    [] Top menu with logo, searchbar.
+    [] Left Menu details ???
+    [] Right Menu with switching
+    [] bottom allerts
+    [] Clerk signing in
+
+
+For certain thing it's a good idea to follow that youtube video that uses stripe to implement sub-seller functionalities etc.

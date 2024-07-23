@@ -19,6 +19,10 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
         <div className="absolute right-0 flex flex-col items-center z-20">
           <RightFloater />
         </div>
+
+        <div className="absolute top-0 flex flex-row p-4 bg-zinc-50 justify-center items-center z-20">
+        </div>
+        
         <div className="absolute w-screen h-screen overflow-hidden top-0 left-0">
           {children}
         </div>

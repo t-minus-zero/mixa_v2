@@ -1,6 +1,7 @@
 "use client";
 
 import { useDashboardData  } from '../../context/DashboardContext';
+import Link from 'next/link';
 
 const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
     const { latestPost } = useDashboardData();
@@ -42,12 +43,12 @@ const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
                             /
                         </div>
                         <div className="flex flex-row items-center justify-start">
-                            <button
+                            <Link href={`/mix`}  
                                 //onClick={(e) => {e.preventDefault(); createPost.mutate( {name} )}} 
                                 className="flex flex-row items-center justify-start py-2 px-4 rounded-full gap-2 border border-zinc-200">
                                 <span className="flex flex-row items-center justify-center text-xl font-thin text-zinc-700 leading-5 -mt-0.5"> + </span>
                                 <p className="flex flex-row items-center justify-start text-sm text-zinc-700 leading-5"> Create Mix </p>
-                            </button>
+                            </Link>
                         </div>
                     </li>
                 </ul>
