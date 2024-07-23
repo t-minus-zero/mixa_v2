@@ -19,18 +19,6 @@
   body {
     color: rgb(var(--foreground-rgb));
   }
-
-*:focus {
-    outline: none;
-    border: none;
-  }
-  
-  input{
-  min-width: none;
-  width: none;
-  background: none;
-  min-width: 0;
-  }
   
   ::-webkit-scrollbar {
   display: none;

@@ -1,0 +1,12 @@
+
+
+
+
+Layout
+    Left Floater / Shows and controls the html structure
+        HtmlElement Accordions
+    Right Floater
+        StyleView
+            CssClasssesElement Accordions
+    Page
+        Htmlvisualizer / Preview of the rendered json into a react component

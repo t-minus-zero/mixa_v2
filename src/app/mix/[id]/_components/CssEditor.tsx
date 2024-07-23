@@ -1,5 +1,5 @@
 'use client'
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTree } from './TreeContext';
 
 function findNodeInTree(tree, selection) {
@@ -17,7 +17,6 @@ function findNodeInTree(tree, selection) {
       const found = findNodeInTree(child, id);
       if (found) return found;
     }
-  
     return null;
   }
 
