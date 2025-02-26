@@ -1,6 +1,6 @@
 "use client";
 
-import { useDashboardData  } from '../../context/DashboardContext';
+import { useDashboardData  } from '../../_contexts/DashboardContext';
 import Link from 'next/link';
 
 const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {

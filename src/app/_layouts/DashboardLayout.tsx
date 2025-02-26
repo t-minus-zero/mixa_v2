@@ -1,7 +1,7 @@
 "use client"
 
 // DashboardLayout.tsx
-import { DashboardDataProvider } from '../context/DashboardContext';
+import { DashboardDataProvider } from '../_contexts/DashboardContext';
 import DashboardTopNav from "./_components/DashboardTopNav";
 import SearchBarActive from "./_components/SearchBarActive";
 import TitleMenu from '../dashboard/_components/TitleMenu';
