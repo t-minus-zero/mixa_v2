@@ -17,6 +17,9 @@ export const TreeProvider = ({ children }) => {
   });
   const [selection, setSelection] = useState(tree);
   const [selectionParent, setSelectionParent] = useState(tree);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
+  const [dropPosition, setDropPosition] = useState(null); // 'before', 'after', or 'inside'
 
   const updateTree = (updateFn) => {
     setTree(prevTree => produce(prevTree, updateFn));
@@ -150,6 +153,51 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  const moveElement = (sourceId, targetId, position) => {
+    updateTree(draft => {
+      // Find and remove the source element
+      let sourceElement;
+      const removeSource = (node) => {
+        if (!node.childrens) return false;
+        for (let i = 0; i < node.childrens.length; i++) {
+          if (node.childrens[i].id === sourceId) {
+            sourceElement = node.childrens[i];
+            node.childrens.splice(i, 1);
+            return true;
+          }
+          if (removeSource(node.childrens[i])) return true;
+        }
+        return false;
+      };
+      removeSource(draft);
+
+      // Insert the element at the new position
+      const insertElement = (node) => {
+        if (node.id === targetId) {
+          if (position === 'inside') {
+            node.childrens.push(sourceElement);
+          } else {
+            const parent = findParent(draft, targetId);
+            if (parent) {
+              const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
+              parent.childrens.splice(
+                position === 'before' ? targetIndex : targetIndex + 1,
+                0,
+                sourceElement
+              );
+            }
+          }
+          return true;
+        }
+        return node.childrens?.some(insertElement) || false;
+      };
+      
+      if (sourceElement) {
+        insertElement(draft);
+      }
+    });
+  };
+
   const value = useMemo(() => ({
     selection, 
     setSelection,
@@ -166,8 +214,15 @@ export const TreeProvider = ({ children }) => {
     updateCss,
     updateContent,
     updateTag,
-    updateTitle
-  }), [selection, tree]);
+    updateTitle,
+    draggedItem,
+    setDraggedItem,
+    dropTarget,
+    setDropTarget,
+    dropPosition,
+    setDropPosition,
+    moveElement,
+  }), [selection, tree, draggedItem, dropTarget, dropPosition]);
 
   return (
     <TreeContext.Provider value={value}>
