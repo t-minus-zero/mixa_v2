@@ -3,23 +3,19 @@
 type StructureType = 'single' | 'dual' | 'individual';
 
 interface StructureSelectorProps {
-  definition: {
-    structures: Record<string, boolean>;
-  };
+  availableStructures: string[];
   currentStructure: StructureType;
   onStructureChange: (structure: StructureType) => void;
 }
 
 export default function StructureSelector({
-  definition,
+  availableStructures,
   currentStructure,
   onStructureChange
 }: StructureSelectorProps) {
-  const { structures } = definition;
-
   return (
     <div className="inline-flex text-xs">
-      {structures.single && (
+      {availableStructures.includes('single') && (
         <button
           className={`
             px-1
@@ -33,7 +29,7 @@ export default function StructureSelector({
           All
         </button>
       )}
-      {structures.dual && (
+      {availableStructures.includes('dual') && (
         <button
           className={`
             px-1
@@ -47,7 +43,7 @@ export default function StructureSelector({
           2 Sides
         </button>
       )}
-      {structures.individual && (
+      {availableStructures.includes('individual') && (
         <button
           className={`
             px-1
