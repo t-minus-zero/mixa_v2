@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useTree } from './TreeContext';
-import AccordionWrapper from './AccordionWrapper';
+import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
 import InputDropAndText from './_fragments/InputDropAndText';
 

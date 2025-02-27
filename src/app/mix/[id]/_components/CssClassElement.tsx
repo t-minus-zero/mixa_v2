@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTree } from './TreeContext';
-import AccordionWrapper from './AccordionWrapper';
+import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
  
  export function CssClassElement ({className, classCss} : {elementClass: string, classCss: string}) {

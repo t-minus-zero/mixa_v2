@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import HtmlElement from './HtmlElement';
-import AccordionWrapper from './AccordionWrapper';
+import AccordionWrapper from './_fragments/AccordionWrapper';
 import {useTree} from './TreeContext';
 
 const renderTree = (node, level = 0) => (
