@@ -1,4 +1,16 @@
-"use client"
+/**
+ * PropertySection Component
+ * 
+ * This component renders a collapsible section of CSS properties based on the provided schema.
+ * It's designed to create a UI for modifying CSS properties with different input types and structures.
+ * 
+ * The component handles complex CSS values such as:
+ * - Single values (e.g., margin: 10px)
+ * - Dual values (e.g., margin: 10px 20px)
+ * - Individual values (e.g., margin: 10px 20px 30px 40px)
+ * - Select values (e.g., display: flex)
+ * - Dimension values with units (e.g., width: 100px, 50%, etc.)
+ */
 
 import { useState } from 'react';
 import AccordionWrapper from '../_fragments/AccordionWrapper';
@@ -8,6 +20,12 @@ import SelectInput from '../_fragments/SelectInput';
 import NumberInput from '../_fragments/NumberInput';
 import StructureSelector from './StructureSelector';
 
+/**
+ * Type definition for structural rendering modes
+ * - 'single': Renders one input for a property (applies same value to all sides)
+ * - 'dual': Renders two inputs (vertical and horizontal values)
+ * - 'individual': Renders four inputs (top, right, bottom, left values)
+ */
 type StructureType = 'single' | 'dual' | 'individual';
 
 interface PropertySectionProps {
@@ -37,7 +55,16 @@ export default function PropertySection({
 }: PropertySectionProps) {
   const [open, setOpen] = useState(false);
 
-  // Check if a property should be shown based on its parent
+  /**
+   * Determines if a property should be displayed based on its parent property's value
+   * 
+   * @param definition - The property definition from the schema
+   * @returns boolean - Whether the property should be shown
+   * 
+   * For example:
+   * - Flex properties (justify-content, align-items) are only shown when display is 'flex'
+   * - Grid properties (grid-template-columns, grid-gap) are only shown when display is 'grid'
+   */
   const shouldShowProperty = (definition: PropertySectionProps['properties'][string]): boolean => {
     if (!definition?.parentProperty) return true;
 
@@ -53,12 +80,31 @@ export default function PropertySection({
     return true;
   };
 
-  // Render a property input based on its type
+  /**
+   * Renders the appropriate input component based on the property definition in the schema
+   * 
+   * @param property - The CSS property name (e.g., 'margin', 'display')
+   * @param definition - The property definition from the schema
+   * @returns JSX.Element - The rendered input component
+   * 
+   * This function handles different types of inputs based on the schema:
+   * - Select inputs (e.g., display: [block, inline, flex, etc.])
+   * - Dimension inputs with unit selection (e.g., margin: 10px)
+   * - Multi-structure dimensions (e.g., margin with single/dual/individual modes)
+   * - Text inputs for properties without specific input types
+   */
   const renderPropertyInput = (property: string, definition: PropertySectionProps['properties'][string]) => {
     const value = values[property] || definition.default || "";
     const [currentStructure, setCurrentStructure] = useState<StructureType>('single');
     
-    // Initialize multi-value state
+    /**
+     * Initialize multi-values state for structural properties
+     * 
+     * This parses CSS shorthand values like:
+     * - "10px" → { all: "10px" } (single structure)
+     * - "10px 20px" → { vertical: "10px", horizontal: "20px" } (dual structure)
+     * - "10px 20px 30px 40px" → { top: "10px", right: "20px", bottom: "30px", left: "40px" } (individual structure)
+     */
     const [multiValues, setMultiValues] = useState<Record<string, string>>(() => {
       // Parse value into individual parts based on spaces
       const parts = value.split(/\s+/);
@@ -82,10 +128,22 @@ export default function PropertySection({
       }
     });
 
-    // For structural properties (like margin, padding), handle structure change
+    // Determine if this property supports multiple structure modes (like margin, padding)
     const hasMultipleStructures = definition.availableStructures && definition.availableStructures.length > 1;
     
-    // Handle structure change
+    /**
+     * Handles structure change between single, dual, and individual modes
+     * 
+     * @param newStructure - The new structure type to change to
+     * 
+     * When changing structure, it intelligently converts values between formats:
+     * - single → dual: Uses the single value for both vertical and horizontal
+     * - single → individual: Uses the single value for all four sides
+     * - dual → single: Uses the vertical value or defaults to 0px
+     * - dual → individual: Maps vertical to top/bottom and horizontal to left/right
+     * - individual → single: Uses the top value or defaults to 0px
+     * - individual → dual: Derives vertical from top and horizontal from right
+     */
     const handleStructureChange = (newStructure: StructureType) => {
       setCurrentStructure(newStructure);
       
@@ -119,11 +177,21 @@ export default function PropertySection({
         newCssValue = value;
       }
       
-      // Update the main CSS value
+      // Update the main CSS value through the onChange callback
       onChange(property, newCssValue);
     };
 
-    // Handle individual value changes within a structure
+    /**
+     * Handles changes to individual values within a structure
+     * 
+     * @param key - The key of the value being changed (e.g., 'all', 'vertical', 'top')
+     * @param newValue - The new value
+     * 
+     * This function:
+     * 1. Updates the specific value in the multiValues state
+     * 2. Generates a complete CSS value string based on the current structure
+     * 3. Calls the onChange callback with the updated CSS property value
+     */
     const handleMultiValueChange = (key: string, newValue: string) => {
       // Update the specific value
       const updatedValues = { ...multiValues, [key]: newValue };
@@ -146,7 +214,11 @@ export default function PropertySection({
       onChange(property, newCssValue);
     };
     
-    // Determine what type of input to show
+    /**
+     * Render select input for properties with predefined options
+     * Used for properties like display, flex-direction, justify-content, etc.
+     * where the schema specifies input.type as 'select' with options array
+     */
     if (definition.input.type === 'select') {
       return (
         <InputWrapper label={property} key={property}>
@@ -159,9 +231,25 @@ export default function PropertySection({
       );
     }
     
-    // For dimension inputs, parse into number and unit
+    /**
+     * Handle dimension inputs (like width, height, margin, padding)
+     * 
+     * These inputs:
+     * 1. Parse the value into number and unit parts (e.g., "10px" → "10" and "px")
+     * 2. Provide a number input for the value and a select input for the unit
+     * 3. Support different structures (single, dual, individual) based on the schema
+     */
     if (definition.input.type === 'dimension') {
-      // Render dimension input based on current structure
+      /**
+       * Renders a dimension input with number and unit selection
+       * 
+       * @param valueKey - The key in multiValues state to modify
+       * @param label - Optional label to display
+       * @returns JSX.Element - The rendered dimension input
+       * 
+       * This parses values like "10px" into a number ("10") and unit ("px")
+       * and provides UI to modify both independently
+       */
       const renderDimensionInput = (valueKey: string, label?: string) => {
         const dimensionValue = multiValues[valueKey] || "0px";
         const match = dimensionValue.match(/^(-?\d*\.?\d+)(px|%|rem|em|vh|vw|fr)$/);
@@ -191,7 +279,12 @@ export default function PropertySection({
         );
       };
       
-      // Return appropriate inputs based on current structure
+      /**
+       * Return the appropriate dimension input UI based on the current structure
+       * - single: one input for all sides
+       * - dual: two inputs for vertical/horizontal
+       * - individual: four inputs for top/right/bottom/left
+       */
       return (
         <div className="w-full" key={property}>
           <div className="flex items-center justify-between mb-2">
@@ -228,7 +321,10 @@ export default function PropertySection({
       );
     }
     
-    // Default to text input
+    /**
+     * Default to basic text input for properties without special handling
+     * Used when no specific input type is defined in the schema
+     */
     return (
       <InputWrapper label={property} key={property}>
         <TextInput
@@ -239,7 +335,11 @@ export default function PropertySection({
     );
   };
 
-  // Render all properties in this section
+  /**
+   * Renders all properties in this section that should be visible
+   * Filters properties based on their parent property values
+   * For example, only show flex properties when display is set to 'flex'
+   */
   const renderProperties = () => {
     return Object.entries(properties)
       .filter(([_, def]) => shouldShowProperty(def))
