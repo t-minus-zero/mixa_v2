@@ -2,13 +2,19 @@
 
 import { ChangeEvent } from 'react';
 
-interface UnitSelectProps {
+interface SelectInputProps {
   value: string;
   onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-  units: string[];
+  options: string[];
+  placeholder?: string;
 }
 
-export default function UnitSelect({ value, onChange, units }: UnitSelectProps) {
+export default function SelectInput({ 
+  value, 
+  onChange, 
+  options,
+  placeholder
+}: SelectInputProps) {
   return (
     <select
       value={value}
@@ -23,9 +29,14 @@ export default function UnitSelect({ value, onChange, units }: UnitSelectProps) 
         appearance-none
       "
     >
-      {units.map((u) => (
-        <option key={u} value={u}>
-          {u}
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
         </option>
       ))}
     </select>

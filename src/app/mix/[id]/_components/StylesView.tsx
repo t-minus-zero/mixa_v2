@@ -1,80 +1,84 @@
 'use client'
-import React, { useState, ChangeEvent } from 'react';
-import CssClassElement from './CssClassElement';
-import AccordionWrapper from './_fragments/AccordionWrapper';
-import {useTree} from './TreeContext';
-import { Ruler } from 'lucide-react'; // Example SVG icon from Lucide
-import LengthInput from './_fragments/LengthInput';
-import PropertyContainer from './_fragments/PropertyContainer';
-import InputContainer from './_fragments/InputContainer';
-import TextInput from './_fragments/TextInput'; 
+import React, { useState } from 'react';
+import { cssSchema } from './_stylesEditor/schema';
+import PropertyInput from './_stylesEditor/PropertyInput';
+import { useTree } from './TreeContext';
+
+interface StylesViewProps {
+  styles: Record<string, string>;
+  onStyleChange: (property: string, value: string) => void;
+}
 
 const StylesView = () => {
   const { tree, selection } = useTree();
 
-  const findCssString = (styles, targetClass) => {
-    const targetStyle = styles.find(style => Object.keys(style)[0] === targetClass);
-    const cssString = targetStyle ? targetStyle[targetClass] : null;
-    console.log(`CSS String for "${targetClass}": ${cssString}`);
-    return cssString;
+  // Check if a subproperty should be shown based on its parent's value
+  const shouldShowSubProperty = (parentValue: string, subDef: any) => {
+    if (!subDef.parentProperty) return true;
+    
+    // Handle flex properties
+    if (subDef.parentProperty === 'display') {
+      if (subDef.group === 'flex') {
+        return parentValue === 'flex';
+      }
+      if (subDef.group === 'grid') {
+        return parentValue === 'grid';
+      }
+    }
+    
+    return true;
   };
 
-  const [length, setLength] = useState<string>('10px');
-  const units = ['px', '%', 'rem', 'em', 'vh', 'vw', 'fr'];
-  const [text, setText] = useState<string>('');
+  // Render all properties in a flat structure
+  const renderProperties = () => {
+    if (!tree?.style) return null;
 
-  // Handle text input change
-  const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
+    return Object.entries(cssSchema.properties).map(([property, definition]) => {
+      // Skip properties that are subproperties of others
+      if (definition.parentProperty) {
+        return null;
+      }
+
+      const value = tree.style[property] || definition.default;
+
+      return (
+        <div key={property} className="border-b border-gray-200">
+          <PropertyInput
+            property={property}
+            definition={definition}
+            value={value}
+            onChange={(newValue) => console.log(property, newValue)}
+          />
+          {/* Render subproperties if they exist and should be shown */}
+          {Object.entries(cssSchema.properties)
+            .filter(([_, subDef]) => 
+              subDef.parentProperty === property && 
+              shouldShowSubProperty(value, subDef)
+            )
+            .map(([subProperty, subDefinition]) => (
+              <div key={subProperty} className="ml-4">
+                <PropertyInput
+                  property={subProperty}
+                  definition={subDefinition}
+                  value={tree.style[subProperty] || subDefinition.default}
+                  onChange={(newValue) => console.log(subProperty, newValue)}
+                  isSubProperty={true}
+                />
+              </div>
+            ))}
+        </div>
+      );
+    });
   };
 
   return (
-    <AccordionWrapper openStatus={true}>
-      <ul>
-        {selection && selection.classes.map((elementClass, index) => (
-          <CssClassElement key={index} className={elementClass} classCss={findCssString(tree.style, elementClass)} />
-        ))}
-        <PropertyContainer label="Margin">
-            <LengthInput
-              label="Top"
-              value={length}
-              onChange={setLength}
-              icon={Ruler}
-              units={units}
-            />
-            <LengthInput
-              label="Right"
-              value={length}
-              onChange={setLength}
-              icon={Ruler}
-              units={units}
-            />
-            <LengthInput
-              label="Bottom"
-              value={length}
-              onChange={setLength}
-              icon={Ruler}
-              units={units}
-            />
-            <LengthInput
-              label="Left"
-              value={length}
-              onChange={setLength}
-              icon={Ruler}
-              units={units}
-            />
-            <PropertyContainer label="ClassName">
-              <InputContainer label="Width">
-                <TextInput
-                  value={text}
-                  onChange={handleTextChange}
-                  placeholder="Enter class name..."
-                />
-              </InputContainer>
-            </PropertyContainer>
-        </PropertyContainer>
-      </ul>
-    </AccordionWrapper>
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto max-h-[calc(100vh-8rem)]">
+        <div>
+          {selection && renderProperties()}
+        </div>
+      </div>
+    </div>
   );
 }
 
