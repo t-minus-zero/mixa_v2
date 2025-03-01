@@ -1,6 +1,7 @@
 "use client"
 
-import { ChangeEvent, useState, useRef, useEffect, ReactNode } from 'react';
+import { ChangeEvent, useState, useRef, ReactNode } from 'react';
+import Portal from 'MixaDev/app/_components/portal/Portal';
 
 interface SelectInputProps {
   value: string;
@@ -18,21 +19,7 @@ export default function SelectInput({
   children
 }: SelectInputProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle changing selection
   const handleSelectOption = (option: string) => {
@@ -47,8 +34,13 @@ export default function SelectInput({
     setIsOpen(false);
   };
 
+  // Handle clicking outside to close dropdown
+  const handleClickOutside = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <div className="relative flex items-center" ref={dropdownRef}>
+    <div className="relative flex items-center" ref={containerRef}>
       {/* Display selected value or children */}
       <div className="flex-grow flex items-center">
         {children ? (
@@ -65,7 +57,10 @@ export default function SelectInput({
       {/* Toggle button */}
       <div 
         className="ml-1 cursor-pointer p-1 text-gray-500 hover:text-gray-700"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -82,23 +77,31 @@ export default function SelectInput({
         </svg>
       </div>
       
-      {/* Dropdown options */}
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10">
-          {options.map((option) => (
-            <div 
-              key={option} 
-              className={`
-                px-3 py-2 text-xs cursor-pointer
-                ${option === value ? 'bg-gray-100 font-medium' : 'hover:bg-gray-50'}
-              `}
-              onClick={() => handleSelectOption(option)}
-            >
-              {option}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Dropdown options using Portal component */}
+      <Portal 
+        show={isOpen}
+        onClickOutside={handleClickOutside}
+        anchorEl={containerRef}
+        placement="bottom-start"
+        offset={2}
+        autoAdjust={true}
+        maxHeight={200}
+        className="bg-white border border-gray-200 rounded shadow-lg overflow-y-auto"
+        zIndex={50}
+      >
+        {options.map((option) => (
+          <div 
+            key={option} 
+            className={`
+              px-3 py-2 text-xs cursor-pointer
+              ${option === value ? 'bg-gray-100 font-medium' : 'hover:bg-gray-50'}
+            `}
+            onClick={() => handleSelectOption(option)}
+          >
+            {option}
+          </div>
+        ))}
+      </Portal>
       
       {/* Hidden select for accessibility */}
       <select

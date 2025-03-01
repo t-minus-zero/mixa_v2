@@ -1,4 +1,5 @@
 export const cssGridSchema = {
+  name: "grid",
   dependency: {
     property: "display",
     value: "grid"
