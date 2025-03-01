@@ -38,7 +38,7 @@ export const cssSchema = {
   properties: {
     // Box-model properties
     margin: {
-      group: "box",
+      group: "position",
       default: "0px",
       inputs: {
         auto: { "$ref": "#/definitions/autoKeyword" },
@@ -51,7 +51,7 @@ export const cssSchema = {
       }
     },
     padding: {
-      group: "box",
+      group: "position",
       default: "0px",
       inputs: {
         dimension: { "$ref": "#/definitions/dimension" }
@@ -63,7 +63,7 @@ export const cssSchema = {
       }
     },
     borderWidth: {
-      group: "box",
+      group: "border",
       default: "medium",
       inputs: {
         none: { pattern: "^none$" },
@@ -88,7 +88,7 @@ export const cssSchema = {
 
     // Flex properties
     flexDirection: {
-      group: "flex",
+      group: "layout",
       parentProperty: "display",
       default: "row",
       inputs: {
@@ -99,7 +99,7 @@ export const cssSchema = {
       }
     },
     justifyContent: {
-      group: "flex",
+      group: "layout",
       parentProperty: "display",
       default: "flex-start",
       inputs: {
@@ -110,7 +110,7 @@ export const cssSchema = {
       }
     },
     alignItems: {
-      group: "flex",
+      group: "layout",
       parentProperty: "display",
       default: "stretch",
       inputs: {
@@ -121,7 +121,7 @@ export const cssSchema = {
       }
     },
     flexWrap: {
-      group: "flex",
+      group: "layout",
       parentProperty: "display",
       default: "nowrap",
       inputs: {
@@ -132,7 +132,7 @@ export const cssSchema = {
       }
     },
     gap: {
-      group: "flex",
+      group: "layout",
       parentProperty: "display",
       default: "0px",
       inputs: {
@@ -200,7 +200,7 @@ export const cssSchema = {
 
     // Grid properties
     gridTemplateColumns: {
-      group: "grid",
+      group: "layout",
       parentProperty: "display",
       default: "none",
       inputs: {
@@ -211,7 +211,7 @@ export const cssSchema = {
       }
     },
     gridTemplateRows: {
-      group: "grid",
+      group: "layout",
       parentProperty: "display",
       default: "none",
       inputs: {
@@ -222,7 +222,7 @@ export const cssSchema = {
       }
     },
     gridGap: {
-      group: "grid",
+      group: "layout",
       parentProperty: "display",
       default: "0px",
       inputs: {
@@ -233,7 +233,7 @@ export const cssSchema = {
       }
     },
     gridColumn: {
-      group: "grid",
+      group: "layout",
       parentProperty: "display",
       default: "auto",
       inputs: {
@@ -244,7 +244,7 @@ export const cssSchema = {
       }
     },
     gridRow: {
-      group: "grid",
+      group: "layout",
       parentProperty: "display",
       default: "auto",
       inputs: {
@@ -254,10 +254,8 @@ export const cssSchema = {
         select: true
       }
     },
-
-    // Color properties
     color: {
-      group: "color",
+      group: "typography",
       default: "#000000",
       inputs: {
         color: { "$ref": "#/definitions/colorValue" }
@@ -266,8 +264,10 @@ export const cssSchema = {
         single: true
       }
     },
+
+    // Background properties
     backgroundColor: {
-      group: "color",
+      group: "appearance",
       default: "transparent",
       inputs: {
         color: { "$ref": "#/definitions/colorValue" }
