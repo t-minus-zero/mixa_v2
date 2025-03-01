@@ -1,5 +1,4 @@
 export const cssInputTypes = {
-    columns: { type: "selection", options: ["{globalKeyword}", "{trackKeyword}", "{trackList}"], default: "{fraction}", format: "{value}" },
     number: { type: "number", min: null, max: null, step: 1, format: "{value}" },
     unit: { type: "selection", options: ["px", "%", "rem", "em", "vh", "vw"], default: "px", format: "{value}" },
     dimension: { type: "dual", format: "{number}{unit}"},
