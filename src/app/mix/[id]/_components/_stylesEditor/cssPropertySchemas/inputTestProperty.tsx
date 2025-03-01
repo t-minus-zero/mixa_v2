@@ -29,7 +29,7 @@ const formatValue = (inputType, values) => {
   
   if (typeConfig.type === 'number') {
     formatted = formatted.replace('{value}', values.value || '0');
-  } else if (typeConfig.type === 'dual') {
+  } else if (typeConfig.type === 'composite') {
     formatted = formatted
       .replace('{number}', values.number || '0')
       .replace('{unit}', values.unit || 'px');
@@ -54,7 +54,26 @@ const formatValue = (inputType, values) => {
       return item;
     });
     
-    formatted = formatted.replace('{items}', formattedItems.join(', '));
+    const separator = typeConfig.separator || ', ';
+    formatted = formatted.replace('{values}', formattedItems.join(separator));
+  } else if (typeConfig.type === 'function') {
+    // Handle function types by replacing each placeholder with its formatted value
+    Object.keys(values).forEach(key => {
+      if (key.startsWith('item_')) return; // Skip nested item values
+      
+      const placeholder = `{${key}}`;
+      if (formatted.includes(placeholder)) {
+        let paramValue = values[key];
+        
+        // If the value is a reference, resolve it
+        if (isReference(paramValue)) {
+          const refType = extractReferenceKey(paramValue);
+          paramValue = formatValue(refType, values[refType] || {});
+        } 
+        
+        formatted = formatted.replace(placeholder, paramValue);
+      }
+    });
   }
   
   return formatted;
@@ -96,7 +115,7 @@ const RenderInput = ({
     );
   }
   
-  if (inputTypeData.type === 'dual') {
+  if (inputTypeData.type === 'composite') {
     return (
       <div className="flex items-center">
         <NumberInput 
@@ -233,12 +252,21 @@ const CSSProperty = ({ propertyKey, schema, onCSSChange }) => {
       if (typeData) {
         if (typeData.type === 'number') {
           initialValues = { value: typeData.default || '0' };
-        } else if (typeData.type === 'dual') {
+        } else if (typeData.type === 'composite') {
           initialValues = { number: '0', unit: 'px' };
         } else if (typeData.type === 'selection') {
           initialValues = { selected: typeData.default || '' };
         } else if (typeData.type === 'list') {
           initialValues = { items: [] };
+        } else if (typeData.type === 'function') {
+          // For function types, initialize with empty values for all placeholders
+          const format = typeData.format || '';
+          const placeholders = format.match(/\{([^}]+)\}/g) || [];
+          
+          placeholders.forEach(placeholder => {
+            const key = placeholder.slice(1, -1); // Remove { and }
+            initialValues[key] = '';
+          });
         }
       }
       

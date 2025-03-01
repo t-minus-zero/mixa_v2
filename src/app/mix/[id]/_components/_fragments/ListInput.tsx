@@ -1,7 +1,7 @@
 "use client"
 
-import { ChangeEvent, useState, useRef, useEffect, ReactNode } from 'react';
-import SelectInput from './SelectInput';
+import { useState, useRef, useEffect, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ListInputProps {
   value: string[];
@@ -20,21 +20,49 @@ export default function ListInput({
   renderItem,
   max = 10
 }: ListInputProps) {
-  const [currentSelection, setCurrentSelection] = useState<string>("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Handle selection change
-  const handleSelectionChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setCurrentSelection(e.target.value);
-  };
+  // Create portal container when component mounts
+  useEffect(() => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    setPortalContainer(container);
+    
+    return () => {
+      document.body.removeChild(container);
+    };
+  }, []);
+
+  // Handle clicking outside to close dropdown
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(e.target as Node) &&
+        addButtonRef.current && 
+        !addButtonRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
 
   // Add item to the list
-  const handleAddItem = () => {
-    if (!currentSelection || value.length >= max) return;
+  const handleAddItem = (item: string) => {
+    if (value.length >= max) return;
     
-    const newList = [...value, currentSelection];
+    const newList = [...value, item];
     onChange(newList);
-    setCurrentSelection("");
+    setDropdownOpen(false);
   };
 
   // Remove item from list
@@ -58,6 +86,19 @@ export default function ListInput({
     const newList = [...value];
     [newList[index], newList[index + 1]] = [newList[index + 1], newList[index]];
     onChange(newList);
+  };
+
+  // Position the dropdown relative to the add button
+  const getDropdownStyles = () => {
+    if (!addButtonRef.current) return {};
+    
+    const rect = addButtonRef.current.getBoundingClientRect();
+    return {
+      position: 'absolute' as const,
+      top: `${rect.bottom + window.scrollY + 5}px`,
+      left: `${rect.left + window.scrollX}px`,
+      zIndex: 1000,
+    };
   };
 
   return (
@@ -115,30 +156,48 @@ export default function ListInput({
         </div>
       )}
       
-      {/* Add new item controls */}
+      {/* Add new item button */}
       {value.length < max && (
-        <div className="flex items-center space-x-2">
-          <div className="flex-grow">
-            <SelectInput
-              value={currentSelection}
-              onChange={handleSelectionChange}
-              options={options}
-              placeholder={placeholder}
-            />
-          </div>
-          
+        <div className="flex justify-end">
           <button
+            ref={addButtonRef}
             type="button"
-            className={`p-1 rounded ${!currentSelection ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-100'}`}
-            onClick={handleAddItem}
-            disabled={!currentSelection}
+            className="p-1 rounded text-gray-500 hover:bg-gray-100 flex items-center"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
           >
+            <span className="text-xs mr-1">{placeholder}</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
           </button>
         </div>
+      )}
+      
+      {/* Dropdown portal */}
+      {dropdownOpen && portalContainer && createPortal(
+        <div 
+          ref={dropdownRef}
+          className="bg-white rounded shadow-md border border-gray-200 min-w-[180px] max-h-[250px] overflow-y-auto"
+          style={getDropdownStyles()}
+        >
+          {options.length > 0 ? (
+            <div className="py-1">
+              {options.map((option, index) => (
+                <div
+                  key={index}
+                  className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleAddItem(option)}
+                >
+                  {option}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 text-sm text-gray-500">No options available</div>
+          )}
+        </div>,
+        portalContainer
       )}
       
       {/* Max items reached message */}
