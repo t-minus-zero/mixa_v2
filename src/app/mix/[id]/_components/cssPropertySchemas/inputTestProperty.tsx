@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { cssInputTypes } from './inputTypesSchema';
 import { cssGridSchema } from './gridSchema';
-import NumberInput from '../../_fragments/NumberInput';
-import TextInput from '../../_fragments/TextInput';
-import SelectInput from '../../_fragments/SelectInput';
-import ListInput from '../../_fragments/ListInput';
-import InputWrapper from '../../_fragments/InputWrapper';
-import AccordionWrapper from '../../_fragments/AccordionWrapper';
+import NumberInput from '../_fragments/NumberInput';
+import TextInput from '../_fragments/TextInput';
+import SelectInput from '../_fragments/SelectInput';
+import ListInput from '../_fragments/ListInput';
+import InputWrapper from '../_fragments/InputWrapper';
+import AccordionWrapper from '../_fragments/AccordionWrapper';
 
 // Function to check if value is a reference to another input type
 const isReference = (value) => {

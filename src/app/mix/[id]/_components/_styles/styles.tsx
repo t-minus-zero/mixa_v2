@@ -1,6 +1,3 @@
-
-
-
 export const inputStyle = {
     minWidth: 'none',	
     width: 'auto',

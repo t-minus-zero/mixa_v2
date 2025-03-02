@@ -38,6 +38,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-, "src/app/mix/[id]/_components/_stylesEditor/cssPropertySchemas"  ],
+, "src/app/mix/[id]/_components/cssPropertySchemas"  ],
   "exclude": ["node_modules"]
 }

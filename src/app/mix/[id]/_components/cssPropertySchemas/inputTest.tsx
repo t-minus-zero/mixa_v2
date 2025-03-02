@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { cssInputTypes } from './inputTypesSchema';
-import NumberInput from '../../_fragments/NumberInput';
-import TextInput from '../../_fragments/TextInput';
-import SelectInput from '../../_fragments/SelectInput';
-import ListInput from '../../_fragments/ListInput';
-import InputWrapper from '../../_fragments/InputWrapper';
-import AccordionWrapper from '../../_fragments/AccordionWrapper';
+import NumberInput from '../_fragments/NumberInput';
+import TextInput from '../_fragments/TextInput';
+import SelectInput from '../_fragments/SelectInput';
+import ListInput from '../_fragments/ListInput';
+import InputWrapper from '../_fragments/InputWrapper';
+import AccordionWrapper from '../_fragments/AccordionWrapper';
 
 export default function InputTest() {
   // State to hold values for different input types
