@@ -251,11 +251,11 @@ export const CssTreeProvider = ({ children }) => {
   };
 
   // Update property by ID
-  const updateProperty = (propertyId, updates) => {
+  const updateProperty = (idList, updates) => {
     updateTree(draft => {
       for (const className in draft.classes) {
         const propertyIndex = draft.classes[className].properties.findIndex(
-          prop => prop.id === propertyId
+          prop => prop.id === idList[0]
         );
         
         if (propertyIndex !== -1) {
@@ -266,17 +266,67 @@ export const CssTreeProvider = ({ children }) => {
     });
   };
 
+  const processValue = (value) => {
+
+    if (Array.isArray(value)) {
+      return value.map(item => processValue(item));
+    }
+
+    if (isReference(value)) {
+      const inputType = extractReferenceKey(value);
+      const inputTypeSchema = cssSchemas.inputTypes[inputType];
+      let newType = inputTypeSchema.inputType;
+      if (['selection', 'list'].includes(newType)) {
+        newType = inputType;
+      }
+      const newValue = {
+        id: uuidv4(),
+        type: newType,
+        value: processValue(inputTypeSchema.default),
+      };
+      return newValue;
+    }
+    return value;
+  }
+
+  // Helper function to update a nested property by following an ID path
+  const updateNestedProperty = (prop, ids, index, value) => {
+    // If we've reached the target property, update its value
+    if (index >= ids.length) {
+      // Check if value is a reference before setting it
+      prop.value = processValue(value);
+      return;
+    }
+    
+    // Find the nested property with the next ID
+    const nextId = ids[index];
+    if (Array.isArray(prop.value)) {
+      const itemIndex = prop.value.findIndex(item => item.id === nextId);
+      if (itemIndex !== -1) {
+        updateNestedProperty(prop.value[itemIndex], ids, index + 1, value);
+      }
+    } else if (prop.value && typeof prop.value === 'object') {
+      if (prop.value.id === nextId) {
+        updateNestedProperty(prop.value, ids, index + 1, value);
+      }
+    } else if (index === ids.length - 1) {
+      // Direct value update (non-object)
+      prop.value = processValue(value);
+    }
+  };
+
   // Update property value by ID
-  const updatePropertyValue = (propertyId, value) => {
+  const updatePropertyValue = (idList, value) => {
     updateTree(draft => {
       for (const className in draft.classes) {
         const propertyIndex = draft.classes[className].properties.findIndex(
-          prop => prop.id === propertyId
+          prop => prop.id === idList[0]
         );
         
         if (propertyIndex !== -1) {
-          draft.classes[className].properties[propertyIndex].value = value;
-          return;
+          let property = draft.classes[className].properties[propertyIndex];
+          updateNestedProperty(property, idList, 1, value);
+          break;
         }
       }
     });

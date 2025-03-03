@@ -64,10 +64,7 @@ export default function CssClassElement({ className, children }: CssClassElement
             <div key={property.id} className="py-1">
               <PropertyElement
                 id={property.id}
-                label={property.type}
-                properties={property}
-                values={property.value}
-                propertyType={property.type}
+                property={property}
               />
             </div>
           ))}

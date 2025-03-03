@@ -1,21 +1,21 @@
 export const cssInputTypes = {
     number: { 
-        inputType: "number", min: null, max: null, step: 1, format: "{value}" },
+        inputType: "number", min: null, max: null, step: 1, format: "{value}", default: 0 },
     unit: { 
         inputType: "selection", default: "px", format: "{value}",
         options: ["px", "%", "rem", "em", "vh", "vw"] },
     dimension: { 
-        inputType: "composite", separator: "", options: ["{number}","{unit}"], format: "{value}"},
+        inputType: "composite", separator: "", options: ["{number}","{unit}"], format: "{value}", default: "0px" },
     count: { 
-        inputType: "number", min: 0, max: null, step: 1, format: "{value}" },
+        inputType: "number", min: 0, max: null, step: 1, format: "{value}", default: 0 },
     fraction: { 
-        inputType: "number", min: 1, max: 12, step: 1, format: "{value}fr" },
+        inputType: "number", min: 1, max: 12, step: 1, format: "{value}fr", default: 0 },
     globalKeyword: { 
-        inputType: "selection", default: "none", format: "{value}",
+        inputType: "selection", default: "unset", format: "{value}",
         options: ["none", "inherit", "initial", "unset", "revert", "revert-layer", "match-parent", "auto"],
      },
     trackKeyword: { 
-        inputType: "selection", default: "none", format: "{value}",
+        inputType: "selection", default: "max-content", format: "{value}",
         options: ["auto", "max-content", "min-content"],
      },
     repeatType: { 
@@ -27,20 +27,23 @@ export const cssInputTypes = {
         options: ["{fraction}", "{dimension}"],  
     },
     minMaxFx: { 
-        inputType: "function", separator: ", ", options: ["{size}", "{size}"], format: "minmax({value})",
+        inputType: "function", separator: ", ", format: "minmax({value})", default: "0px 0px",  
+        options: ["{size}", "{size}"]
     },
     fitContentFx: { 
-        inputType: "function", separator: " ", options: "fit-content({size})", format: "fit-content({value})"
+        inputType: "function", separator: " ", format: "fit-content({value})", default: "0px",
+        options: "{size}"
     },
     trackSizeList: { 
-        inputType: "list", separator: " ", min: 1, max: 12, format: "{value}", 
+        inputType: "list", separator: " ", min: 1, max: 12, format: "{value}", default: "0px 0px",
         options: ["{size}"] 
     },
     repeatFx: { 
-        inputType: "function", separator: ", ", options: ["{repeatType}","{trackSizeList}"], format: "repeat({value})"
+        inputType: "function", separator: ", ", format: "repeat({value})", default: "auto-fill 0px 0px",
+        options: ["{repeatType}","{trackSizeList}"] 
     },
     trackList: { 
-        inputType: "list", separator: " ", min: 1, max: 12, format: "{value}", 
+        inputType: "list", separator: " ", min: 1, max: 12, format: "{value}", default: "auto-fit 0fr 0px 0px",
         options: ["{trackKeyword}", "{fraction}", "{dimension}", "{repeatFx}"] 
     }
 };
