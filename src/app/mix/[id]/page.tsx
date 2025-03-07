@@ -62,12 +62,6 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     }
   };
 
-  useEffect(() => {
-    if (tree) {
-      handleUpdateMix();
-    }
-  }, [tree]);
-
   if (isLoading) {
     return <div>Loading...</div>;
   }

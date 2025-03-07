@@ -94,6 +94,7 @@ export const CssTreeProvider = ({ children }) => {
     return String(value);
   }
 
+  // CSS tree state is agnostic from the TreeContext
   const [cssTree, setCssTree] = useState({
     classes: {
       "default": {
@@ -171,41 +172,57 @@ export const CssTreeProvider = ({ children }) => {
           }
         ]
       }
-    },
-    selectedClass: 'default',
-    selectedProperty: null
+    }
   });
+  
+  // Separate state for selections, similar to TreeContext
+  const [selectedClass, setSelectedClass] = useState('default');
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   // Update tree using Immer for immutable updates
   const updateTree = (updateFn) => {
     setCssTree(prevTree => produce(prevTree, updateFn));
   };
 
+
   // Class operations
-  const addClass = (className) => {
+  const addClass = (className, addToSelected = false) => {
+    // Create a new class name if none is provided
+    const newClassName = className || uuidv4().substring(0, 6);
+    
     updateTree(draft => {
-      if (!draft.classes[className]) {
-        draft.classes[className] = {
-          name: className,
-          properties: []
+      if (!draft.classes[newClassName]) {
+        draft.classes[newClassName] = {
+          name: newClassName,
+          properties: [
+            {
+              id: uuidv4(),
+              type: "display",
+              value: 'flex'
+            }
+          ]
         };
       }
     });
+    
+    return newClassName; // Return the class name (useful when generating a new one)
   };
 
   const removeClass = (className) => {
     updateTree(draft => {
       delete draft.classes[className];
-      if (draft.selectedClass === className) {
-        draft.selectedClass = Object.keys(draft.classes)[0] || null;
-      }
     });
+    
+    // Update selected class if it's the one being deleted
+    if (selectedClass === className) {
+      const firstAvailableClass = Object.keys(cssTree.classes)[0] || null;
+      setSelectedClass(firstAvailableClass);
+    }
   };
 
   const selectClass = (className) => {
-    updateTree(draft => {
-      draft.selectedClass = className;
-    });
+    setSelectedClass(className);
+    setSelectedProperty(null); // Clear property selection when changing class
   };
 
   // Property operations
@@ -236,6 +253,11 @@ export const CssTreeProvider = ({ children }) => {
         );
       }
     });
+    
+    // Update selected property if it's the one being deleted
+    if (selectedProperty && selectedProperty.id === propertyId) {
+      setSelectedProperty(null);
+    }
   };
 
   // Find property by ID in any class
@@ -250,7 +272,6 @@ export const CssTreeProvider = ({ children }) => {
     return null;
   };
 
-  // Update property by ID
   const updateProperty = (idList, updates) => {
     updateTree(draft => {
       for (const className in draft.classes) {
@@ -261,6 +282,22 @@ export const CssTreeProvider = ({ children }) => {
         if (propertyIndex !== -1) {
           Object.assign(draft.classes[className].properties[propertyIndex], updates);
           return;
+        }
+      }
+    });
+  };
+
+  const updatePropertyValue = (idList, value) => {
+    updateTree(draft => {
+      for (const className in draft.classes) {
+        const propertyIndex = draft.classes[className].properties.findIndex(
+          prop => prop.id === idList[0]
+        );
+        
+        if (propertyIndex !== -1) {
+          let property = draft.classes[className].properties[propertyIndex];
+          updateNestedProperty(property, idList, 1, value);
+          break;
         }
       }
     });
@@ -315,23 +352,6 @@ export const CssTreeProvider = ({ children }) => {
     }
   };
 
-  // Update property value by ID
-  const updatePropertyValue = (idList, value) => {
-    updateTree(draft => {
-      for (const className in draft.classes) {
-        const propertyIndex = draft.classes[className].properties.findIndex(
-          prop => prop.id === idList[0]
-        );
-        
-        if (propertyIndex !== -1) {
-          let property = draft.classes[className].properties[propertyIndex];
-          updateNestedProperty(property, idList, 1, value);
-          break;
-        }
-      }
-    });
-  };
-
   // Helper functions for references
   const isReference = (value) => {
     return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
@@ -366,8 +386,13 @@ export const CssTreeProvider = ({ children }) => {
     // Schemas
     cssSchemas,
     // Format utilities
-    formatProperty
-  }), [cssTree]);
+    formatProperty,
+    // Selections
+    selectedClass,
+    setSelectedClass,
+    selectedProperty,
+    setSelectedProperty
+  }), [cssTree, selectedClass, selectedProperty]);
 
   return (
     <CssTreeContext.Provider value={value}>

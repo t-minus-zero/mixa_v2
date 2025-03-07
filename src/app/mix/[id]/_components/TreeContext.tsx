@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 const TreeContext = createContext();
 
+
+
 export const TreeProvider = ({ children }) => {
   const [tree, setTree] = useState({
     id: "root", 
@@ -23,6 +25,10 @@ export const TreeProvider = ({ children }) => {
 
   const updateTree = (updateFn) => {
     setTree(prevTree => produce(prevTree, updateFn));
+  };
+
+  const updateGlobalCss = (cssString) => {
+    setCss(cssString);
   };
 
   const addStyle = (id, classObj) => {
@@ -91,7 +97,7 @@ export const TreeProvider = ({ children }) => {
             id: uuidv4().substring(0, 8),
             tag: "div",
             title: uuidv4().substring(0, 6),
-            classes: [uuidv4().substring(0, 6)],
+            classes: [],
             style: [{"className":"css string"}],
             content: "",
             childrens: []
@@ -212,6 +218,7 @@ export const TreeProvider = ({ children }) => {
     addClass,
     updateClassCss,
     updateCss,
+    updateGlobalCss,
     updateContent,
     updateTag,
     updateTitle,
