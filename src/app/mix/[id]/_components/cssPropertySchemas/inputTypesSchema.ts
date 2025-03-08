@@ -52,6 +52,6 @@ export const cssInputTypes = {
     },
     colorKeywords: { 
         inputType: "selection", default: "transparent", format: "{value}",
-        options: ["transparent", "current", "white", "black", "red", "green", "blue", "yellow", "orange", "purple", "pink", "brown", "gray", "olive", "navy", "maroon", "lime", "teal", "aqua", "fuchsia", "olive"]
+        options: ["transparent", "current", "white", "black", "red", "green", "blue", "yellow", "orange", "purple", "pink", "brown", "gray", "olive", "navy", "maroon", "lime", "teal", "aqua", "fuchsia"]
     }
 };

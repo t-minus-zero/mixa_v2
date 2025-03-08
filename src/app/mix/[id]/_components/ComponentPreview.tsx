@@ -3,6 +3,11 @@ import React from 'react';
 import { useTree } from './TreeContext';
 import { useCssTree } from './CssTreeContext';
 
+// Helper function to convert kebab-case to camelCase for React styles
+function kebabToCamelCase(kebabString) {
+    return kebabString.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+}
+
 // Helper function to convert CSS string to object
 function cssToObject(cssString) {
     const cssObject = {};
@@ -12,7 +17,7 @@ function cssToObject(cssString) {
     cssArray.forEach((cssRule) => {
         const [property, value] = cssRule.split(':');
         if (property && value) {
-            const formattedProperty = property.trim();
+            const formattedProperty = kebabToCamelCase(property.trim());
             const formattedValue = value.trim();
             cssObject[formattedProperty] = formattedValue;
         }
@@ -53,10 +58,26 @@ const RenderTree = ({ node, rootCss }) => {
 
 const HTMLVisualizer = () => {
     const { tree } = useTree();
-
-    // Parse the root's css array into an object
-    const rootCss = parseCssArray(tree.style);
-
+    const { generateCss } = useCssTree();
+    
+    // Get formatted CSS from CssTreeContext
+    const formattedClasses = generateCss();
+    
+    // Convert to the format parseCssArray expects
+    const cssArray = formattedClasses.map(item => {
+        // Extract the CSS content between curly braces (remove selector and braces)
+        const cssContent = item.cssString
+            .replace(`.${item.className} {`, '')
+            .replace(/}$/, '')
+            .trim();
+            
+        // Return an object with the class name as key and CSS string as value
+        return { [item.className]: cssContent };
+    });
+    
+    // Parse the CSS array into an object of className to cssObject mappings
+    const rootCss = parseCssArray(cssArray);
+    
     // Render the tree starting from the root
     return <RenderTree node={tree} rootCss={rootCss} />;
 };
