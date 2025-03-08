@@ -43,11 +43,5 @@ export const mixes = createTable(
   {
     id: serial("id").primaryKey(),
     jsonContent: jsonb("json_content"),
-  },
-  (element) => ({
-    jsonIndex: index("json_idx").on(element.jsonContent),
-  })
+  }
 );
-
-
-
