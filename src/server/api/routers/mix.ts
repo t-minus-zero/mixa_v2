@@ -99,7 +99,7 @@ export const mixRouter = createTRPCRouter({
           const result = await ctx.db
             .update(mixes)
             .set({
-              jsonContent: input.jsonContent
+              jsonContent: stringifyObject(input.jsonContent)
             })
             .where(eq(mixes.id, input.id))
             .returning();
@@ -112,7 +112,7 @@ export const mixRouter = createTRPCRouter({
             .insert(mixes)
             .values({
               id: input.id,
-              jsonContent: input.jsonContent
+              jsonContent: stringifyObject(input.jsonContent)
             })
             .returning();
 

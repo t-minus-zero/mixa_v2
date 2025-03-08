@@ -45,5 +45,13 @@ export const cssInputTypes = {
     trackList: { 
         inputType: "list", separator: " ", min: 1, max: 12, format: "{value}", default: "auto-fit 0fr 0px 0px",
         options: ["{trackKeyword}", "{fraction}", "{dimension}", "{repeatFx}"] 
+    },
+    individual: { 
+        inputType: "list", separator: " ", min: 1, max: 4, format: "{value}", default: 0,
+        options: ["{dimension}"]
+    },
+    colorKeywords: { 
+        inputType: "selection", default: "transparent", format: "{value}",
+        options: ["transparent", "current", "white", "black", "red", "green", "blue", "yellow", "orange", "purple", "pink", "brown", "gray", "olive", "navy", "maroon", "lime", "teal", "aqua", "fuchsia", "olive"]
     }
 };

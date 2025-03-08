@@ -4,6 +4,8 @@ import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 
 import {cssDisplaySchema} from './cssPropertySchemas/displaySchema';
+import {cssPositionSchema} from './cssPropertySchemas/positionSchema';
+import {cssTypographySchema} from './cssPropertySchemas/typographySchema';
 import { cssInputTypes } from './cssPropertySchemas/inputTypesSchema';
 
 // Simple CSS tree structure with classes and properties
@@ -13,8 +15,11 @@ export const CssTreeProvider = ({ children }) => {
   // Schemas definition
   const cssSchemas = {
     inputTypes: cssInputTypes,
-    //for now we load jsut the display schema, later we will load all schemas and combine them to have a single schema for all properties
-    properties: cssDisplaySchema 
+    properties: {
+      ...cssDisplaySchema,
+      ...cssPositionSchema,
+      ...cssTypographySchema
+    }
   }
 
   // CSS utility functions

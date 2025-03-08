@@ -1,6 +1,7 @@
 'use client'
 import React from 'react';
 import { useTree } from './TreeContext';
+import { useCssTree } from './CssTreeContext';
 
 // Helper function to convert CSS string to object
 function cssToObject(cssString) {
