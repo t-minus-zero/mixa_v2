@@ -2,15 +2,55 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCssTree } from './CssTreeContext';
+import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
-import InputClickAndText from './_fragments/InputClickAndText';
 import PropertyElement from './PropertyElement';
+import PropertySelector from './PropertySelector';
 
 // component for a class in the css tree
 // renders a collapsible section with a class name and its properties components
 interface CssClassElementProps {
   className: string;
   children?: React.ReactNode;
+}
+
+const TitleWithButtons = ({ className, onToggle, onDelete }) => { 
+  return (
+    <div className="w-full p-2 flex flex-row items-center justify-start group hover:bg-zinc-50 rounded-md transition-colors">
+      <div className='flex-grow cursor-pointer' onClick={onToggle}>
+        <h3 className="text-sm font-medium">{className}</h3>
+      </div>
+      <div className='flex flex-row items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity'>
+        
+        {/* Edit button - no functionality for now */}
+        <button className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-zinc-600">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+        
+        {/* Copy button - no functionality for now */}
+        <button className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-zinc-600">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+        
+        {/* Delete button - with functionality */}
+        <button 
+          className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-red-500"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function CssClassElement({ className, children }: CssClassElementProps) {
@@ -24,7 +64,9 @@ export default function CssClassElement({ className, children }: CssClassElement
     cssSchemas, //inputTypes and properties schemas
   } = useCssTree();
   
-  const [isOpen, setIsOpen] = useState(true);
+  const { selection, removeClass: removeClassFromElement } = useTree();
+  
+  const [isOpen, setIsOpen] = useState(false);
   
   // Get the class object from the context using className
   const classObj = cssTree.classes[className];
@@ -37,6 +79,28 @@ export default function CssClassElement({ className, children }: CssClassElement
     }
   };
   
+  // Handle deleting class
+  const handleDeleteClass = () => {
+    // Remove class from CssTree
+    removeClass(className);
+    
+    // If there's a selected element, also remove the class from it
+    if (selection && selection.classes && selection.classes.includes(className)) {
+      removeClassFromElement(selection.id, className);
+    }
+  };
+  
+  // Handle property selection from PropertySelector
+  const handleAddProperty = (propertyType) => {
+    // Add the property to the class
+    addProperty(className, propertyType);
+    
+    // Expand the accordion to show the newly added property
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+  
   if (!classObj) {
     return (
       <div className="p-2 text-sm text-gray-500">
@@ -46,38 +110,33 @@ export default function CssClassElement({ className, children }: CssClassElement
   }
   
   return (
-    <li className="w-full">
+    <li className={`w-full bg-zinc-100 rounded-lg border ${isOpen ? 'border-blue-400' : 'border-zinc-200'}`}>
       <div 
-        className="tracking-tight relative p-1 group w-full h-full flex flex-row items-center justify-start rounded-lg gap-2"
-        onClick={() => setIsOpen(!isOpen)}
+        className="relative flex flex-start group" 
       >
-        <InputClickAndText 
-          id={className} 
-          initValue={className} 
-          updateValue={handleUpdateClassName} 
+        <TitleWithButtons 
+          className={className}
+          onToggle={() => setIsOpen(!isOpen)}
+          onDelete={handleDeleteClass}
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
-        <div className="pl-4">
+        <div className="border-t border-zinc-200">
           {/* Properties list */}
           {classObj.properties && Array.isArray(classObj.properties) && classObj.properties.map((property) => (
-            <div key={property.id} className="py-1">
+            <div key={property.id} className="">
               <PropertyElement
-                id={property.id}
+                classId={className}
                 property={property}
               />
             </div>
           ))}
           
-          {/* If there are no properties, show a message */}
-          {(!classObj.properties || !Array.isArray(classObj.properties) || classObj.properties.length === 0) && (
-            <div className="py-2 text-sm text-gray-500 italic">
-              No properties
-            </div>
-          )}
-          
-          {/* Children (might be additional controls or information) */}
-          {children}
+          {/* Property selector */}
+          <PropertySelector
+            className={className}
+            onAddProperty={handleAddProperty}
+          />
         </div>
       </AccordionWrapper>
     </li>

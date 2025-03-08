@@ -231,13 +231,14 @@ export const CssTreeProvider = ({ children }) => {
       if (draft.classes[className]) {
         // Get default value from schema
         const schema = cssSchemas.properties[propertyType];
-        let defaultValue = schema?.default || '';
+        const inputTypeSchema = schema.inputs;
+        let defaultValue = inputTypeSchema?.default || '';
         
         // Create new property with ID
         const newProperty = {
           id: uuidv4(),
           type: propertyType,
-          value: defaultValue
+          value: processValue(defaultValue),
         };
         
         draft.classes[className].properties.push(newProperty);
@@ -288,6 +289,7 @@ export const CssTreeProvider = ({ children }) => {
   };
 
   const updatePropertyValue = (idList, value) => {
+  
     updateTree(draft => {
       for (const className in draft.classes) {
         const propertyIndex = draft.classes[className].properties.findIndex(
@@ -313,7 +315,7 @@ export const CssTreeProvider = ({ children }) => {
       const inputType = extractReferenceKey(value);
       const inputTypeSchema = cssSchemas.inputTypes[inputType];
       let newType = inputTypeSchema.inputType;
-      if (['selection', 'list'].includes(newType)) {
+      if (['selection', 'list', 'composite', 'number'].includes(newType)) {
         newType = inputType;
       }
       const newValue = {
@@ -323,6 +325,18 @@ export const CssTreeProvider = ({ children }) => {
       };
       return newValue;
     }
+
+    // When we load a default we need to give it an id
+    // First check if value is an object if it is we check if it has id
+    if (typeof value === 'object' && value !== null && !('id' in value)) {
+      const newValue = {
+        id: uuidv4(),
+        type: value.type,
+        value: processValue(value.value),
+      };
+      return newValue;
+    }
+
     return value;
   }
 

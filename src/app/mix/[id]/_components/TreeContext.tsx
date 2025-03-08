@@ -159,13 +159,21 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  const removeClass = (id, className) => {
+    updateNode(id, node => {
+      if (node.classes) {
+        node.classes = node.classes.filter(cls => cls !== className);
+      }
+    });
+  };
+
   const moveElement = (sourceId, targetId, position) => {
     updateTree(draft => {
       // Find and remove the source element
       let sourceElement;
       const removeSource = (node) => {
         if (!node.childrens) return false;
-        for (let i = 0; i < node.childrens.length; i++) {
+        for (let i = 0; i <node.childrens.length; i++) {
           if (node.childrens[i].id === sourceId) {
             sourceElement = node.childrens[i];
             node.childrens.splice(i, 1);
@@ -216,6 +224,7 @@ export const TreeProvider = ({ children }) => {
     createElement,
     updateClassName,
     addClass,
+    removeClass,
     updateClassCss,
     updateCss,
     updateGlobalCss,

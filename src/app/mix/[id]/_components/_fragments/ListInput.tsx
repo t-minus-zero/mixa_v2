@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import Portal from 'MixaDev/app/_components/portal/Portal';
 
 interface ListInputProps {
   value: string[];
@@ -21,21 +21,9 @@ export default function ListInput({
   max = 10
 }: ListInputProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-
-  // Create portal container when component mounts
-  useEffect(() => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    setPortalContainer(container);
-    
-    return () => {
-      document.body.removeChild(container);
-    };
-  }, []);
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -53,7 +41,11 @@ export default function ListInput({
     };
     
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      // Ensure we safely remove the event listener
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [dropdownOpen]);
 
   // Add item to the list
@@ -88,33 +80,20 @@ export default function ListInput({
     onChange(newList);
   };
 
-  // Position the dropdown relative to the add button
-  const getDropdownStyles = () => {
-    if (!addButtonRef.current) return {};
-    
-    const rect = addButtonRef.current.getBoundingClientRect();
-    return {
-      position: 'absolute' as const,
-      top: `${rect.bottom + window.scrollY + 5}px`,
-      left: `${rect.left + window.scrollX}px`,
-      zIndex: 1000,
-    };
-  };
-
   return (
-    <div className="space-y-2" ref={listRef}>
+    <div className="w-full" ref={listRef}>
       {/* List items */}
       {value.length > 0 && (
-        <div className="space-y-1">
+        <div className="border border-zinc-200 rounded-md">
           {value.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center space-x-1 rounded border border-gray-200 p-1">
+            <div key={`${item}-${index}`} className="flex items-center border-b border-gray-200 px-2 py-1">
               {/* Item content - either custom rendered or default */}
               <div className="flex-grow">
                 {renderItem ? renderItem(item, index) : <div className="text-xs">{item}</div>}
               </div>
               
               {/* Item controls */}
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 border-l border-zinc-200">
                 {/* Move up button */}
                 <button
                   type="button"
@@ -158,11 +137,11 @@ export default function ListInput({
       
       {/* Add new item button */}
       {value.length < max && (
-        <div className="flex justify-end">
+        <div className="flex w-full">
           <button
             ref={addButtonRef}
             type="button"
-            className="p-1 rounded text-gray-500 hover:bg-gray-100 flex items-center"
+            className="w-full flex items-center justify-center p-1 rounded text-gray-500 hover:bg-gray-100"
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
             <span className="text-xs mr-1">{placeholder}</span>
@@ -175,30 +154,33 @@ export default function ListInput({
       )}
       
       {/* Dropdown portal */}
-      {dropdownOpen && portalContainer && createPortal(
-        <div 
-          ref={dropdownRef}
-          className="bg-white rounded shadow-md border border-gray-200 min-w-[180px] max-h-[250px] overflow-y-auto"
-          style={getDropdownStyles()}
-        >
-          {options.length > 0 ? (
-            <div className="py-1">
-              {options.map((option, index) => (
-                <div
-                  key={index}
-                  className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleAddItem(option)}
-                >
-                  {option}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-2 px-3 text-sm text-gray-500">No options available</div>
-          )}
-        </div>,
-        portalContainer
-      )}
+      <Portal
+        show={dropdownOpen}
+        onClickOutside={() => setDropdownOpen(false)}
+        anchorEl={addButtonRef}
+        placement="bottom-start"
+        offset={5}
+        autoAdjust={true}
+        maxHeight={250}
+        className="bg-white rounded shadow-md border border-gray-200 min-w-[180px] overflow-y-auto"
+        zIndex={1000}
+      >
+        {options.length > 0 ? (
+          <div className="py-1">
+            {options.map((option, index) => (
+              <div
+                key={index}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleAddItem(option)}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-2 px-3 text-sm text-gray-500">No options available</div>
+        )}
+      </Portal>
       
       {/* Max items reached message */}
       {value.length >= max && (

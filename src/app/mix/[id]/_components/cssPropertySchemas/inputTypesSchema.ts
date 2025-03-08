@@ -1,11 +1,11 @@
 export const cssInputTypes = {
     number: { 
         inputType: "number", min: null, max: null, step: 1, format: "{value}", default: 0 },
-    unit: { 
+    unit: {
         inputType: "selection", default: "px", format: "{value}",
         options: ["px", "%", "rem", "em", "vh", "vw"] },
     dimension: { 
-        inputType: "composite", separator: "", options: ["{number}","{unit}"], format: "{value}", default: "0px" },
+        inputType: "composite", separator: "", options: ["{number}","{unit}"], format: "{value}", default: [{type: "number", value: 0},{ type: "unit", value: "px" }]},
     count: { 
         inputType: "number", min: 0, max: null, step: 1, format: "{value}", default: 0 },
     fraction: { 

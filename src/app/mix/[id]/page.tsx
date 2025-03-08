@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "MixaDev/trpc/react";
 import { useTree } from './_components/TreeContext';
+import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
 
 /* This is the editing page */
@@ -14,8 +15,9 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   }
 
   const [mixData, setMixData] = useState(null);
-  const { tree } = useTree();
-  const { setTree } = useTree();
+  const { tree, setTree } = useTree();
+  const { cssTree, updateTree } = useCssTree();
+  
   const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery({
     id: idAsNumber,
   });
@@ -25,7 +27,25 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   useEffect(() => {
     if (mix) {
       setMixData(mix);
-      setTree(mix.jsonContent);
+      
+      // Handle backwards compatibility
+      if (typeof mix.jsonContent === 'object') {
+        // New format with combined data
+        if (mix.jsonContent.treeData) {
+          setTree(mix.jsonContent.treeData);
+        }
+        
+        if (mix.jsonContent.cssData && mix.jsonContent.cssData.classes) {
+          // Use updateTree to update the cssTree
+          updateTree(draft => {
+            // Directly set the classes on the draft object
+            draft.classes = mix.jsonContent.cssData.classes;
+          });
+        }
+      } else {
+        // Legacy format with only tree data
+        setTree(mix.jsonContent);
+      }
     }
   }, [mix]);
 
@@ -49,11 +69,17 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       ...defaultJsonContent,
       ...tree
     };
+    
+    // Create the combined data structure
+    const combinedData = {
+      treeData: updatedTree,
+      cssData: cssTree
+    };
 
     try {
       const updatedMix = await replaceMixMutation.mutateAsync({
         id: idAsNumber,
-        jsonContent: updatedTree,
+        jsonContent: combinedData,
       });
       setMixData(updatedMix);
       console.log("Mix updated successfully:", updatedMix);

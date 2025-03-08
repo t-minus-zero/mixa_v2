@@ -72,13 +72,18 @@ export const mixRouter = createTRPCRouter({
     .input(z.object({
       id: z.number(),
       jsonContent: z.object({
-        id: z.string(),
-        tag: z.string(),
-        title: z.string(),
-        classes: z.array(z.string()),
-        style: z.array(z.any()),
-        content: z.string(),
-        childrens: z.array(z.any())
+        treeData: z.object({
+          id: z.string(),
+          tag: z.string(),
+          title: z.string(),
+          classes: z.array(z.string()),
+          style: z.array(z.any()),
+          content: z.string(),
+          childrens: z.array(z.any())
+        }),
+        cssData: z.object({
+          classes: z.record(z.string(), z.any())
+        })
       })
     }))
     .mutation(async ({ ctx, input }) => {
