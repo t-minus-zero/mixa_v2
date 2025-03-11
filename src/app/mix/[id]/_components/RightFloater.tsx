@@ -4,6 +4,7 @@ import CssClassElement from './CssClassElement';
 import { useCssTree } from './CssTreeContext';
 import { useTree } from './TreeContext';
 import { v4 as uuidv4 } from 'uuid';
+import HtmlContent from './HtmlContent';
 
 // Add Class Button Component
 const AddClassButton = ({ isForSelectedElement }) => {
@@ -140,6 +141,8 @@ const RightFloater = () => {
         <div className="borderborder-zinc-200">
           <AddClassButton isForSelectedElement={!showAllClasses} />
         </div>
+        {/* Add HtmlContent component when an element is selected */}
+        {selection && !showAllClasses && <HtmlContent />}
       </div>
     </div>
   );

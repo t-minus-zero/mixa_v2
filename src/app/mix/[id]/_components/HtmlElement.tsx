@@ -4,15 +4,17 @@ import React, { useState, useRef } from 'react';
 import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
-import InputDropAndText from './_fragments/InputDropAndText';
+import HtmlTagSelector from './HtmlTagSelector';
 
 function HtmlElement({ node, level = 0, children }) {
   const {
     selection,
     selectionHandler,
     createElement,
+    deleteElement,
     selectionParent,
     updateTitle,
+    updateTag,
     draggedItem,
     setDraggedItem,
     dropTarget,
@@ -87,6 +89,22 @@ function HtmlElement({ node, level = 0, children }) {
     updateTitle(node.id, elementTitle);
   }
 
+  const handleDeleteElement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Don't allow deleting the root element
+    if (node.id === 'root') {
+      console.warn('Cannot delete root element');
+      return;
+    }
+    
+    // Ask for confirmation before deleting
+    if (confirm(`Are you sure you want to delete "${node.title}" (${node.tag}) and all its children?`)) {
+      deleteElement(node.id);
+    }
+  };
+
   const getDropIndicatorStyle = () => {
     if (dropTarget?.id !== node.id || !dropPosition) return '';
     
@@ -138,16 +156,30 @@ function HtmlElement({ node, level = 0, children }) {
             </span>
           }
         </button>
-        <InputDropAndText id={node.id} initValue={"[]"} listOfValues={['[]', 'T', 'O']} />
+        <HtmlTagSelector nodeId={node.id} currentTag={node.tag || 'div'} />
         <InputClickAndText id={node.id} initValue={node.title} updateValue={changeTitle} />
-        <div className="absolute right-1">
+        <div className="absolute right-1 flex items-center gap-1">
+          {/* Add Button - + */}
           <button
-              onClick={(e) => { e.preventDefault(); createElement(node.id); }}
-              className={"flex items-center justify-center w-6 hover:bg-zinc-200 h-6 rounded-lg"}>
-              <span className="text-xs group-hover:flex text-zinc-700 hidden">
+            onClick={(e) => { e.preventDefault(); createElement(node.id); }}
+            className="flex items-center justify-center w-6 hover:bg-zinc-200 h-6 rounded-lg"
+          >
+            <span className="text-xs group-hover:flex text-zinc-700 hidden">
               +
-              </span>
+            </span>
           </button>
+          
+          {/* Delete Button - X (only shown for non-root elements and on hover) */}
+          {node.id !== 'root' && (
+            <button 
+              className="w-6 h-6 flex items-center justify-center hover:text-red-500 rounded-lg"
+              onClick={handleDeleteElement}
+            >
+              <span className="text-xs group-hover:flex text-zinc-700 hidden">
+                ×
+              </span>
+            </button>
+          )}
         </div>
       </div>
       <AccordionWrapper openStatus={isOpen}>{children}</AccordionWrapper>

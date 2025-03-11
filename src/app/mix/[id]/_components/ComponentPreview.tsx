@@ -49,11 +49,61 @@ const RenderTree = ({ node, rootCss }) => {
         return { ...acc, ...rootCss[className] };
     }, {});
 
+    // Start with basic props (style and className)
+    const elementProps = { 
+        style: combinedCss, 
+        className: (node.classes || []).join(' ') 
+    };
+
+    // Process additional attributes if they exist
+    if (node.attributes && Array.isArray(node.attributes)) {
+        // Add each attribute to the props object
+        node.attributes.forEach(attr => {
+            if (attr && attr.attribute && attr.value !== undefined) {
+                // Special handling for certain attributes
+                if (attr.attribute === 'style') {
+                    console.warn('Style attribute found in node attributes, but styles are handled separately');
+                    return;
+                }
+                if (attr.attribute === 'className') {
+                    console.warn('className attribute found in node attributes, but classes are handled separately');
+                    return;
+                }
+                
+                // Add the attribute to props
+                elementProps[attr.attribute] = attr.value;
+            }
+        });
+    }
+
     // Create child elements
     const children = (node.childrens || []).map(child => <RenderTree key={child.id} node={child} rootCss={rootCss} />);
+    
+    // Get content
+    const content = node.content || '';
+    
+    // Determine what to include as children for this element
+    let elementChildren;
+    if (children.length === 0 && !content) {
+        // No children or content, pass null
+        elementChildren = null;
+    } else if (children.length === 0) {
+        // Only content, no child elements
+        elementChildren = content;
+    } else if (!content) {
+        // Only child elements, no content
+        elementChildren = children;
+    } else {
+        // Both child elements and content
+        elementChildren = [...children, content];
+    }
 
-    // Create the element
-    return React.createElement(node.tag, { style: combinedCss, className: (node.classes || []).join(' ') }, [...children, node.content || '']);
+    // Create the element with all props including attributes
+    return React.createElement(
+        node.tag, 
+        elementProps, 
+        elementChildren
+    );
 };
 
 const HTMLVisualizer = () => {
