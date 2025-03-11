@@ -181,6 +181,37 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  // (remember to refractor when we switch to IDs for classes instead of names)
+  const renameClassesInTree = (oldClassName, newClassName) => {
+    updateTree(draft => {
+      const updateClassNames = (node) => {
+        if (node.classes && Array.isArray(node.classes)) {
+          node.classes = node.classes.map(cls => 
+            cls === oldClassName ? newClassName : cls
+          );
+        }
+        
+        // Also update style references if at root level
+        if (node.id === "root" && node.style && Array.isArray(node.style)) {
+          node.style = node.style.map(styleObj => {
+            if (styleObj[oldClassName]) {
+              const newStyleObj = {};
+              newStyleObj[newClassName] = styleObj[oldClassName];
+              return newStyleObj;
+            }
+            return styleObj;
+          });
+        }
+        
+        if (node.childrens && Array.isArray(node.childrens)) {
+          node.childrens.forEach(updateClassNames);
+        }
+      };
+      
+      updateClassNames(draft);
+    });
+  };
+
   const moveElement = (sourceId, targetId, position) => {
     updateTree(draft => {
       // Find and remove the source element
@@ -296,6 +327,7 @@ export const TreeProvider = ({ children }) => {
     createImageElement,
     updateClassName,
     removeClass,
+    renameClassesInTree,
     updateClass: updateClassCss,
     addClass,
     updateContent,

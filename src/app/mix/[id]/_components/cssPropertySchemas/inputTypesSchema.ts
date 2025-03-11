@@ -1,6 +1,8 @@
 export const cssInputTypes = {
     number: { 
         inputType: "number", min: null, max: null, step: 1, format: "{value}", default: 0 },
+    text: { 
+        inputType: "text", format: "{value}", default: "" },
     unit: {
         inputType: "selection", default: "px", format: "{value}",
         options: ["px", "%", "rem", "em", "vh", "vw"] },
@@ -53,5 +55,13 @@ export const cssInputTypes = {
     colorKeywords: { 
         inputType: "selection", default: "transparent", format: "{value}",
         options: ["transparent", "current", "white", "black", "red", "green", "blue", "yellow", "orange", "purple", "pink", "brown", "gray", "olive", "navy", "maroon", "lime", "teal", "aqua", "fuchsia"]
+    },
+    borderList: {
+        inputType: "composite", separator: " ", options: ["{dimension}","{borderKeywords}","{text}"], format: "{value}", 
+        default: [{type: "dimension", value: [{type: "number", value: 0},{type: "unit", value: "px"}]},{ type: "borderKeywords", value: "solid" }, {type: "text", value: "#000000"}]
+    },
+    borderKeywords: { 
+        inputType: "selection", default: "none", format: "{value}",
+        options: ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]
     }
 };

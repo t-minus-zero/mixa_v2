@@ -2,7 +2,7 @@ export const cssTypographySchema = {
   color: {
     default: "inherit",
     label: "Color",
-    inputs: { inputType: "selection", options: ["inherit", "{globalKeyword}", "{colorKeywords}"], default: "inherit", format: "{value}" },
+    inputs: { inputType: "selection", options: ["inherit", "{globalKeyword}", "{colorKeywords}", "{text}"], default: "inherit", format: "{value}" },
     format: "color: {value};"
   },
   fontFamily: {

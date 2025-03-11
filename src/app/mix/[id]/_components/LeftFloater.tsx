@@ -12,6 +12,7 @@ interface IconInfo {
   width?: number;
   height?: number;
   color?: string;
+  customUrl?: string;
 }
 
 const renderTree = (node, level = 0) => (
@@ -32,18 +33,28 @@ const LeftFloater = () => {
   const handleSelectIcon = (icon: IconInfo) => {
     console.log('Selected icon with color:', icon);
     
-    // Only proceed if we have a valid icon with prefix and name
-    if (icon && icon.prefix && icon.name) {
+    let iconUrl = '';
+    
+    // Check if this is a custom URL icon
+    if (icon.customUrl) {
+      iconUrl = icon.customUrl;
+    }
+    // Otherwise, only proceed if we have a valid icon with prefix and name
+    else if (icon && icon.prefix && icon.name) {
       // Create the image URL for the Iconify API with the color parameter
-      const iconUrl = `https://api.iconify.design/${icon.prefix}/${icon.name}.svg${icon.color ? `?color=${encodeURIComponent(icon.color)}` : ''}`;
-      
-      // Add image element as a child of the currently selected element
-      // If successful, show a success message
-      if (createImageElement(selection.id, iconUrl)) {
-        console.log(`Added icon ${icon.prefix}:${icon.name} with color ${icon.color || 'default'} to element ${selection.id}`);
-      } else {
-        console.error('Failed to add icon to the selected element');
-      }
+      iconUrl = `https://api.iconify.design/${icon.prefix}/${icon.name}.svg${icon.color ? `?color=${encodeURIComponent(icon.color)}` : ''}`;
+    } else {
+      console.error('Invalid icon data received');
+      setShowIconBrowser(false);
+      return;
+    }
+    
+    // Add image element as a child of the currently selected element
+    // If successful, show a success message
+    if (createImageElement(selection.id, iconUrl)) {
+      console.log(`Added ${icon.customUrl ? 'custom image' : `icon ${icon.prefix}:${icon.name}`} to element ${selection.id}`);
+    } else {
+      console.error('Failed to add icon to the selected element');
     }
     
     // Close the icon browser after selection

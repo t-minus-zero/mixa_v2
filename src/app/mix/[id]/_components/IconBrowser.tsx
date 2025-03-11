@@ -46,6 +46,7 @@ interface IconInfo {
   width?: number;
   height?: number;
   color?: string; 
+  customUrl?: string; // Add this property for direct custom URLs
 }
 
 interface IconBrowserProps {
@@ -62,6 +63,7 @@ const IconBrowser: React.FC<IconBrowserProps> = ({ onSelectIcon, onClose }) => {
   const [totalIcons, setTotalIcons] = useState(POPULAR_ICONS.length);
   const [error, setError] = useState<string | null>(null);
   const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'completed'>('idle');
+  const [customImageUrl, setCustomImageUrl] = useState<string>('');
 
   // Function to search for icons
   const searchIcons = async () => {
@@ -176,6 +178,23 @@ const IconBrowser: React.FC<IconBrowserProps> = ({ onSelectIcon, onClose }) => {
     }
   };
 
+  // Handle using a custom image URL
+  const handleUseCustomUrl = () => {
+    if (customImageUrl && onSelectIcon) {
+      // Create a custom icon object with the provided URL
+      const customIcon: IconInfo = {
+        prefix: 'custom',
+        name: 'custom-image',
+        color: selectedColor
+      };
+      
+      // The actual URL will be used directly in the LeftFloater component
+      // We're setting a special flag on the icon object to indicate it's a direct URL
+      onSelectIcon({ ...customIcon, customUrl: customImageUrl });
+      if (onClose) onClose();
+    }
+  };
+
   // Helper to safely get first letter
   const getFirstLetter = (name?: string) => {
     if (!name || typeof name !== 'string') return '?';
@@ -242,6 +261,56 @@ const IconBrowser: React.FC<IconBrowserProps> = ({ onSelectIcon, onClose }) => {
             </span>
           </div>
         </form>
+
+        {/* Custom Image URL input */}
+        <div className="mb-6 border-t pt-4 border-gray-200">
+          <h3 className="font-medium mb-2 text-sm">Use a Custom Image URL</h3>
+          <div className="flex">
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-l-md"
+              placeholder="Paste image URL here..."
+              value={customImageUrl}
+              onChange={(e) => setCustomImageUrl(e.target.value)}
+            />
+            <button
+              type="button"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-r-md"
+              disabled={!customImageUrl}
+              onClick={handleUseCustomUrl}
+            >
+              Use URL
+            </button>
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>Paste a direct URL to any image (PNG, SVG, JPG, etc.)</span>
+          </div>
+          
+          {/* Custom URL preview */}
+          {customImageUrl && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-10 w-10 border border-gray-200 rounded flex items-center justify-center">
+                <img
+                  src={customImageUrl}
+                  alt="Custom image preview"
+                  className="max-h-8 max-w-8 object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      const placeholder = document.createElement('div');
+                      placeholder.innerHTML = '!';
+                      placeholder.className = 'w-6 h-6 bg-red-200 flex items-center justify-center text-xs rounded';
+                      parent.appendChild(placeholder);
+                    }
+                  }}
+                />
+              </div>
+              <span className="text-xs">Preview</span>
+            </div>
+          )}
+        </div>
         
         {/* Error message */}
         {error && (

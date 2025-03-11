@@ -106,7 +106,7 @@ export const cssDisplaySchema = {
     backgroundColor: {
       default: "transparent",
       label: "Background Color",
-      inputs: { inputType: "selection", options: ["transparent", "{globalKeyword}", "{colorKeywords}"], default: "transparent", format: "{value}" },
+      inputs: { inputType: "selection", options: ["transparent", "{globalKeyword}", "{colorKeywords}", "{text}"], default: "transparent", format: "{value}" },
       format: "background-color: {value};"
     },
     border: {
@@ -115,15 +115,11 @@ export const cssDisplaySchema = {
       inputs: { 
         inputType: "selection", 
         options: [
-          "none", 
-          "{globalKeyword}", 
-          "1px solid black", 
-          "1px dashed black", 
-          "2px solid black", 
-          "1px solid gray", 
-          "1px solid #ccc"
+          "auto",
+          "{globalKeyword}",
+          "{borderList}"
         ], 
-        default: "none", 
+        default: "auto", 
         format: "{value}" 
       },
       format: "border: {value};"

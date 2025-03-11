@@ -213,6 +213,32 @@ export const CssTreeProvider = ({ children }) => {
     return newClassName; // Return the class name (useful when generating a new one)
   };
 
+  // (remember to refractor when we switch to IDs for classes instead of names)
+  const renameClass = (oldClassName, newClassName) => {
+    if (!oldClassName || !newClassName || oldClassName === newClassName || 
+        !cssTree.classes[oldClassName] || cssTree.classes[newClassName]) {
+      return false; // Invalid input or class already exists
+    }
+
+    updateTree(draft => {
+      // Create new class with the new name but same properties
+      draft.classes[newClassName] = {
+        ...draft.classes[oldClassName],
+        name: newClassName
+      };
+      
+      // Delete the old class
+      delete draft.classes[oldClassName];
+    });
+
+    // Update selected class if it's the one being renamed
+    if (selectedClass === oldClassName) {
+      setSelectedClass(newClassName);
+    }
+
+    return true;
+  };
+
   const removeClass = (className) => {
     updateTree(draft => {
       delete draft.classes[className];
@@ -389,6 +415,7 @@ export const CssTreeProvider = ({ children }) => {
     updateTree,
     // Class operations
     addClass,
+    renameClass,
     removeClass,
     selectClass,
     // Property operations

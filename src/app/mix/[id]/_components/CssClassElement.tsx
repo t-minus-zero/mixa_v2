@@ -6,6 +6,7 @@ import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import PropertyElement from './PropertyElement';
 import PropertySelector from './PropertySelector';
+import InputClickAndText from './_fragments/InputClickAndText';
 
 // component for a class in the css tree
 // renders a collapsible section with a class name and its properties components
@@ -14,11 +15,13 @@ interface CssClassElementProps {
   children?: React.ReactNode;
 }
 
-const TitleWithButtons = ({ className, onToggle, onDelete }) => { 
+const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange }) => { 
   return (
     <div className="w-full p-2 flex flex-row items-center justify-start group hover:bg-zinc-50 rounded-md transition-colors">
-      <div className='flex-grow cursor-pointer' onClick={onToggle}>
-        <h3 className="text-sm font-medium">{className}</h3>
+      <div className='flex flex-row items-center flex-grow cursor-pointer' onClick={onToggle}>
+        <div className='cursor-text' onClick={(e) => e.stopPropagation()}>
+          <InputClickAndText id={className} initValue={className} updateValue={onChange} />
+        </div>
       </div>
       <div className='flex flex-row items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity'>
         
@@ -62,20 +65,33 @@ export default function CssClassElement({ className, children }: CssClassElement
     addProperty,
     generateCss,
     cssSchemas, //inputTypes and properties schemas
+    renameClass
   } = useCssTree();
   
-  const { selection, removeClass: removeClassFromElement } = useTree();
+  const { 
+    selection, 
+    removeClass: removeClassFromElement,
+    renameClassesInTree
+  } = useTree();
   
   const [isOpen, setIsOpen] = useState(false);
   
   // Get the class object from the context using className
   const classObj = cssTree.classes[className];
   
-  // Handle updating class name
+  // Handle updating class name (remember to refractor when we switch to IDs for classes instead of names)
   const handleUpdateClassName = (newClassName) => {
     if (newClassName !== className && newClassName.trim()) {
-      // If we implement renaming classes, would call a context function here
-      console.log("Would rename class from", className, "to", newClassName);
+      // Rename the class in CssTreeContext
+      const success = renameClass(className, newClassName);
+      
+      if (success) {
+        // Update all references to this class name in the tree
+        renameClassesInTree(className, newClassName);
+        console.log(`Renamed class from ${className} to ${newClassName}`);
+      } else {
+        console.log(`Failed to rename class from ${className} to ${newClassName}`);
+      }
     }
   };
   
@@ -117,7 +133,9 @@ export default function CssClassElement({ className, children }: CssClassElement
         <TitleWithButtons 
           className={className}
           onToggle={() => setIsOpen(!isOpen)}
+          openStatus={isOpen}
           onDelete={handleDeleteClass}
+          onChange={handleUpdateClassName}
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
