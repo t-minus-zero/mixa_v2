@@ -5,7 +5,7 @@ export const cssInputTypes = {
         inputType: "text", format: "{value}", default: "" },
     unit: {
         inputType: "selection", default: "px", format: "{value}",
-        options: ["px", "%", "rem", "em", "vh", "vw"] },
+        options: ["px", "%", "rem", "em", "vh", "vw", "fr"] },
     dimension: { 
         inputType: "composite", separator: "", options: ["{number}","{unit}"], format: "{value}", default: [{type: "number", value: 0},{ type: "unit", value: "px" }]},
     count: { 
@@ -63,5 +63,8 @@ export const cssInputTypes = {
     borderKeywords: { 
         inputType: "selection", default: "none", format: "{value}",
         options: ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]
+    },
+    backdropFilterBlur: { 
+        inputType: "dimension", default: [{type: "number", value: 0}, {type: "unit", value: "px"}], format: "{value}",
     }
 };

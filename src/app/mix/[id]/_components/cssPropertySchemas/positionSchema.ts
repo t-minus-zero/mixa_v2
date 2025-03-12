@@ -189,5 +189,11 @@ export const cssPositionSchema = {
       label: "Margin Left",
       inputs: { inputType: "selection", options: ["{globalKeyword}","auto","{dimension}"], default: "{dimension}", format: "{value}" },
       format: "margin-left: {value};"
+    },
+    boxSizing: {
+      default: "content-box",
+      label: "Box Sizing",
+      inputs: { inputType: "selection", options: ["content-box", "border-box"], default: "content-box", format: "{value}" },
+      format: "box-sizing: {value};"
     }
 };

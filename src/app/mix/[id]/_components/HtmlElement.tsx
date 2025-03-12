@@ -127,7 +127,7 @@ function HtmlElement({ node, level = 0, children }) {
         ${node.childrens && node.childrens.length > 0 && isOpen ? 'border-zinc-300' : 'border-transparent'}
         ${selectionParent && selectionParent.id === node.id ? 'border-l' : ''}
         ${getDropIndicatorStyle()}
-        relative p-1
+        relative py-1
       `}
       style={{ marginLeft: level / 5 + "rem" }}
       draggable="true"
@@ -143,7 +143,7 @@ function HtmlElement({ node, level = 0, children }) {
         className={`
           ${selection.id === node.id ? 'bg-zinc-100' : ''}
           ${draggedItem?.id === node.id ? 'opacity-50' : ''}
-          tracking-tight relative p-1 group w-full h-full flex flex-row items-center rounded-lg flex-start gap-2
+          tracking-tight relative group w-full h-full flex flex-row items-center rounded-lg flex-start gap-2
         `}
       >
         <button

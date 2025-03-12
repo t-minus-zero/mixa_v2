@@ -8,6 +8,9 @@ export default {
       fontFamily: {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
       },
+      fontSize: {
+        'xxs': '0.625rem', // 10px when base is 16px
+      },
     },
   },
   plugins: [],

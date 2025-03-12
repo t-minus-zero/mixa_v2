@@ -147,5 +147,26 @@ export const cssDisplaySchema = {
       label: "Border Radius",
       inputs: { inputType: "selection", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
       format: "border-radius: {value};"
+    },
+    borderBottom: {
+      default: "none",
+      label: "Border Bottom",
+      inputs: { 
+        inputType: "selection", 
+        options: [
+          "auto",
+          "{globalKeyword}",
+          "{borderList}"
+        ], 
+        default: "auto", 
+        format: "{value}" 
+      },
+      format: "border-bottom: {value};"
+    },
+    backdropFilter: {
+      default: "none",
+      label: "Backdrop Filter",
+      inputs: { inputType: "selection", default: "{backdropFilterBlur}", format: "{value}" , options: ["none", "{backdropFilterBlur}", "{globalKeyword}"] },
+      format: "backdrop-filter: blur({value});"
     }
 };

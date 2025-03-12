@@ -5,6 +5,7 @@ import { api } from "MixaDev/trpc/react";
 import { useTree } from './_components/TreeContext';
 import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
+import ResizableContainer from '../../_components/Resize/ResizableContainer';
 
 /* This is the editing page */
 export default function MixModal({ params: { id: mixId } }: { params: { id: string }; }) {
@@ -88,6 +89,21 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     }
   };
 
+  // Dot Grid Background Component
+  const DotGridBackground = () => {
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
+            backgroundSize: '16px 16px'
+          }}
+        />
+      </div>
+    );
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -97,9 +113,22 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      <div className="w-64 h-64 overflow-hidden resize border border-zinc-300 rounded-lg" style={{ maxHeight: 'calc(100vh - 1rem)', maxWidth: 'calc(100vw - 1rem)' }}>
+      {/* Background dots grid */}
+      <DotGridBackground />
+      
+      <ResizableContainer 
+        initialWidth={400} 
+        initialHeight={400}
+        minWidth={200} 
+        minHeight={200}
+        style={{ 
+          maxHeight: 'calc(100vh - 1rem)', 
+          maxWidth: 'calc(100vw - 1rem)' 
+        }}
+      >
         <HTMLVisualizer />
-      </div>
+      </ResizableContainer>
+      
       <button onClick={handleUpdateMix} className="absolute bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded">
         Update Mix
       </button>

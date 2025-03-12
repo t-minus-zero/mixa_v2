@@ -62,7 +62,7 @@ const LeftFloater = () => {
   };
   
   return (
-    <div className="h-full py-4 min-w-52 flex flex-col justify-between group/tree">
+    <div className="ml-1 h-full w-full min-w-64 py-4 flex flex-col justify-between group/tree">
       <div className="flex flex-col bg-zinc-50 p-2 rounded-xl gap-2" style={{maxHeight: 'calc(100% - 8rem)'}}>
         <div className="flex flex-row gap-2 text-xs">
           {/* To add quick actions like Add component */} 

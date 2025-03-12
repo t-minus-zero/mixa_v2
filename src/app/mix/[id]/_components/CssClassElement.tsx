@@ -17,8 +17,8 @@ interface CssClassElementProps {
 
 const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange }) => { 
   return (
-    <div className="w-full p-2 flex flex-row items-center justify-start group hover:bg-zinc-50 rounded-md transition-colors">
-      <div className='flex flex-row items-center flex-grow cursor-pointer' onClick={onToggle}>
+    <div className="w-full p-2 flex flex-row items-center justify-start group hover:bg-zinc-50 rounded-md transition-colors cursor-pointer" onClick={onToggle}>
+      <div className='flex flex-row items-center flex-grow ' >
         <div className='cursor-text' onClick={(e) => e.stopPropagation()}>
           <InputClickAndText id={className} initValue={className} updateValue={onChange} />
         </div>
