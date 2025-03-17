@@ -16,6 +16,8 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   }
 
   const [mixData, setMixData] = useState(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
+  const [showImageInput, setShowImageInput] = useState(false);
   const { tree, setTree } = useTree();
   const { cssTree, updateTree } = useCssTree();
   
@@ -30,7 +32,7 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       setMixData(mix);
       
       // Handle backwards compatibility
-      if (typeof mix.jsonContent === 'object') {
+      if (typeof mix.jsonContent === 'object' && mix.jsonContent !== null) {
         // New format with combined data
         if (mix.jsonContent.treeData) {
           setTree(mix.jsonContent.treeData);
@@ -42,6 +44,13 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
             // Directly set the classes on the draft object
             draft.classes = mix.jsonContent.cssData.classes;
           });
+        }
+
+        // Load background image if exists
+        // Using optional chaining to safely access the property
+        if ('backgroundImageUrl' in mix.jsonContent && 
+            typeof mix.jsonContent.backgroundImageUrl === 'string') {
+          setBackgroundImageUrl(mix.jsonContent.backgroundImageUrl);
         }
       } else {
         // Legacy format with only tree data
@@ -71,10 +80,11 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       ...tree
     };
     
-    // Create the combined data structure
+    // Create the combined data structure with background image
     const combinedData = {
       treeData: updatedTree,
-      cssData: cssTree
+      cssData: cssTree,
+      backgroundImageUrl
     };
 
     try {
@@ -89,19 +99,41 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     }
   };
 
-  // Dot Grid Background Component
-  const DotGridBackground = () => {
+  // Background Image Component
+  const BackgroundImage = () => {
+    if (!backgroundImageUrl) return null;
+
     return (
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden z-0">
         <div 
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
-            backgroundSize: '16px 16px'
+            backgroundImage: `url(${backgroundImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.8, // Increased opacity for better visibility
           }}
         />
       </div>
     );
+  };
+
+  // Handle image URL input
+  const handleImageUrlSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const input = form.elements.namedItem('imageUrl') as HTMLInputElement;
+    if (input && input.value) {
+      setBackgroundImageUrl(input.value);
+      setShowImageInput(false);
+      // Log to confirm the URL was set
+      console.log("Background image URL set to:", input.value);
+    }
+  };
+
+  const toggleImageInput = () => {
+    setShowImageInput(!showImageInput);
   };
 
   if (isLoading) {
@@ -113,8 +145,44 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      {/* Background dots grid */}
-      <DotGridBackground />
+      {/* Background image */}
+      <BackgroundImage />
+      
+      {/* Background image URL input button */}
+      <div className="absolute top-4 right-4 z-10">
+        {showImageInput ? (
+          <form onSubmit={handleImageUrlSubmit} className="flex gap-2">
+            <input 
+              type="text" 
+              name="imageUrl"
+              placeholder="Enter image URL" 
+              className="px-2 py-1 text-sm rounded border border-gray-300" 
+              defaultValue={backgroundImageUrl}
+            />
+            <button 
+              type="submit" 
+              className="bg-blue-500 text-white px-2 py-1 text-sm rounded"
+            >
+              Set
+            </button>
+            <button 
+              type="button" 
+              onClick={toggleImageInput}
+              className="bg-gray-500 text-white px-2 py-1 text-sm rounded"
+            >
+              Cancel
+            </button>
+          </form>
+        ) : (
+          <button 
+            onClick={toggleImageInput} 
+            className="bg-blue-500 text-white px-3 py-1 rounded flex items-center"
+          >
+            {backgroundImageUrl ? 'Change Background Image' : 'Set Background Image'}
+            {backgroundImageUrl && <span className="ml-2 text-xs whitespace-nowrap">(currently set)</span>}
+          </button>
+        )}
+      </div>
       
       <ResizableContainer 
         initialWidth={400} 

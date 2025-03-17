@@ -5,6 +5,7 @@ import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
+import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react';
 
 function HtmlElement({ node, level = 0, children }) {
   const {
@@ -125,7 +126,7 @@ function HtmlElement({ node, level = 0, children }) {
       ref={elementRef}
       className={`
         ${node.childrens && node.childrens.length > 0 && isOpen ? 'border-zinc-300' : 'border-transparent'}
-        ${selectionParent && selectionParent.id === node.id ? 'border-l' : ''}
+        ${selectionParent && selectionParent.id === node.id ? 'border-l bg-zinc-100/50 rounded-lg' : ''}
         ${getDropIndicatorStyle()}
         relative py-1
       `}
@@ -141,18 +142,18 @@ function HtmlElement({ node, level = 0, children }) {
           selectionHandler(node);
         }}
         className={`
-          ${selection.id === node.id ? 'bg-zinc-100' : ''}
+          ${selection.id === node.id ? 'bg-zinc-50/50 border-blue-500' : 'border-transparent'}
           ${draggedItem?.id === node.id ? 'opacity-50' : ''}
-          tracking-tight relative group w-full h-full flex flex-row items-center rounded-lg flex-start gap-2
+          tracking-tight relative group w-full h-full flex flex-row items-center rounded-lg flex-start border 
         `}
       >
         <button
           onClick={(e) => {e.preventDefault; setIsOpen(!isOpen)}}
-          className={"flex items-center justify-center w-6 hover:bg-zinc-200 h-6 rounded-lg"}
+          className={"flex items-center justify-center w-6 hover:bg-zinc-100/50 h-6 rounded-lg"}
         > 
           {node.childrens && node.childrens.length > 0 &&
-            <span className="group-hover/tree:flex hidden text-xs text-zinc-700">
-                {isOpen ? '▼' : '▶'}
+            <span className="group-hover/tree:flex hidden text-zinc-700">
+                {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </span>
           }
         </button>
@@ -162,10 +163,10 @@ function HtmlElement({ node, level = 0, children }) {
           {/* Add Button - + */}
           <button
             onClick={(e) => { e.preventDefault(); createElement(node.id); }}
-            className="flex items-center justify-center w-6 hover:bg-zinc-200 h-6 rounded-lg"
+            className="flex items-center justify-center w-6 hover:bg-zinc-200/50 h-6 rounded-lg"
           >
-            <span className="text-xs group-hover:flex text-zinc-700 hidden">
-              +
+            <span className="group-hover:flex text-zinc-700 hidden">
+              <Plus size={14} />
             </span>
           </button>
           
@@ -175,8 +176,8 @@ function HtmlElement({ node, level = 0, children }) {
               className="w-6 h-6 flex items-center justify-center hover:text-red-500 rounded-lg"
               onClick={handleDeleteElement}
             >
-              <span className="text-xs group-hover:flex text-zinc-700 hidden">
-                ×
+              <span className="group-hover:flex text-zinc-700 hidden">
+                <X size={14} />
               </span>
             </button>
           )}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import { Smartphone, Tablet, Monitor, RotateCw } from 'lucide-react';
 
 // Device preset dimensions
 const DEVICE_PRESETS = {
@@ -130,34 +131,34 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
   return (
     // Outer wrapper div
     <div className="relative">
-      <div className="absolute px-3 -top-2.5 z-20 gap-2 w-full flex items-center justify-between p-1 font-semibold text-zinc-700 text-xxs">
+      <div className="absolute px-3 -top-2.5 z-10 gap-2 w-full flex items-center justify-between p-1 font-semibold text-zinc-700 text-xxs">
           <div className="flex flex-row gap-2">
             <button 
-              className={`hover:bg-zinc-200 px-2 py-1 rounded-lg ${currentDevice === 'PHONE' ? 'bg-zinc-300' : 'bg-zinc-100'}`}
+              className={`hover:bg-zinc-100/50 backdrop-blur-sm px-2 py-1 rounded-lg ${currentDevice === 'PHONE' ? 'bg-zinc-100/50' : ''}`}
               onClick={() => handleDeviceSelect('PHONE')}
             >
-              PHONE
+              <Smartphone size={16} />
             </button>
             <button 
-              className={`hover:bg-zinc-200 px-2 py-1 rounded-lg ${currentDevice === 'TABLET' ? 'bg-zinc-300' : 'bg-zinc-100'}`}
+              className={`hover:bg-zinc-100/50 backdrop-blur-sm px-2 py-1 rounded-lg ${currentDevice === 'TABLET' ? 'bg-zinc-100/50' : ''}`}
               onClick={() => handleDeviceSelect('TABLET')}
             >
-              TABLET
+              <Tablet size={16} />
             </button>
             <button 
-              className={`hover:bg-zinc-200 px-2 py-1 rounded-lg ${currentDevice === 'DESKTOP' ? 'bg-zinc-300' : 'bg-zinc-100'}`}
+              className={`hover:bg-zinc-100/50 backdrop-blur-sm px-2 py-1 rounded-lg ${currentDevice === 'DESKTOP' ? 'bg-zinc-100/50' : ''}`}
               onClick={() => handleDeviceSelect('DESKTOP')}
             >
-              DESKTOP
+              <Monitor size={16} />
             </button>
           </div>
           <div className="flex flex-row gap-2">
             <button 
-              className={`hover:bg-zinc-200 bg-zinc-100 px-2 py-1 rounded-lg ${currentDevice === 'DESKTOP' ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`hover:bg-zinc-100/50 backdrop-blur-sm px-2 py-1 rounded-lg ${currentDevice === 'DESKTOP' ? 'bg-zinc-100/50 cursor-not-allowed' : ''}`}
               onClick={handleRotate}
               disabled={currentDevice === 'DESKTOP'}
             >
-              ROTATE
+              <RotateCw size={16} />
             </button>
           </div>
       </div>
@@ -168,27 +169,11 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
         style={resizableContainerStyle}
       >
 
-        <div className="relative w-full h-full border border-gray-300 p-4">
+        <div className="relative w-full h-full border border-zinc-200/50 rounded-xl p-2 overflow-hidden">
 
           {/* Inner container with 100% width and height */}
           <div className="inner-container w-full h-full min-w-full min-h-full relative">
             {children}
-          </div>
-
-          {/* Custom resize handle (cross) - positioned in the outer wrapper */}
-          <div
-            className="absolute z-20 -bottom-3 p-1 bg-zinc-100 -right-3 w-6 h-6 flex items-center justify-center"
-          >
-            {/* SVG cross icon */}
-            <svg 
-              className="w-full h-full p-1 z-20 hidden"
-              viewBox="0 0 8 8" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <line x1="0" y1="4" x2="8" y2="4" stroke="rgb(110,110,115)" strokeWidth="0.3" />
-              <line x1="4" y1="0" x2="4" y2="8" stroke="rgb(110,110,115)" strokeWidth="0.3" />
-            </svg>
           </div>
 
         </div>

@@ -1,10 +1,12 @@
 'use client'
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import CssClassElement from './CssClassElement';
 import { useCssTree } from './CssTreeContext';
 import { useTree } from './TreeContext';
 import { v4 as uuidv4 } from 'uuid';
 import HtmlContent from './HtmlContent';
+import { SearchIcon, X } from 'lucide-react';
+import AccordionWrapper from './_fragments/AccordionWrapper';
 
 // Add Class Button Component
 const AddClassButton = ({ isForSelectedElement }) => {
@@ -40,38 +42,153 @@ const AddClassButton = ({ isForSelectedElement }) => {
   return (
     <button 
       onClick={handleAddClass}
-      className="w-full bg-zinc-100 border border-zinc-200 text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 py-2 px-4 rounded-lg text-xs transition-colors"
+      className="w-full border border-zinc-200 rounded-lg text-zinc-500 hover:bg-zinc-50/50 hover:text-blue-400 py-2 px-4 text-xs transition-colors flex items-center justify-center"
     >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      </svg>
       {isForSelectedElement ? 'Add Class to Selected Element' : 'Add New Class'}
     </button>
   );
 };
 
-const SearchWithButtons = ({ searchValue, onSearchChange, showAllClasses, onToggleView }) => {
-  return (
-    <div className="flex flex-row items-stretch rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
-      <div className="flex-grow"> 
-        <input 
-          type="text" 
-          placeholder="Search..." 
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full px-2 py-2 text-sm focus:outline-none focus:border-blue-400 bg-transparent"
-        />
-      </div>
-      <div 
-        className={`flex items-center border-l border-zinc-200 px-3 cursor-pointer text-sm ${
-          showAllClasses 
-            ? 'bg-zinc-200 text-zinc-600' 
-            : 'bg-transparent text-zinc-400 hover:text-zinc-600'
-        }`} 
-        onClick={onToggleView}
-      >
-        All
-      </div>
-    </div>
-  )
+// Define interface for ClassesFloater props
+interface ClassesFloaterProps {
+  classesToDisplay: string[];
+  showAllClasses: boolean;
+  setShowAllClasses: (show: boolean) => void;
+  searchText: string;
+  setSearchText: (text: string) => void;
 }
+
+const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, searchText, setSearchText }: ClassesFloaterProps) => {
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  const toggleAccordion = () => {
+    // Only toggle if not in search mode
+    if (!isSearchMode) {
+      setIsAccordionOpen(!isAccordionOpen);
+    }
+  };
+  
+  const toggleSearch = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSearchMode(!isSearchMode);
+    if (!isSearchMode) {
+      // When entering search mode, ensure accordion is open
+      setIsAccordionOpen(true);
+      // Focus search input after rendering
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 0);
+    } else {
+      // When exiting search mode, clear search text
+      setSearchText('');
+    }
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  };
+  
+  // Toggle between showing all classes or just selected element's classes
+  const toggleShowAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllClasses(!showAllClasses);
+  };
+  
+  // Handle clicks outside of the search area to exit search mode
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isSearchMode && searchText === '' && 
+          searchInputRef.current && 
+          !searchInputRef.current.contains(e.target as Node)) {
+        setIsSearchMode(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSearchMode, searchText]);
+
+  return (
+    <div className="flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden">
+      
+      {/* Header with title or search */}
+      <div 
+          className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer border-b border-zinc-200" 
+          onClick={toggleAccordion}
+        >
+          <div className='flex flex-row items-center flex-grow px-2'>
+            {isSearchMode ? (
+              // Search input
+              <div className='cursor-text w-full' onClick={(e) => e.stopPropagation()}>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchText}
+                  onChange={handleSearchChange}
+                  className="w-full text-sm bg-transparent outline-none"
+                  placeholder="Search..."
+                />
+              </div>
+            ) : (
+              // Title "Classes"
+              <div className='font-medium text-sm'>
+                Classes
+              </div>
+            )}
+          </div>
+          <div className='flex flex-row items-center justify-end'>
+            {/* Search/Close button */}
+            <button 
+              className={`w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isSearchMode ? 'text-zinc-400 hover:text-red-500' : 'text-zinc-400 hover:text-zinc-600'}`}
+              onClick={toggleSearch}
+            >
+              {isSearchMode ? <X size={16} /> : <SearchIcon size={16} />}
+            </button>
+            
+            {/* All toggle button */}
+            <button
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                showAllClasses 
+                  ? 'bg-zinc-50/50 text-zinc-600 font-medium' 
+                  : 'bg-transparent text-zinc-400 hover:text-zinc-600'
+              }`}
+              onClick={toggleShowAll}
+            >
+              All
+            </button>
+          </div>
+      </div>
+
+      {/* Accordion content */}
+      <div className="overflow-y-auto">
+        <AccordionWrapper openStatus={isSearchMode || isAccordionOpen}>
+          {!showAllClasses && classesToDisplay.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500 text-center">
+              No classes on selected element
+            </div>
+          ) : (
+            <ul className="w-full gap-2 flex flex-col p-2">
+              {classesToDisplay.map((className) => (
+                <CssClassElement key={className} className={className} />
+              ))}
+            </ul>
+          )}
+          <div className="w-full p-2 pt-0">
+            <AddClassButton isForSelectedElement={!showAllClasses} />
+          </div>
+        </AccordionWrapper>
+      </div>
+      
+    </div>
+  );
+};
 
 const RightFloater = () => {
   const { cssTree } = useCssTree();
@@ -81,16 +198,11 @@ const RightFloater = () => {
   const { updateTree } = useTree();
   const { setSelection } = useTree();
   
-  // Change from string to boolean toggle
+  // State for toggling between all classes and selected element's classes
   const [showAllClasses, setShowAllClasses] = useState(false);
-  // Add state for search input
+  // State for search input
   const [searchInput, setSearchInput] = useState('');
   
-  // Handle toggle view mode
-  const handleToggleView = () => {
-    setShowAllClasses(!showAllClasses);
-  };
-
   // Get classes to display based on current mode and selection
   const classesToDisplay = useMemo(() => {
     // First get the base list of classes based on view mode
@@ -115,32 +227,17 @@ const RightFloater = () => {
 
   return (
     <div 
-      className="h-full min-w-52 max-w-80 mr-2 flex flex-col justify-between group/tree">
+      className="h-full w-full min-w-64 py-4 flex flex-col justify-between group/tree">
       <div className="flex flex-col gap-2 max-h-[calc(100vh-6rem)] overflow-hidden">
-        <SearchWithButtons 
-          searchValue={searchInput}
-          onSearchChange={setSearchInput}
+        <ClassesFloater 
+          classesToDisplay={classesToDisplay}
           showAllClasses={showAllClasses}
-          onToggleView={handleToggleView}
+          setShowAllClasses={setShowAllClasses}
+          searchText={searchInput}
+          setSearchText={setSearchInput}
         />
-        <div className="overflow-y-scroll flex-grow">
-          <div className="flex-1 overflow-y-auto">
-            {!showAllClasses && classesToDisplay.length === 0 ? (
-              <div className="p-4 text-sm text-gray-500 text-center">
-                No classes on selected element
-              </div>
-            ) : (
-              <ul className="w-full h-full gap-2 flex flex-col">
-                {classesToDisplay.map((className) => (
-                  <CssClassElement key={className} className={className} />
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-        <div className="borderborder-zinc-200">
-          <AddClassButton isForSelectedElement={!showAllClasses} />
-        </div>
+
+        
         {/* Add HtmlContent component when an element is selected */}
         {selection && !showAllClasses && <HtmlContent />}
       </div>

@@ -133,7 +133,7 @@ export default function PropertyElement({ classId, property }) {
 
   return (
     <div 
-      className="w-full border-b border-gray-200 py-1 hover:bg-gray-50 relative"
+      className="w-full border-b border-gray-200 py-1 hover:bg-zinc-50/50 relative"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >

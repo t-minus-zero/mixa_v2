@@ -6,6 +6,12 @@ Have the creation of the new mix being called from the dashboard instead of the 
 Maybe can be solved differently by jumping mire than one page back?
 For /mix we'll have an easter egg page.
 
+
+[] Ai Implement an AI assistant on the mix page.
+
+
+[] Copy Claude's smooth menu transition-in for the top menu
+
 [] Complete the UI for the Mix page.
     [] Context menu implementation
     [] Top menu with logo, searchbar.

@@ -46,7 +46,7 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
     <div className={`flex items-center ${className || ''}`}>
       <button
         ref={buttonRef}
-        className="px-2 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 rounded text-zinc-700 transition-colors"
+        className="px-2 py-1 text-xxs hover:bg-zinc-50/50 rounded text-zinc-700 transition-colors font-bold tracking-tight uppercase"
         onClick={() => setIsOpen(!isOpen)}
       >
         {currentTag || 'div'}
@@ -97,10 +97,10 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
               filteredTags.map(([tagName, tagSchema]) => (
                 <div 
                   key={tagName}
-                  className="px-3 py-2 text-sm hover:bg-zinc-100 cursor-pointer truncate"
+                  className="px-2 py-1 text-sm hover:bg-zinc-100 cursor-pointer truncate"
                   onClick={() => handleSelectTag(tagName)}
                 >
-                  <span className="text-xs font-medium">{tagName}</span>
+                  <span className="text-xxs font-medium tracking-tight uppercase">{tagName}</span>
                   {tagSchema.description && (
                     <span className="ml-2 text-xs text-zinc-500 truncate">({tagSchema.description})</span>
                   )}
