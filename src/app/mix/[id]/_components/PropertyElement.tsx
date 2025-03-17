@@ -9,6 +9,7 @@ import SelectInput from './_fragments/SelectInput';
 import NumberInput from './_fragments/NumberInput';
 import ListInput from './_fragments/ListInput';
 import CompositeInput from './_fragments/CompositeInput';
+import { X, Copy } from 'lucide-react';
 
 // Component for property in the css tree
 // Renders a collapsible section with a property name and its value editor
@@ -119,7 +120,7 @@ export default function PropertyElement({ classId, property }) {
         )
     }else{
         // Fallback for other object types
-        return <div className="text-xs text-gray-400">Complex value editor not implemented</div>;
+        return <div className="text-xs text-zinc-400">Complex value editor not implemented</div>;
     }
   };
 
@@ -133,7 +134,7 @@ export default function PropertyElement({ classId, property }) {
 
   return (
     <div 
-      className="w-full border-b border-gray-200 py-1 hover:bg-zinc-50/50 relative"
+      className="w-full border-b border-zinc-200/50 py-1 hover:bg-zinc-50/50 relative"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -143,22 +144,35 @@ export default function PropertyElement({ classId, property }) {
       >
         <span className="text-xs font-medium">{propertySchema.label}</span>
         <div className="flex items-center">
-          <span className="text-xs text-gray-500 mr-2">
-            {property && property.value ? formatProperty(property.value, property.type) : 'No value'}
-          </span>
+          {!isHovering && (
+            <span className="text-xxs text-zinc-500 mr-2">
+              {property && property.value ? formatProperty(property.value, property.type) : 'No value'}
+            </span>
+          )}
           
-          {/* Remove button that appears on hover */}
+          {/* Buttons that appear on hover */}
           {isHovering && (
-            <button
-              className="text-gray-400 hover:text-red-500 transition-colors "
-              onClick={handleRemoveProperty}
-              aria-label="Remove property"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="text-zinc-700 hover:text-blue-500 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  if (property && property.value) {
+                    navigator.clipboard.writeText(formatProperty(property.value, property.type));
+                  }
+                }}
+                aria-label="Copy property value"
+              >
+                <Copy size={12} />
+              </button>
+              <button
+                className="text-zinc-700 hover:text-red-500 transition-colors"
+                onClick={handleRemoveProperty}
+                aria-label="Remove property"
+              >
+                <X size={12} />
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -168,7 +182,7 @@ export default function PropertyElement({ classId, property }) {
           {property ? (
             renderPropertyInput([property.id], property)
           ) : (
-            <span className="text-xs text-gray-400">No value to edit</span>
+            <span className="text-xxs text-zinc-400">No value to edit</span>
           )}
         </div>
       </AccordionWrapper>

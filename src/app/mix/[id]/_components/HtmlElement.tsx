@@ -5,7 +5,7 @@ import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
-import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Copy } from 'lucide-react';
 
 function HtmlElement({ node, level = 0, children }) {
   const {
@@ -90,22 +90,6 @@ function HtmlElement({ node, level = 0, children }) {
     updateTitle(node.id, elementTitle);
   }
 
-  const handleDeleteElement = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Don't allow deleting the root element
-    if (node.id === 'root') {
-      console.warn('Cannot delete root element');
-      return;
-    }
-    
-    // Ask for confirmation before deleting
-    if (confirm(`Are you sure you want to delete "${node.title}" (${node.tag}) and all its children?`)) {
-      deleteElement(node.id);
-    }
-  };
-
   const getDropIndicatorStyle = () => {
     if (dropTarget?.id !== node.id || !dropPosition) return '';
     
@@ -145,7 +129,7 @@ function HtmlElement({ node, level = 0, children }) {
         className={`
           ${selection.id === node.id ? 'bg-blue-200/50' : ''}
           ${draggedItem?.id === node.id ? 'opacity-50' : ''}
-          tracking-tight relative group w-full h-full flex flex-row items-center rounded-lg flex-start border border-transparent
+          tracking-tight hover:bg-zinc-50/50 relative group w-full h-full flex flex-row items-center rounded-lg flex-start border border-transparent
         `}
       >
         <button
@@ -153,35 +137,26 @@ function HtmlElement({ node, level = 0, children }) {
           className={"flex items-center justify-center w-6 hover:bg-zinc-100/50 h-6 rounded-lg"}
         > 
           {node.childrens && node.childrens.length > 0 &&
-            <span className="group-hover/tree:flex hidden text-zinc-700">
-                {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </span>
+            (isOpen ? <ChevronDown size={14} className="text-zinc-700" /> : <ChevronRight size={14} className="text-zinc-700" />)
           }
         </button>
         <HtmlTagSelector nodeId={node.id} currentTag={node.tag || 'div'} />
         <InputClickAndText id={node.id} initValue={node.title} updateValue={changeTitle} />
-        <div className="absolute right-1 flex items-center gap-1">
+        <div className="absolute right-1 flex items-center">
+          {/* Copy Button */}
+          <button
+            className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-lg bg-zinc-50 text-zinc-700 hover:text-blue-500 text-xs"
+          >
+            <Copy size={12} />
+          </button>
+          
           {/* Add Button - + */}
           <button
             onClick={(e) => { e.preventDefault(); createElement(node.id); }}
-            className="flex items-center justify-center w-6 hover:bg-zinc-200/50 h-6 rounded-lg"
+            className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-lg bg-zinc-50 text-zinc-700 hover:text-blue-500"
           >
-            <span className="group-hover:flex text-zinc-700 hidden">
-              <Plus size={14} />
-            </span>
+            <Plus size={12} />
           </button>
-          
-          {/* Delete Button - X (only shown for non-root elements and on hover) */}
-          {node.id !== 'root' && (
-            <button 
-              className="w-6 h-6 flex items-center justify-center hover:text-red-500 rounded-lg"
-              onClick={handleDeleteElement}
-            >
-              <span className="group-hover:flex text-zinc-700 hidden">
-                <X size={14} />
-              </span>
-            </button>
-          )}
         </div>
       </div>
       <AccordionWrapper openStatus={isOpen}>{children}</AccordionWrapper>

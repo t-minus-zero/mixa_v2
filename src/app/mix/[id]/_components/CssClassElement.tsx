@@ -20,7 +20,7 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
   const [isVisible, setIsVisible] = useState(true);
   
   return (
-    <div className="w-full p-2 flex flex-row items-center justify-start group hover:bg-zinc-50/50 rounded-md transition-colors cursor-pointer" onClick={onToggle}>
+    <div className="w-full px-2 py-1 flex flex-row items-center justify-start group rounded-md cursor-pointer" onClick={onToggle}>
       
       {/* Renamble name */}
       <div className='flex flex-row items-center flex-grow ' >
@@ -29,10 +29,10 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
         </div>
       </div>
 
-      <div className='flex flex-row items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity'>
+      <div className={`flex flex-row items-center justify-end ${openStatus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
         {/* Eye toggle button */}
         <button 
-          className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-zinc-600"
+          className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-zinc-600"
           onClick={(e) => {
             e.stopPropagation();
             setIsVisible(!isVisible);
@@ -42,13 +42,13 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
         </button>
         
         {/* Copy button - no functionality for now */}
-        <button className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-zinc-600">
+        <button className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-zinc-600">
           <CopyIcon size={16} />
         </button>
         
         {/* Delete button - with functionality */}
         <button 
-          className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-red-500"
+          className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-red-500"
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
@@ -131,9 +131,9 @@ export default function CssClassElement({ className, children }: CssClassElement
   }
   
   return (
-    <li className={`w-full bg-zinc-100/50 rounded-lg border ${isOpen ? 'border-blue-400' : 'border-zinc-100'}`}>
+    <li className={`w-full rounded-lg  border ${isOpen ? 'border-blue-400 bg-blue-50/50' : 'border-zinc-100 bg-zinc-100/50'}`}>
       <div 
-        className="relative flex flex-start group" 
+        className={`relative flex flex-start group ${isOpen ? 'bg-blue-100/50' : 'bg-transparent'}`}
       >
         <TitleWithButtons 
           className={className}

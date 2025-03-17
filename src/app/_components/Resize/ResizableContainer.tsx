@@ -131,7 +131,7 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
   return (
     // Outer wrapper div
     <div className="relative">
-      <div className="absolute px-3 -top-2.5 z-10 gap-2 w-full flex items-center justify-between p-1 font-semibold text-zinc-700 text-xxs">
+      <div className="absolute px-3 -top-6 z-10 gap-2 w-full flex items-center justify-between p-1 font-semibold text-zinc-700 text-xxs">
           <div className="flex flex-row gap-2">
             <button 
               className={`hover:bg-zinc-100/50 backdrop-blur-sm px-2 py-1 rounded-lg ${currentDevice === 'PHONE' ? 'bg-zinc-100/50' : ''}`}

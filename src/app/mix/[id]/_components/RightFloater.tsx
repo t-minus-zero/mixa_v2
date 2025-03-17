@@ -116,7 +116,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
   }, [isSearchMode, searchText]);
 
   return (
-    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-36'}`}>
+    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-32'}`}>
       
       {/* Header with title or search */}
       <div 
@@ -154,7 +154,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
             
             {/* All toggle button */}
             <button
-              className={`px-3 py-1 text-xs rounded transition-colors ${
+              className={`p-1 text-xs rounded transition-colors ${
                 showAllClasses 
                   ? 'bg-zinc-50/50 text-zinc-600 font-medium' 
                   : 'bg-transparent text-zinc-400 hover:text-zinc-600'

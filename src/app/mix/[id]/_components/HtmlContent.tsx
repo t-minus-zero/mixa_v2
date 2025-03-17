@@ -85,7 +85,7 @@ const HtmlContent = () => {
   }
 
   return (
-    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-xl shadow-sm border border-zinc-200 mt-4 overflow-hidden transition-all duration-300 ${isAccordionOpen ? 'w-64' : 'w-36'}`}>
+    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 mt-4 overflow-hidden transition-all duration-300 ${isAccordionOpen ? 'w-64' : 'w-32'}`}>
       {/* Header with title */}
       <div 
         className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer border-b border-zinc-200" 
@@ -122,13 +122,22 @@ const HtmlContent = () => {
       {/* Accordion content */}
       <div className="overflow-y-auto">
         <AccordionWrapper openStatus={isAccordionOpen}>
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={handleContentChange}
-            placeholder="Write content..."
-            className="w-full p-2 bg-transparent text-sm focus:outline-none min-h-[100px]"
-          />
+          <div className="w-full py-2 flex flex-col gap-2">
+            <div className="px-2">
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Write content..."
+              className="w-full p-2 rounded-lg bg-zinc-100/50 border-zinc-200 border text-sm focus:outline-none min-h-[100px]"
+            />
+            </div>
+            <div className="px-2">
+              <button className="w-full text-xs p-2 rounded-lg bg-zinc-100/50 border-zinc-200 border">
+                Save
+              </button>
+            </div>
+          </div>
         </AccordionWrapper>
       </div>
     </div>

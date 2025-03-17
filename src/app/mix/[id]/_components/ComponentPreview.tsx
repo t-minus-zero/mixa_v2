@@ -49,9 +49,22 @@ const RenderTree = ({ node, rootCss }) => {
         return { ...acc, ...rootCss[className] };
     }, {});
 
+    // Process inlineStyle - convert kebab-case to camelCase for React
+    const processedInlineStyle = {};
+    if (node.inlineStyle) {
+        Object.entries(node.inlineStyle).forEach(([prop, value]) => {
+            // Convert CSS property names from kebab-case to camelCase for React
+            const camelCaseProp = prop.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+            processedInlineStyle[camelCaseProp] = value;
+        });
+    }
+
+    // Merge with existing combined CSS (giving priority to inline styles)
+    const finalStyles = { ...combinedCss, ...processedInlineStyle };
+
     // Start with basic props (style and className)
     const elementProps = { 
-        style: combinedCss, 
+        style: finalStyles, 
         className: (node.classes || []).join(' ') 
     };
 

@@ -6,6 +6,10 @@ import {htmlElementsSchema, htmlAttributesSchema} from './htmlElementsSchema';
 
 const TreeContext = createContext();
 
+const VisualizationCssProperties = {
+  highlight:[{"outline": "1px dashed rgba(10, 132, 255, 0.75)"}],
+  explode3d:[{"box-shadow": "0 0 10px rgba(0, 0, 0, 0.5)"}],
+}
 
 
 export const TreeProvider = ({ children }) => {
@@ -14,7 +18,8 @@ export const TreeProvider = ({ children }) => {
     tag: "div", 
     title: "root", 
     classes: [], // List of classes separated by spaces
-    style: [{"className":"css string"}], // Object of css properties by class (option only populated in the root level)
+    style: [], // Array of style properties (legacy, keeping for backward compatibility)
+    inlineStyle: {}, // Flat object of inline CSS properties
     content: "", // Text content of object
     attributes: [{"attribute":"src", "value":"url"}],
     childrens: []
@@ -67,11 +72,49 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  // Function to apply visualization styles using the flat inlineStyle object
+  const applyVisualizationStyle = (nodeId, styleName, shouldApply) => {
+    if (!nodeId || nodeId === "root") return;
+    
+    updateNode(nodeId, node => {
+      // Initialize inlineStyle if it doesn't exist
+      if (!node.inlineStyle) node.inlineStyle = {};
+      
+      if (shouldApply) {
+        // Add the visualization properties to the flat inlineStyle object
+        VisualizationCssProperties[styleName].forEach(styleProp => {
+          const propName = Object.keys(styleProp)[0];
+          const propValue = styleProp[propName];
+          
+          // Add to the flat inlineStyle object
+          node.inlineStyle[propName] = propValue;
+        });
+      } else {
+        // Remove the visualization properties from inlineStyle
+        VisualizationCssProperties[styleName].forEach(styleProp => {
+          const propName = Object.keys(styleProp)[0];
+          
+          // Remove property from inlineStyle
+          delete node.inlineStyle[propName];
+        });
+      }
+    });
+  };
+
   const selectionHandler = (node) => {
     if (selection.id !== node.id) {
+      // Remove highlight styles from current selection
+      applyVisualizationStyle(selection.id, 'highlight', false);
+      
+      // Get parent for new selection
       const parent = findParent(tree, node.id);
+      
+      // Update selection state
       setSelectionParent(parent ? parent : tree);
       setSelection(node);
+      
+      // Apply highlight styles to new selection
+      applyVisualizationStyle(node.id, 'highlight', true);
     } else {
       setSelectionParent(tree);
     }
@@ -97,6 +140,38 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  // Handle element delete with keyboard shortcut
+  const handleKeyDown = (e) => {
+    // Check if the target is an input element - if so, don't handle the backspace
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    // Check if backspace key is pressed and there's a selected element
+    if (e.key === 'Backspace' && selection && selection.id !== 'root') {
+      e.preventDefault(); // Prevent browser navigation
+      
+      // Ask for confirmation before deleting
+      if (confirm(`Are you sure you want to delete "${selection.title}" (${selection.tag}) and all its children?`)) {
+        deleteElement(selection.id);
+        // After deletion, select the parent
+        if (selectionParent) {
+          setSelection(selectionParent);
+        }
+      }
+    }
+  };
+
+  // Set up keydown event listener
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selection, selectionParent]); // Re-attach when selection or parent changes
+
   const createElement = (id) => {
     updateTree(draft => {
       const findAndCreate = (node) => {
@@ -113,6 +188,7 @@ export const TreeProvider = ({ children }) => {
             title: uuidv4().substring(0, 6),
             classes: [],
             style: [{"className":"css string"}],
+            inlineStyle: {}, // Initialize inlineStyle
             content: "",
             childrens: []
           });
@@ -294,6 +370,8 @@ export const TreeProvider = ({ children }) => {
             tag: "img",
             title: "Image", // More descriptive title
             classes: [],
+            style: [{"className":"css string"}],
+            inlineStyle: {}, // Initialize inlineStyle
             content: "",
             attributes: [
               { attribute: "src", value: imageUrl },

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
 import { useTree } from './TreeContext';
 
@@ -11,8 +11,10 @@ interface HtmlTagSelectorProps {
 export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlTagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filterText, setFilterText] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const { updateTag, htmlSchemas } = useTree();
 
   // Handle tag selection
@@ -20,10 +22,11 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
     updateTag(nodeId, tagName);
     setIsOpen(false);
     setFilterText('');
+    setSelectedIndex(0);
   };
 
   // Focus the input when dropdown opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => {
         inputRef.current?.focus();
@@ -42,6 +45,67 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
     }
   );
 
+  // Reset selected index when filtered tags change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filteredTags.length]);
+
+  // Scroll to the selected item when it changes
+  useEffect(() => {
+    if (isOpen && listRef.current && filteredTags.length > 0) {
+      const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
+      if (selectedElement) {
+        // Calculate if the element is out of view
+        const containerRect = listRef.current.getBoundingClientRect();
+        const elementRect = selectedElement.getBoundingClientRect();
+        
+        if (elementRect.bottom > containerRect.bottom) {
+          // If below visible area, scroll down
+          selectedElement.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        } else if (elementRect.top < containerRect.top) {
+          // If above visible area, scroll up
+          selectedElement.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+      }
+    }
+  }, [selectedIndex, isOpen, filteredTags.length]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < filteredTags.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : 0));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (filteredTags.length > 0 && selectedIndex >= 0 && selectedIndex < filteredTags.length) {
+          const selectedTag = filteredTags[selectedIndex];
+          if (selectedTag) {
+            const [tagName] = selectedTag;
+            handleSelectTag(tagName);
+          }
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        setFilterText('');
+        setSelectedIndex(0);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className={`flex items-center ${className || ''}`}>
       <button
@@ -57,6 +121,7 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
         onClickOutside={() => {
           setIsOpen(false);
           setFilterText('');
+          setSelectedIndex(0);
         }}
         anchorEl={buttonRef}
         placement="bottom-start"
@@ -75,6 +140,7 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
                 type="text"
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Filter HTML tags..."
                 className="w-full text-xs p-2 rounded focus:outline-none bg-zinc-50"
               />
@@ -93,24 +159,31 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
           
           {/* Tags list */}
           <div className="overflow-y-auto max-h-[250px] no-scrollbar custom-scrollbar">
-            {filteredTags.length > 0 ? (
-              filteredTags.map(([tagName, tagSchema]) => (
-                <div 
-                  key={tagName}
-                  className="px-2 py-1 text-sm hover:bg-zinc-100 cursor-pointer truncate"
-                  onClick={() => handleSelectTag(tagName)}
-                >
-                  <span className="text-xxs font-medium tracking-tight uppercase">{tagName}</span>
-                  {tagSchema.description && (
-                    <span className="ml-2 text-xs text-zinc-500 truncate">({tagSchema.description})</span>
-                  )}
+            <div ref={listRef}>
+              {filteredTags.length > 0 ? (
+                filteredTags.map(([tagName, tagSchema], index) => (
+                  <div 
+                    key={tagName}
+                    className={`px-2 py-1 text-sm cursor-pointer truncate ${
+                      selectedIndex === index 
+                        ? 'bg-zinc-200/50' 
+                        : 'hover:bg-zinc-100'
+                    }`}
+                    onClick={() => handleSelectTag(tagName)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <span className="text-xxs font-medium tracking-tight uppercase">{tagName}</span>
+                    {tagSchema.description && (
+                      <span className="ml-2 text-xs text-zinc-500 truncate">({tagSchema.description})</span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="px-3 py-2 text-xs text-zinc-500 italic">
+                  No matching tags
                 </div>
-              ))
-            ) : (
-              <div className="px-3 py-2 text-xs text-zinc-500 italic">
-                No matching tags
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </Portal>
