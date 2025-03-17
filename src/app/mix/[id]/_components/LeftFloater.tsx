@@ -123,7 +123,7 @@ const LeftFloater = () => {
     <div className="h-full w-full min-w-64 py-4 flex flex-col justify-between group/tree">
 
       {/* Layers section */}
-      <div className="flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-r-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-y-scroll">
+      <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-r-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-y-scroll transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-36'}`}>
        
         {/* Header with title or search */}
         <div 
@@ -171,7 +171,7 @@ const LeftFloater = () => {
       </div>
       
       {/* Icon Browser Button */}
-      <div className="w-full mt-4">
+      <div className="w-full mt-4 hidden">
         <button 
           ref={iconButtonRef}
           onClick={handleOpenIconBrowser}

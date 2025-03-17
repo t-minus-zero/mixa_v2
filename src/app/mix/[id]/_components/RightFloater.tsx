@@ -116,7 +116,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
   }, [isSearchMode, searchText]);
 
   return (
-    <div className="flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden">
+    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-36'}`}>
       
       {/* Header with title or search */}
       <div 
@@ -227,8 +227,8 @@ const RightFloater = () => {
 
   return (
     <div 
-      className="h-full w-full min-w-64 py-4 flex flex-col justify-between group/tree">
-      <div className="flex flex-col gap-2 max-h-[calc(100vh-6rem)] overflow-hidden">
+      className="h-full w-full w-64 flex flex-col justify-between items-end group/tree">
+      <div className="flex flex-col items-end max-h-[calc(100vh-6rem)] overflow-hidden">
         <ClassesFloater 
           classesToDisplay={classesToDisplay}
           showAllClasses={showAllClasses}

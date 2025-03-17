@@ -85,7 +85,7 @@ const HtmlContent = () => {
   }
 
   return (
-    <div className="flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-xl shadow-sm border border-zinc-200 mt-4 overflow-hidden">
+    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-xl shadow-sm border border-zinc-200 mt-4 overflow-hidden transition-all duration-300 ${isAccordionOpen ? 'w-64' : 'w-36'}`}>
       {/* Header with title */}
       <div 
         className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer border-b border-zinc-200" 
