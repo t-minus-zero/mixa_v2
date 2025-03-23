@@ -6,6 +6,7 @@ import { useTree } from './_components/TreeContext';
 import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
 import ResizableContainer from '../../_components/Resize/ResizableContainer';
+import { useNotifications } from '../../_contexts/NotificationsContext';
 
 /* This is the editing page */
 export default function MixModal({ params: { id: mixId } }: { params: { id: string }; }) {
@@ -59,8 +60,15 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     }
   }, [mix]);
 
+  const { addNotification } = useNotifications();
+
   const handleUpdateMix = async () => {
     if (!tree) {
+      addNotification({
+        type: 'error',
+        message: 'No tree data to update',
+        duration: 3000
+      });
       console.error("No tree data to update");
       return;
     }
@@ -87,14 +95,36 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       backgroundImageUrl
     };
 
+    // Show in-progress notification
+    addNotification({
+      type: 'info',
+      message: 'Updating mix...',
+      duration: 2000
+    });
+
     try {
       const updatedMix = await replaceMixMutation.mutateAsync({
         id: idAsNumber,
         jsonContent: combinedData,
       });
       setMixData(updatedMix);
+      
+      // Show success notification
+      addNotification({
+        type: 'success',
+        message: 'Mix updated successfully!',
+        duration: 3000
+      });
+      
       console.log("Mix updated successfully:", updatedMix);
     } catch (error) {
+      // Show error notification
+      addNotification({
+        type: 'error',
+        message: `Failed to update mix: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        duration: 5000
+      });
+      
       console.error("Failed to update mix:", error);
     }
   };

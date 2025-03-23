@@ -1,10 +1,10 @@
 import "MixaDev/styles/globals.css";
 
-
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "MixaDev/trpc/react";
+import NotificationsProvider from "./_contexts/NotificationsContext";
 
 export const metadata: Metadata = {
   title: "Mixa",
@@ -23,9 +23,11 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          {children}
-          {modal}
-          <div id="modal-root"></div>
+          <NotificationsProvider>
+            {children}
+            {modal}
+            <div id="modal-root"></div>
+          </NotificationsProvider>
         </TRPCReactProvider>
       </body>
     </html>

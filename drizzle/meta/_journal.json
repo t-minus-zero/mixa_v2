@@ -8,6 +8,20 @@
       "when": 1741474787871,
       "tag": "0000_amazing_flatman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1742691363373,
+      "tag": "0001_fair_omega_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1742692944881,
+      "tag": "0002_flawless_mephisto",
+      "breakpoints": true
     }
   ]
 }

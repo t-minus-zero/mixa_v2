@@ -1,10 +1,10 @@
 "use client";
 
-import { useDashboardData  } from '../../_contexts/DashboardContext';
+// We no longer need the context for data as it's now server-side
 import Link from 'next/link';
 
 const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
-    const { latestPost } = useDashboardData();
+    // We'll rely on props instead of context for data
 
     return (
         <nav 
@@ -34,7 +34,7 @@ const DashboardTopNav = ({ children }: { children: React.ReactNode }) => {
                         <div className="flex flex-row items-center justify-start">
                             <a className="flex flex-row items-center justify-start gap-2 cursor-pointer">  
                                 <span className="flex flex-row items-center justify-center rounded-md font-bold text-sm text-zinc-50 bg-zinc-900 w-5 h-5 leading-5"> X </span>
-                                <p className="flex flex-row items-center justify-start text-sm text-zinc-900 leading-5"> {latestPost ? latestPost.title : "Untitled"} </p>
+                                <p className="flex flex-row items-center justify-start text-sm text-zinc-900 leading-5">Dashboard</p>
                             </a>
                         </div>
                     </li>

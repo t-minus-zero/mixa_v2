@@ -1,0 +1,1 @@
+ALTER TABLE "mixa_mix" ADD COLUMN "name" varchar(128);

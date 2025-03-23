@@ -171,7 +171,7 @@ const LeftFloater = () => {
       </div>
       
       {/* Icon Browser Button */}
-      <div className="w-full mt-4 hidden">
+      <div className="w-full mt-4">
         <button 
           ref={iconButtonRef}
           onClick={handleOpenIconBrowser}

@@ -1,68 +1,69 @@
 "use client"
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { api } from 'MixaDev/trpc/react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { Mix } from './DataContext';
 
-const DashboardDataContext = createContext(null);
-
-export const DashboardDataProvider = ({ children }) => {
-    const [latestPost, setLatestPost] = useState(null);
-
-    const { data: post } = api.post.getLatest.useQuery();
-
-    useEffect(() => {
-        if (post) {
-            setLatestPost(post);
-        }
-    }, [post]);
-
-    return (
-        <DashboardDataContext.Provider value={{ latestPost }}>
-            {children}
-        </DashboardDataContext.Provider>
-    );
-};
-
-export const useDashboardData = () => {
-    return useContext(DashboardDataContext);
-};
-
-/*---------------------------------*/
-
-interface Project {
-  id: string;
-  name: string;
-  // Add other project fields as needed
-}
-
+// Dashboard context - purely client-side UI state
 interface DashboardContextProps {
-  projects: Project[];
-  setProjects: (projects: Project[]) => void;
+  // Selection state
+  selectedMixIds: number[];
+  toggleMixSelection: (id: number, isMultiSelectMode: boolean) => void;
+  clearSelections: () => void;
+  isMixSelected: (id: number) => boolean;
+  
+  // UI state for mixes
+  mixes: Mix[];
+  setMixes: (mixes: Mix[]) => void;
 }
 
 const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
 
-export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
+export const DashboardProvider = ({ children, initialMixes = [] }: { children: ReactNode, initialMixes?: Mix[] }) => {
+  // Selection state
+  const [selectedMixIds, setSelectedMixIds] = useState<number[]>([]);
+  // Mix data state (received from server but managed in client context)
+  const [mixes, setMixes] = useState<Mix[]>(initialMixes);
 
-  useEffect(() => {
-    // Fetch projects and update state
-    fetch('/api/projects')
-      .then(response => response.json())
-      .then(data => setProjects(data));
-  }, []);
+  // Selection handling functions
+  const toggleMixSelection = (id: number, isMultiSelectMode: boolean) => {
+    if (isMultiSelectMode) {
+      // Toggle the selection while keeping others
+      setSelectedMixIds(prev => 
+        prev.includes(id) 
+          ? prev.filter(mixId => mixId !== id) 
+          : [...prev, id]
+      );
+    } else {
+      // Replace selection with just this item
+      setSelectedMixIds([id]);
+    }
+  };
+
+  const clearSelections = () => setSelectedMixIds([]);
+  
+  const isMixSelected = (id: number) => selectedMixIds.includes(id);
 
   return (
-    <DashboardContext.Provider value={{ projects, setProjects }}>
+    <DashboardContext.Provider value={{ 
+      // Selection state
+      selectedMixIds,
+      toggleMixSelection,
+      clearSelections,
+      isMixSelected,
+      
+      // Mix data state
+      mixes,
+      setMixes
+    }}>
       {children}
     </DashboardContext.Provider>
   );
 };
 
-export const useDashboardContext = () => {
+export const useDashboard = () => {
   const context = useContext(DashboardContext);
   if (!context) {
-    throw new Error('useDashboardContext must be used within a DashboardProvider');
+    throw new Error('useDashboard must be used within a DashboardProvider');
   }
   return context;
 };

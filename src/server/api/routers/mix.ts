@@ -15,6 +15,19 @@ function stringifyObject(obj: object): string {
 }
 
 export const mixRouter = createTRPCRouter({
+  // Procedure to get all mixes
+  getAllMixes: publicProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const result = await ctx.db
+          .select()
+          .from(mixes)
+          .orderBy(mixes.id);
+        return result;
+      } catch (error) {
+        throw new Error('Failed to fetch mixes');
+      }
+    }),
   // Procedure to fetch a mix by ID
   getMixById: publicProcedure
   .input(z.object({ id: z.number() }))
@@ -32,11 +45,22 @@ export const mixRouter = createTRPCRouter({
       }
       // Get the first item from the result array
       const mix = result[0];
+      
+      // Ensure mix exists (we've already checked result.length above, but this satisfies TypeScript)
+      if (!mix) {
+        throw new Error(`Mix with id ${input.id} not found`);
+      }
+      
       // No need to parse the JSON content, it is already an object
       const parsedContent = mix.jsonContent;
-      // Return the parsed content along with the mix ID
+      
+      // Return the parsed content along with all mix metadata
       return {
         id: mix.id,
+        name: mix.name,
+        mixType: mix.mixType,
+        createdAt: mix.createdAt,
+        updatedAt: mix.updatedAt,
         jsonContent: parsedContent,
       };
     } catch (error) {
@@ -46,20 +70,29 @@ export const mixRouter = createTRPCRouter({
 
   // Procedure to create a new mix
   createMix: publicProcedure
-    .input(z.object({ jsonContent: z.object({
-      id: z.string(),
-      tag: z.string(),
-      title: z.string(),
-      classes: z.array(z.string()),
-      style: z.array(z.any()),
-      content: z.string(),
-      childrens: z.array(z.any())
-    }) }))
+    .input(z.object({
+      name: z.string().optional(),
+      mixType: z.string().optional(),
+      jsonContent: z.object({
+        id: z.string(),
+        tag: z.string(),
+        title: z.string(),
+        classes: z.array(z.string()),
+        style: z.array(z.any()),
+        content: z.string(),
+        childrens: z.array(z.any())
+      })
+    }))
     .mutation(async ({ ctx, input }) => {
       try {
         const jsonString = stringifyObject(input.jsonContent);
+        const now = new Date();
         const result = await ctx.db.insert(mixes).values({
+          name: input.name ?? "New Mix",
+          mixType: input.mixType ?? "webpage",
           jsonContent: jsonString,
+          createdAt: now,
+          updatedAt: now,
         }).returning();
         return result;
       } catch (error) {
@@ -71,6 +104,8 @@ export const mixRouter = createTRPCRouter({
   replaceMixById: publicProcedure
     .input(z.object({
       id: z.number(),
+      name: z.string().optional(),
+      mixType: z.string().optional(),
       jsonContent: z.object({
         treeData: z.object({
           id: z.string(),
@@ -96,10 +131,14 @@ export const mixRouter = createTRPCRouter({
 
         if (existingMix.length > 0) {
           // Update the existing mix
+          const now = new Date();
           const result = await ctx.db
             .update(mixes)
             .set({
-              jsonContent: stringifyObject(input.jsonContent)
+              name: input.name ?? "New Mix",
+              mixType: input.mixType,
+              jsonContent: stringifyObject(input.jsonContent),
+              updatedAt: now
             })
             .where(eq(mixes.id, input.id))
             .returning();
@@ -108,11 +147,16 @@ export const mixRouter = createTRPCRouter({
           return result;
         } else {
           // Insert a new mix
+          const now = new Date();
           const result = await ctx.db
             .insert(mixes)
             .values({
               id: input.id,
-              jsonContent: stringifyObject(input.jsonContent)
+              name: input.name ?? "New Mix",
+              mixType: input.mixType ?? "webpage",
+              jsonContent: stringifyObject(input.jsonContent),
+              createdAt: now,
+              updatedAt: now
             })
             .returning();
 

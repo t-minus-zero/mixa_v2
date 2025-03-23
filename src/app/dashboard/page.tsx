@@ -1,13 +1,11 @@
 import ProjectsGrid from './_components/ProjectsGrid';
-import {db} from '../../server/db';
+import { getAllMixes } from '../_contexts/DataContext';
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage({ children }: { children: React.ReactNode }) {
-
-  const mixes = await db.query.mixes.findMany({
-    orderBy: (model, {desc}) => desc(model.id),
-  });
+  // Use the server-side data utility to fetch mixes
+  const mixes = await getAllMixes();
   
   return (
     <div className="w-screen flex items-center flex-col overflow-hidden">
