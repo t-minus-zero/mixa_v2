@@ -1,11 +1,18 @@
-export default async function LibraryPage({ children }: { children: React.ReactNode }) {
-    
-    return (
-      <div className="w-screen flex items-center flex-col overflow-hidden">
-        <div className="w-full flex items-center flex-col px-4">
-            {children}
-        </div>
+"use client"
+
+import ProjectsGrid from '../_components/ProjectsGrid';
+import { useDashboard } from '../../_contexts/DashboardContext';
+
+export default function LibraryPage() {
+  // Get mixes from the dashboard context
+  const { mixes } = useDashboard();
+  
+  return (
+    <div className="w-full flex items-center flex-col overflow-hidden">
+      <div className="w-full max-w-full flex items-center flex-col">
+        <ProjectsGrid mixes={mixes} />
       </div>
-    );
-  }
+    </div>
+  );
+}
   

@@ -1,11 +1,13 @@
 "use client"
 
-import { useDashboard } from '../../_contexts/DashboardContext';
 import ProjectsGrid from '../_components/ProjectsGrid';
+import { getAllMixes } from '../../_contexts/DataContext';
 
-export default function CollectionPage() {
-  // Get mixes from the dashboard context
-  const { mixes } = useDashboard();
+export const dynamic = "force-dynamic";
+
+export default async function ProjectsPage() {
+  // Use the server-side data utility to fetch mixes
+  const mixes = await getAllMixes();
   
   return (
     <div className="w-full flex items-center flex-col overflow-hidden">

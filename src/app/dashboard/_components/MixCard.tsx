@@ -1,7 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow, isValid } from "date-fns";
-import { Box, Check } from "lucide-react";
+import { Box, Check, Image as ImageIcon } from "lucide-react";
 import { useDashboard } from "../../_contexts/DashboardContext";
 
 interface MixCardProps {
@@ -57,9 +57,9 @@ const MixCard = ({ id, mName, updatedAt }: MixCardProps) => {
       <div 
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        style={{ gridTemplateColumns: "1fr", gridTemplateRows: "1fr 1fr" }}
-        className={`w-full h-80 bg-zinc-0 border ${isSelected ? 'border-blue-500 border-2' : 'border-zinc-200'} rounded-xl cursor-pointer overflow-hidden group grid relative`}>
-        <div className="p-6 flex flex-row justify-between items-start gap-4 group">
+        className={`w-full aspect-[1/1] bg-zinc-50 border ${isSelected ? 'border-zinc-800' : 'border-zinc-50'} relative rounded-xl cursor-pointer overflow-hidden group flex flex-col transition-all duration-300`}>
+        
+        <div className="p-6 flex flex-row items-center justify-between items-start gap-4 group">
           <div className="flex flex-row items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center bg-zinc-100 rounded-full">
               <Box size={16} className="text-zinc-800" />
@@ -70,18 +70,22 @@ const MixCard = ({ id, mName, updatedAt }: MixCardProps) => {
             </div>
           </div>
           <div className="text-zinc-900 cursor-pointer leading-5">
-            <button className="flex flex-row items-center justify-center rounded-full hover:bg-white border border-zinc-300 font-bold text-sm text-zinc-500 w-8 h-8 leading-5"> &#8942; </button>
+            <button className="flex flex-row items-center justify-center rounded-full hover:bg-white border-zinc-300 font-bold text-sm text-zinc-500 w-8 h-8 leading-5"> &#8942; </button>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-end -mb-12 group-hover:-mb-24 transition-all duration-300 ease-in-out">
+        <div className=" hidden flex flex-col px-6 w-full">
+          <p className="text-zinc-500 text-sm pr-2"> John Doe is working on this mix. <br /> [AI employee] </p>
+        </div>
+
+        <div className="absolute flex w-full h-full flex-col items-center justify-end bottom-[-20%] group-hover:bottom-[-40%] transition-all duration-300 ease-in-out ">
           <div 
-            className="w-5/6 h-full ">
-            <img
-              className="rounded-xl object-cover w-full h-full" 
-              src="https://utfs.io/f/9ff23c88-bd7a-40ce-ab9d-6d25d73d8ccf-n9ys8r.jpg" 
-              alt="Component image" />
+            className="w-full h-full px-6 [background:linear-gradient(180deg,rgba(250,250,252,0.00)_0%,#FAFAFC_28.7%)]">
+            <div className="rounded-xl mt-12 w-full h-full flex items-center justify-center bg-zinc-200">
+              <ImageIcon size={48} className="text-zinc-400" />
+            </div>
           </div>
         </div>
+
       </div>
     );
   }

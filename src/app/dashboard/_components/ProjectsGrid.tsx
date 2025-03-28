@@ -8,11 +8,9 @@ const ProjectsGrid = ( {mixes} : {mixes : any} ) => {
     return (
         <div
         onClick={() => clearSelections()}
-        style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr", gridTemplateRows: "1fr", maxWidth: "1440px" }} 
-        className="w-full grid gap-12">
+        className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-6 transition-all duration-300 overflow-x-hidden">
           {mixes.map((mix : any, index : number) => (
-            <div key={mix.id}
-              style={{gridColumn: index === 0 ? "span 2": "span 1" }}>
+            <div key={mix.id}>
                 <MixCard 
                   id={mix.id} 
                   mName={mix.name || `Project ${mix.id}`}

@@ -14,6 +14,10 @@ interface DashboardContextProps {
   // UI state for mixes
   mixes: Mix[];
   setMixes: (mixes: Mix[]) => void;
+
+  // Left panel state
+  leftPanelState: 'open' | 'closed';
+  toggleLeftPanel: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
@@ -23,6 +27,8 @@ export const DashboardProvider = ({ children, initialMixes = [] }: { children: R
   const [selectedMixIds, setSelectedMixIds] = useState<number[]>([]);
   // Mix data state (received from server but managed in client context)
   const [mixes, setMixes] = useState<Mix[]>(initialMixes);
+  // Left panel state
+  const [leftPanelState, setLeftPanelState] = useState<'open' | 'closed'>('closed');
 
   // Selection handling functions
   const toggleMixSelection = (id: number, isMultiSelectMode: boolean) => {
@@ -43,6 +49,11 @@ export const DashboardProvider = ({ children, initialMixes = [] }: { children: R
   
   const isMixSelected = (id: number) => selectedMixIds.includes(id);
 
+  // Toggle left panel state
+  const toggleLeftPanel = () => {
+    setLeftPanelState(prev => prev === 'open' ? 'closed' : 'open');
+  };
+
   return (
     <DashboardContext.Provider value={{ 
       // Selection state
@@ -53,7 +64,11 @@ export const DashboardProvider = ({ children, initialMixes = [] }: { children: R
       
       // Mix data state
       mixes,
-      setMixes
+      setMixes,
+
+      // Left panel state
+      leftPanelState,
+      toggleLeftPanel
     }}>
       {children}
     </DashboardContext.Provider>

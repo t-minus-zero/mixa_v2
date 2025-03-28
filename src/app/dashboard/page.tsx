@@ -1,16 +1,15 @@
+"use client"
+
+import { useDashboard } from '../_contexts/DashboardContext';
 import ProjectsGrid from './_components/ProjectsGrid';
-import { getAllMixes } from '../_contexts/DataContext';
 
-export const dynamic = "force-dynamic";
-
-export default async function DashboardPage({ children }: { children: React.ReactNode }) {
-  // Use the server-side data utility to fetch mixes
-  const mixes = await getAllMixes();
+export default function DashboardPage() {
+  // Get mixes from the dashboard context
+  const { mixes } = useDashboard();
   
   return (
-    <div className="w-screen flex items-center flex-col overflow-hidden">
-      <div className="w-full flex items-center flex-col px-4">
-        {children}
+    <div className="w-full flex items-center flex-col overflow-hidden">
+      <div className="w-full max-w-full flex items-center flex-col">
         <ProjectsGrid mixes={mixes} />
       </div>
     </div>
