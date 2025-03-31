@@ -5,8 +5,36 @@ import { api } from "MixaDev/trpc/react";
 import { useTree } from './_components/TreeContext';
 import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
+import MixFloaterMenu from './_components/MixFloaterMenu';
 import ResizableContainer from '../../_components/Resize/ResizableContainer';
 import { useNotifications } from '../../_contexts/NotificationsContext';
+
+// Define interfaces for type safety
+interface TreeData {
+  id: string;
+  tag: string;
+  title: string;
+  classes: string[];
+  style: any[];
+  content: string;
+  childrens: any[];
+}
+
+interface MixJsonContent {
+  treeData: TreeData;
+  cssData: { classes: Record<string, any> };
+  backgroundImageUrl?: string;
+}
+
+interface MixData {
+  id: number;
+  name: string | null;
+  mixType: string | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+  jsonContent: MixJsonContent | unknown;
+  deletedAt?: Date | null;
+}
 
 /* This is the editing page */
 export default function MixModal({ params: { id: mixId } }: { params: { id: string }; }) {
@@ -16,9 +44,9 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     throw new Error("Invalid mix id");
   }
 
-  const [mixData, setMixData] = useState(null);
+  const [mixData, setMixData] = useState<MixData | null>(null);
+  const [mixTitle, setMixTitle] = useState('');
   const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
-  const [showImageInput, setShowImageInput] = useState(false);
   const { tree, setTree } = useTree();
   const { cssTree, updateTree } = useCssTree();
   
@@ -28,9 +56,15 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   const replaceMixMutation = api.mixRouter.replaceMixById.useMutation();
 
+  // This effect handles initial data loading and runs only when mix data changes
+  // It does not depend on local state variables to avoid circular dependencies
   useEffect(() => {
     if (mix) {
       setMixData(mix);
+      // Only set the title if it hasn't been manually changed
+      if (!mixTitle || mixTitle === '') {
+        setMixTitle(mix.name || 'Untitled Mix');
+      }
       
       // Handle backwards compatibility
       if (typeof mix.jsonContent === 'object' && mix.jsonContent !== null) {
@@ -61,6 +95,12 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   }, [mix]);
 
   const { addNotification } = useNotifications();
+
+  // Handle mix name change - just updates the local state without saving to the server
+  const handleMixNameChange = (newName: string) => {
+    // Simply update the local state for immediate feedback
+    setMixTitle(newName);
+  };
 
   const handleUpdateMix = async () => {
     if (!tree) {
@@ -95,76 +135,54 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       backgroundImageUrl
     };
 
-    // Show in-progress notification
-    addNotification({
-      type: 'info',
-      message: 'Updating mix...',
-      duration: 2000
-    });
-
     try {
+      // Show in-progress notification
+      addNotification({
+        type: 'info',
+        message: 'Saving mix...',
+        duration: 2000
+      });
+
       const updatedMix = await replaceMixMutation.mutateAsync({
         id: idAsNumber,
         jsonContent: combinedData,
+        name: mixTitle  // Include the current name from state
       });
-      setMixData(updatedMix);
+      
+      // Handle the returned data properly
+      if (updatedMix && !Array.isArray(updatedMix)) {
+        setMixData(updatedMix as unknown as MixData);
+      }
       
       // Show success notification
       addNotification({
         type: 'success',
-        message: 'Mix updated successfully!',
+        message: 'Mix saved successfully!',
         duration: 3000
       });
       
-      console.log("Mix updated successfully:", updatedMix);
+      return Promise.resolve();
     } catch (error) {
+      console.error("Failed to update mix:", error);
+      
       // Show error notification
       addNotification({
         type: 'error',
-        message: `Failed to update mix: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to save mix: ${error instanceof Error ? error.message : 'Unknown error'}`,
         duration: 5000
       });
       
-      console.error("Failed to update mix:", error);
+      return Promise.reject(error);
     }
   };
 
-  // Background Image Component
-  const BackgroundImage = () => {
-    if (!backgroundImageUrl) return null;
-
-    return (
-      <div className="absolute inset-0 overflow-hidden z-0">
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url(${backgroundImageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.8, // Increased opacity for better visibility
-          }}
-        />
-      </div>
-    );
+  // Handle background image update
+  const handleBackgroundImageChange = (url: string) => {
+    setBackgroundImageUrl(url);
   };
 
   // Handle image URL input
-  const handleImageUrlSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const input = form.elements.namedItem('imageUrl') as HTMLInputElement;
-    if (input && input.value) {
-      setBackgroundImageUrl(input.value);
-      setShowImageInput(false);
-      // Log to confirm the URL was set
-      console.log("Background image URL set to:", input.value);
-    }
-  };
 
-  const toggleImageInput = () => {
-    setShowImageInput(!showImageInput);
-  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -175,44 +193,12 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      {/* Background image */}
-      <BackgroundImage />
-      
-      {/* Background image URL input button */}
-      <div className="absolute top-4 right-4 z-10">
-        {showImageInput ? (
-          <form onSubmit={handleImageUrlSubmit} className="flex gap-2">
-            <input 
-              type="text" 
-              name="imageUrl"
-              placeholder="Enter image URL" 
-              className="px-2 py-1 text-sm rounded border border-gray-300" 
-              defaultValue={backgroundImageUrl}
-            />
-            <button 
-              type="submit" 
-              className="bg-blue-500 text-white px-2 py-1 text-sm rounded"
-            >
-              Set
-            </button>
-            <button 
-              type="button" 
-              onClick={toggleImageInput}
-              className="bg-gray-500 text-white px-2 py-1 text-sm rounded"
-            >
-              Cancel
-            </button>
-          </form>
-        ) : (
-          <button 
-            onClick={toggleImageInput} 
-            className="bg-blue-500 text-white px-3 py-1 rounded flex items-center"
-          >
-            {backgroundImageUrl ? 'Change Background Image' : 'Set Background Image'}
-            {backgroundImageUrl && <span className="ml-2 text-xs whitespace-nowrap">(currently set)</span>}
-          </button>
-        )}
-      </div>
+      {/* Mix Floater Menu */}
+      <MixFloaterMenu 
+        mixName={mixTitle}
+        onMixNameChange={handleMixNameChange}
+        onSave={handleUpdateMix}
+      />
       
       <ResizableContainer 
         initialWidth={400} 
@@ -223,13 +209,11 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
           maxHeight: 'calc(100vh - 1rem)', 
           maxWidth: 'calc(100vw - 1rem)' 
         }}
+        backgroundImageUrl={backgroundImageUrl}
+        onBackgroundImageChange={handleBackgroundImageChange}
       >
         <HTMLVisualizer />
       </ResizableContainer>
-      
-      <button onClick={handleUpdateMix} className="absolute bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded">
-        Update Mix
-      </button>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Smartphone, Tablet, Monitor, RotateCw } from 'lucide-react';
+import BackgroundImageSelector from './BackgroundImageSelector';
 
 // Device preset dimensions
 const DEVICE_PRESETS = {
@@ -22,6 +23,8 @@ interface ResizableContainerProps {
   maxHeight?: number;
   className?: string;
   style?: React.CSSProperties;
+  backgroundImageUrl?: string;
+  onBackgroundImageChange?: (url: string) => void;
 }
 
 const ResizableContainer: React.FC<ResizableContainerProps> = ({
@@ -34,6 +37,8 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
   maxHeight = Infinity,
   className = '',
   style = {},
+  backgroundImageUrl = '',
+  onBackgroundImageChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentDevice, setCurrentDevice] = useState<DeviceType>(null);
@@ -160,6 +165,12 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
             >
               <RotateCw size={16} />
             </button>
+            {onBackgroundImageChange && (
+              <BackgroundImageSelector
+                backgroundImageUrl={backgroundImageUrl}
+                onBackgroundImageChange={onBackgroundImageChange}
+              />
+            )}            
           </div>
       </div>
       {/* Resizable container */}
@@ -170,9 +181,24 @@ const ResizableContainer: React.FC<ResizableContainerProps> = ({
       >
 
         <div className="relative w-full h-full border border-zinc-200/50 rounded-xl p-2 overflow-hidden">
+          {/* Background image */}
+          {backgroundImageUrl && (
+            <div className="absolute inset-0 overflow-hidden z-0">
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${backgroundImageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.8,
+                }}
+              />
+            </div>
+          )}
 
           {/* Inner container with 100% width and height */}
-          <div className="inner-container w-full h-full min-w-full min-h-full relative">
+          <div className="inner-container w-full h-full min-w-full min-h-full relative z-1">
             {children}
           </div>
 

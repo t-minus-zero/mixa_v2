@@ -1,21 +1,31 @@
 "use client"
 
 import React from 'react';
-import { PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useDashboard } from '../../_contexts/DashboardContext';
+import SidePanel from './SidePanel';
+import AccordionWrapper from '../../mix/[id]/_components/_fragments/AccordionWrapper';
 
 const FloatingMenu: React.FC = () => {
   const { toggleLeftPanel, leftPanelState } = useDashboard();
+
   return (
-    <div 
-      onClick={toggleLeftPanel}
-      className={`fixed z-30 top-3 ${leftPanelState === 'open' ? 'left-4' : 'left-6'} flex flex-row items-center gap-2 rounded-lg py-1 px-2 cursor-pointer hover:bg-zinc-100/90 transition-all duration-300 ease-in-out`}
-    >
-      <div className="w-6 h-6 flex items-center text-xs font-bold justify-center text-zinc-50 bg-zinc-900 rounded-lg">m</div>
-      <span className={`font-bold text-zinc-900 transition-all duration-300 ease-in-out ${leftPanelState === 'open' ? 'text-2xl' : 'text-lg'}`}>mixa</span>
-      {leftPanelState === 'open' 
-        ? <PanelLeftClose size={20} className="text-zinc-700" /> 
-        : <PanelLeft size={20} className="text-zinc-700" />}
+    <div className={`z-40 left-0 top-0 flex flex-col py-2 px-2 ${leftPanelState === 'open' ? 'border-r border-zinc-100' : ''}`}>
+      {/* App icon - always visible */}
+      <div 
+        onClick={toggleLeftPanel}
+        className="flex justify-center p-1 rounded-full"
+      >
+        <div className="w-10 h-10 flex items-center text-lg font-bold justify-center text-zinc-800 bg-zinc-0 rounded-full cursor-pointer hover:bg-zinc-100 transition-all duration-300">
+          X
+        </div>
+      </div>
+
+      {/* Side panel with accordion animation */}
+      <AccordionWrapper openStatus={leftPanelState === 'open'}>
+        <div className="overflow-hidden bg-white shadow-sm h-[calc(100vh-48px)]">
+          <SidePanel />
+        </div>
+      </AccordionWrapper>
     </div>
   );
 };

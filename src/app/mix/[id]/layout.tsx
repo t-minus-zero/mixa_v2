@@ -6,7 +6,6 @@ import {CssTreeProvider} from './_components/CssTreeContext';
 import LeftFloater from './_components/LeftFloater';
 import RightFloater from './_components/RightFloater';
 import MixDebugger from './_components/MixDebugger';
-import Floater from './_components/Sections/Floater';
 import { SectionsProvider } from './_components/Sections/SectionsContext';
 import SectionsLayout from './_components/Sections/SectionsLayout';
 import AiChat from './_components/AiChat/AiChat';
@@ -31,10 +30,6 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="absolute right-0 flex flex-col items-center z-20">
           <RightFloater />
-        </div>
-
-        <div className="absolute bottom-2 z-20">
-          <Floater />
         </div>
       </div>
       
