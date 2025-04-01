@@ -12,25 +12,12 @@ interface TitleMenuProps {
 }
 
 const TitleMenu: React.FC<TitleMenuProps> = ({ title, controls }) => {
-  const [selection, setSelection] = useState<string>('Projects');
-  const { leftPanelState } = useDashboard();
-  const pathname = usePathname();
-  
-  // Dynamically update title based on the current route
-  const getPageTitle = () => {
-    if (pathname.includes('/library')) return 'Library';
-    if (pathname.includes('/collection')) return 'Collection';
-    if (pathname.includes('/projects')) return 'Projects';
-    if (pathname.includes('/explore')) return 'Explore';
-    if (pathname.includes('/storage')) return 'Storage';
-    return title || 'Dashboard';
-  };
-
+ 
   return (
     <div className="w-full flex flex-col items-start justify-center gap-4">
       <div className="w-full flex flex-row items-center justify-between">
-          <div className={`flex flex-row items-center gap-4 pt-2 transition-all duration-300 ease-in-out ${leftPanelState === 'open' ? 'ml-0' : 'ml-10'}`}>
-            <h2 className="text-lg font-semibold text-zinc-800">{getPageTitle()}</h2>
+          <div className={`flex flex-row items-center gap-4 pt-2 transition-all duration-300 ease-in-out`}>
+            <h2 className="text-lg font-semibold text-zinc-800">{title}</h2>
           </div>
           <div className="flex flex-row items-center gap-4 pt-2">
             {controls}

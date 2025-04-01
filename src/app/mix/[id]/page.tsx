@@ -8,6 +8,7 @@ import HTMLVisualizer from './_components/ComponentPreview';
 import MixFloaterMenu from './_components/MixFloaterMenu';
 import ResizableContainer from '../../_components/Resize/ResizableContainer';
 import { useNotifications } from '../../_contexts/NotificationsContext';
+import TitleMenu from '../../dashboard/_components/TitleMenu';
 
 // Define interfaces for type safety
 interface TreeData {
@@ -193,12 +194,19 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      {/* Mix Floater Menu */}
-      <MixFloaterMenu 
-        mixName={mixTitle}
-        onMixNameChange={handleMixNameChange}
-        onSave={handleUpdateMix}
-      />
+      {/* Title Menu with Mix Floater controls */}
+      <div className="absolute top-4 left-4 right-4 z-20">
+        <TitleMenu 
+          title={mixTitle}
+          controls={
+            <MixFloaterMenu 
+              mixName={mixTitle}
+              onMixNameChange={handleMixNameChange}
+              onSave={handleUpdateMix}
+            />
+          }
+        />
+      </div>
       
       <ResizableContainer 
         initialWidth={400} 

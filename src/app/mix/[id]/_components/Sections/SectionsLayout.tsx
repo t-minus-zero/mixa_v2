@@ -4,24 +4,24 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSections } from "./SectionsContext";
 
 interface SectionsLayoutProps {
-  leftContent?: React.ReactNode;
-  rightContent?: React.ReactNode;
+  mainContent?: React.ReactNode;
+  sideContent?: React.ReactNode;
 }
 
 export default function SectionsLayout({ 
-  leftContent, 
-  rightContent
+  mainContent, 
+  sideContent
 }: SectionsLayoutProps) {
   const { sections } = useSections();
   
-  // Default left column is 1/3 of the width (as a percentage)
-  const [leftColumnWidth, setLeftColumnWidth] = useState(33);
+  // Default main column takes up 2/3 of the width (as a percentage)
+  const [mainColumnWidth, setMainColumnWidth] = useState(67);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   
   // Calculate effective column widths based on sections visibility
-  const effectiveLeftWidth = sections.aichat ? leftColumnWidth : 0;
-  const effectiveRightWidth = sections.aichat ? (100 - leftColumnWidth) : 100;
+  const effectiveMainWidth = sections.aichat ? mainColumnWidth : 100;
+  const effectiveSideWidth = sections.aichat ? (100 - mainColumnWidth) : 0;
 
   // Handle start dragging
   const handleDragStart = (e: React.MouseEvent) => {
@@ -52,7 +52,7 @@ export default function SectionsLayout({
       80
     );
     
-    setLeftColumnWidth(newWidthPercentage);
+    setMainColumnWidth(newWidthPercentage);
   };
 
   // Handle end dragging
@@ -83,34 +83,35 @@ export default function SectionsLayout({
       className="relative w-full h-full overflow-hidden bg-zinc-100"
       style={{ 
         display: 'grid',
-        gridTemplateColumns: `${effectiveLeftWidth}% ${effectiveRightWidth}%`,
+        gridTemplateColumns: `${effectiveMainWidth}% ${effectiveSideWidth}%`,
         transition: isDraggingRef.current ? 'none' : 'grid-template-columns 300ms ease-in-out'
       }}
     >
-      {/* Left column (AI Chat) */}
+      {/* Main content */}
       <div 
         className="relative h-full overflow-hidden transition-all pl-2 duration-300 ease-in-out"
+        style={{
+          opacity: 1,
+          transition: isDraggingRef.current ? 'none' : 'all 300ms ease-in-out'
+        }}
+      >
+        {mainContent || <div>Main Content</div>}
+      </div>
+      
+      {/* Side content */}
+      <div id="sidecontent"
+        className={`relative h-full overflow-hidden transition-all ${sections.aichat ? 'p-2' : 'p-0'}`}
         style={{
           opacity: sections.aichat ? 1 : 0,
           maxWidth: sections.aichat ? '100%' : '0',
           transition: isDraggingRef.current ? 'none' : 'all 300ms ease-in-out'
         }}
       >
-        {leftContent || <div>Left Column Content</div>}
-      </div>
-      
-      {/* Right column (Work View) */}
-      <div id="rightcontent"
-        className={`relative h-full overflow-hidden transition-all ${sections.aichat ? 'p-2' : 'p-0'}`}
-        style={{
-          transition: isDraggingRef.current ? 'none' : 'all 300ms ease-in-out'
-        }}
-      >
         <div 
-          id="rightcontentwrapper" 
+          id="sidecontentwrapper" 
           className={`relative w-full h-full overflow-hidden shadow-sm bg-zinc-100 flex items-center justify-center border-zinc-200 ${sections.aichat ? 'rounded-xl border' : ''}`}
         >
-          {rightContent || <div>Right Column Content</div>}
+          {sideContent || <div>Side Content</div>}
         </div>  
       </div>
       
@@ -119,7 +120,7 @@ export default function SectionsLayout({
         <div 
           className="absolute flex items-center justify-center h-full cursor-col-resize bg-transparent hover:opacity-50 z-50"
           style={{ 
-            left: `${leftColumnWidth}%`,
+            left: `${mainColumnWidth}%`,
             width: '6px'
           }}
           onMouseDown={handleDragStart}     

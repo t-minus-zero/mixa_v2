@@ -13,15 +13,15 @@ import AiChat from './_components/AiChat/AiChat';
 export default function MixLayout({ children }: { children: React.ReactNode }) {
   const [center, setCenter] = useState();
 
-  // Define the content for the left column (AI Chat)
-  const leftColumnContent = (
+  // Define the content for the side column (AI Chat)
+  const sideContent = (
     <div className="w-full h-full rounded-xl overflow-hidden">
       <AiChat />
     </div>
   );
 
-  // Define the content for the right column (Work View)
-  const rightColumnContent = (
+  // Define the content for the main column (Work View)
+  const mainContent = (
     <div className="relative w-full h-full">
       <div className="relative w-full h-full overflow-hidden bg-zinc-50 flex items-center justify-center rounded-xl">
         <MixDebugger />
@@ -45,8 +45,8 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
         <TreeProvider>
           <div className="relative w-screen h-screen overflow-hidden">
             <SectionsLayout 
-              leftContent={leftColumnContent}
-              rightContent={rightColumnContent}
+              sideContent={sideContent}
+              mainContent={mainContent}
             />
           </div>
         </TreeProvider>
