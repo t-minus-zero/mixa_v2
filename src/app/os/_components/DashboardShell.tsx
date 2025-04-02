@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import DashboardMain from './DashboardMain';
 import DashboardSide from './DashboardSide';
 import DashboardSidebar from './DashboardSidebar';
+import KitChat from '../../kit/_components/KitChat';
+import { useDashboardContext } from '../_contexts/DashboardContext';
 
 export default function DashboardShell({ 
   mainContent,
@@ -12,11 +14,16 @@ export default function DashboardShell({
   mainContent?: React.ReactNode,
   sideContent?: React.ReactNode
 }) {
-  // State to track if sidebar is open/hovered
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { 
+    sideContentType, setSideContentType,
+    isSideOpen, setSideOpen 
+  } = useDashboardContext();
   
-  // State to track if side panel is open
-  const [isSideOpen, setIsSideOpen] = useState(false);
+  // State to track if sidebar is open/hovered
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // State to track if sidebar should remain open
+  const [isSidebarLocked, setIsSidebarLocked] = useState(true);
   
   // Default side panel takes up 30% of width when open
   const [mainColumnWidth, setMainColumnWidth] = useState(70);
@@ -27,14 +34,33 @@ export default function DashboardShell({
   
   // Toggle side panel open/closed
   const toggleSide = () => {
-    setIsSideOpen(prev => !prev);
+    setSideOpen(!isSideOpen);
   };
   
+  // Detect when sideContent is provided
+  React.useEffect(() => {
+    // If sideContent exists but we don't have a specific type set, mark it as 'custom'
+    if (!!sideContent && !sideContentType) {
+      setSideContentType('custom');
+    } else if (!sideContent && sideContentType === 'custom') {
+      // If sideContent is removed and type was 'custom', clear the type
+      setSideContentType(null);
+    }
+  }, [sideContent, sideContentType, setSideContentType]);
+  
+  // Refs for initial positions
+  const initialMouseX = useRef<number>(0);
+  const initialMainWidth = useRef<number>(0);
+
   // Handle start dragging
   const handleDragStart = (e: React.MouseEvent) => {
     e.preventDefault();
     isDraggingRef.current = true;
     document.body.style.cursor = "col-resize";
+    
+    // Store initial positions for more accurate dragging
+    initialMouseX.current = e.clientX;
+    initialMainWidth.current = mainColumnWidth;
     
     // Remove transitions during dragging for better performance
     if (containerRef.current) {
@@ -50,12 +76,17 @@ export default function DashboardShell({
     if (!isDraggingRef.current || !containerRef.current) return;
     
     const containerRect = containerRef.current.getBoundingClientRect();
-    const availableWidth = containerRect.width;
-    const offsetX = e.clientX - containerRect.left;
+    // Account for sidebar width when calculating available width
+    const sidebarWidth = isSidebarOpen ? 48 : 0; // 3rem = 48px
+    const availableWidth = containerRect.width - sidebarWidth;
     
-    // Calculate new width as percentage (clamped between 15% and 70%)
+    // Calculate the delta (change) from the starting position
+    const deltaX = e.clientX - initialMouseX.current;
+    const deltaPercentage = (deltaX / availableWidth) * 100;
+    
+    // Apply the delta to the initial width (moving right decreases main width)
     const newWidthPercentage = Math.min(
-      Math.max(100 - ((offsetX / availableWidth) * 100), 30), 
+      Math.max(initialMainWidth.current - deltaPercentage, 30), 
       85
     );
     
@@ -93,11 +124,13 @@ export default function DashboardShell({
       <DashboardSidebar 
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
+        isLocked={isSidebarLocked}
+        setIsLocked={setIsSidebarLocked}
       />
       
       {/* Collapsible side panel */}
       <DashboardSide 
-        content={sideContent}
+        content={sideContentType === 'kit' ? <KitChat /> : sideContent}
         isOpen={isSideOpen}
         mainColumnWidth={mainColumnWidth}
         isDragging={isDraggingRef.current}

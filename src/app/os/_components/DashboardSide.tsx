@@ -23,23 +23,15 @@ export default function DashboardSide({
     <>
       {/* Left Side Panel */}
       <div 
-        className="relative h-full overflow-auto bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0"
+        className="relative h-full overflow-auto bg-gray-50 transition-all duration-300 ease-in-out flex-shrink-0"
         style={{ 
           width: isOpen ? `${100 - mainColumnWidth}%` : '0',
           opacity: isOpen ? 1 : 0,
           transition: isDragging ? 'none' : 'all 300ms ease-in-out'
         }}
       >
-        <div className="p-4">
-          {content || (
-            <div className="flex flex-col gap-3">
-              <h2 className="text-xl font-semibold">Side Panel</h2>
-              <p>This side panel will show additional content.</p>
-              <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                <p>Controls and UI will appear here.</p>
-              </div>
-            </div>
-          )}
+        <div className="h-full w-full">
+          {content}
         </div>
       </div>
       
@@ -49,13 +41,19 @@ export default function DashboardSide({
           className="absolute flex items-center justify-center h-full cursor-col-resize bg-transparent group z-50"
           style={{ 
             left: `calc(${100 - mainColumnWidth}% - 4px)`,
-            marginLeft: isSidebarOpen ? '2.5rem' : '0', // Add sidebar width (w-10 = 2.5rem) when open
+            marginLeft: isSidebarOpen ? '3rem' : '0', // Add sidebar width (w-12 = 3rem) when open
             width: '8px',
             transition: isDragging ? 'none' : 'all 300ms ease-in-out' 
           }}
           onMouseDown={onDragStart}     
         >
-          <div className="h-full group-hover:bg-gray-200 w-[2px] rounded-lg"></div>
+          <div className="h-full w-[2px] rounded-lg overflow-hidden">
+            <div className="h-full w-full group-hover:opacity-100 opacity-0 transition-opacity duration-200" 
+                 style={{ 
+                   background: 'linear-gradient(to bottom, transparent, #e5e7eb 50%, transparent)'
+                 }}
+            ></div>
+          </div>
         </div>
       )}
 
