@@ -1,24 +1,13 @@
 "use client"
 
-import React, {useState} from 'react';
+import React from 'react';
 import { TreeProvider } from './_components/TreeContext';
-import {CssTreeProvider} from './_components/CssTreeContext';
+import { CssTreeProvider } from './_components/CssTreeContext';
 import LeftFloater from './_components/LeftFloater';
 import RightFloater from './_components/RightFloater';
 import MixDebugger from './_components/MixDebugger';
-import { SectionsProvider } from './_components/Sections/SectionsContext';
-import SectionsLayout from './_components/Sections/SectionsLayout';
-import AiChat from './_components/AiChat/AiChat';
 
 export default function MixLayout({ children }: { children: React.ReactNode }) {
-  const [center, setCenter] = useState();
-
-  // Define the content for the side column (AI Chat)
-  const sideContent = (
-    <div className="w-full h-full rounded-xl overflow-hidden">
-      <AiChat />
-    </div>
-  );
 
   // Define the content for the main column (Work View)
   const mainContent = (
@@ -40,17 +29,12 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SectionsProvider>
-      <CssTreeProvider>
-        <TreeProvider>
-          <div className="relative w-screen h-screen overflow-hidden">
-            <SectionsLayout 
-              sideContent={sideContent}
-              mainContent={mainContent}
-            />
-          </div>
-        </TreeProvider>
-      </CssTreeProvider>
-    </SectionsProvider>
+    <CssTreeProvider>
+      <TreeProvider>
+        <div className="relative w-screen h-screen overflow-hidden">
+          {mainContent}
+        </div>
+      </TreeProvider>
+    </CssTreeProvider>
   );
 }

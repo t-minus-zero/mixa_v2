@@ -4,7 +4,7 @@ import React, { ChangeEvent, useState, useEffect, useRef } from 'react';
 import { Bolt, Code, Sparkles, Save } from 'lucide-react';
 import TextInput from './_fragments/TextInput';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
-import { useSections } from './Sections/SectionsContext';
+
 
 interface MixFloaterMenuProps {
   mixName: string;
@@ -20,7 +20,6 @@ export default function MixFloaterMenu({
   const [name, setName] = useState(mixName);
   const [isSaving, setIsSaving] = useState(false);
   const { addNotification } = useNotifications();
-  const { sections, toggleSection } = useSections();
   const initialRender = useRef(true);
 
   // Update local state when prop changes (e.g., when mix data loads)
@@ -97,17 +96,7 @@ export default function MixFloaterMenu({
             <Code size={18} />
           </button>
           
-          <button
-            onClick={() => toggleSection("aichat")}
-            className={`p-1.5 ${
-              sections.aichat 
-                ? 'text-blue-500 bg-blue-50' 
-                : 'text-gray-500 hover:text-blue-500 hover:bg-blue-50'
-            } rounded-md transition-colors`}
-            title="AI Chat"
-          >
-            <Sparkles size={18} />
-          </button>
+          {/* AI Chat button removed as we no longer need it */}
           
           <button
             onClick={handleSave}
