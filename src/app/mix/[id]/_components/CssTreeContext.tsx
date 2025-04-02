@@ -3,10 +3,8 @@ import React, { createContext, useState, useContext, useMemo } from 'react';
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 
-import {cssDisplaySchema} from './cssPropertySchemas/displaySchema';
-import {cssPositionSchema} from './cssPropertySchemas/positionSchema';
-import {cssTypographySchema} from './cssPropertySchemas/typographySchema';
-import { cssInputTypes } from './cssPropertySchemas/inputTypesSchema';
+import { cssSchema } from '../_schemas/css';
+import { inputsSchema } from '../_schemas/inputs';
 
 // Simple CSS tree structure with classes and properties
 const CssTreeContext = createContext();
@@ -14,12 +12,8 @@ const CssTreeContext = createContext();
 export const CssTreeProvider = ({ children }) => {
   // Schemas definition
   const cssSchemas = {
-    inputTypes: cssInputTypes,
-    properties: {
-      ...cssDisplaySchema,
-      ...cssPositionSchema,
-      ...cssTypographySchema
-    }
+    inputTypes: inputsSchema,
+    properties: cssSchema
   }
 
   // CSS utility functions

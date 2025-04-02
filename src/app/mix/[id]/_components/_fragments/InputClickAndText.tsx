@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { inputStyle } from '../_styles/styles';
+
+// Inline styles previously imported from _styles/styles.tsx
+const inputStyle = {
+    minWidth: 'none',
+    width: 'auto',
+    background: 'none',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    transition: 'all 0.3s ease-in-out',
+};
 
 const InputClickAndText = ({ id, initValue, updateValue }:{ id:any, initValue:any, updateValue:Function }) =>{
     const [mode, setMode] = useState('rest'); // rest, typing

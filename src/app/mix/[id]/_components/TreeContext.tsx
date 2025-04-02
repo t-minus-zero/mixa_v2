@@ -2,14 +2,10 @@
 import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid'; 
-import {htmlElementsSchema, htmlAttributesSchema} from './htmlElementsSchema'; 
+import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
+import { VisualizationCssProperties } from '../_utils/selectionUtils';
 
 const TreeContext = createContext();
-
-const VisualizationCssProperties = {
-  highlight:[{"outline": "1px dashed rgba(10, 132, 255, 0.75)"}],
-  explode3d:[{"box-shadow": "0 0 10px rgba(0, 0, 0, 0.5)"}],
-}
 
 
 export const TreeProvider = ({ children }) => {
@@ -31,7 +27,7 @@ export const TreeProvider = ({ children }) => {
   const [dropPosition, setDropPosition] = useState(null); // 'before', 'after', or 'inside'
 
   const htmlSchemas = {
-    elements: htmlElementsSchema,
+    elements: htmlTagsSchema,
     attributes: htmlAttributesSchema
   }
   

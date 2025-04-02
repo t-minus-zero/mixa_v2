@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useCssTree } from './CssTreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
-import InputWrapper from './_fragments/InputWrapper';
 import TextInput from './_fragments/TextInput';
 import SelectInput from './_fragments/SelectInput';
 import NumberInput from './_fragments/NumberInput';
