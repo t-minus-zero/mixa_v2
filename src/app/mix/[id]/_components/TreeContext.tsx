@@ -3,12 +3,29 @@ import React, { createContext, useState, useContext, useMemo, useEffect } from '
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid'; 
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
-import { VisualizationCssProperties } from '../_utils/selectionUtils';
+import { useNotifications } from '../../../_contexts/NotificationsContext';
+
+// Define visualization CSS properties for element styling
+type StyleName = 'highlight'; // Add more style names as needed
+
+type StyleProperty = Record<string, string>;
+
+type VisualizationStyles = {
+  [key in StyleName]: StyleProperty[];
+};
+
+const VisualizationCssProperties: VisualizationStyles = {
+  highlight: [
+    { border: '1px dashed #666' }
+  ]
+  // Add other visualization styles as needed
+};
 
 const TreeContext = createContext();
 
 
 export const TreeProvider = ({ children }) => {
+  const { addNotification } = useNotifications();
   const [tree, setTree] = useState({
     id: "root", 
     tag: "div", 
@@ -32,14 +49,32 @@ export const TreeProvider = ({ children }) => {
   }
   
   // Utility function to check if an element is a void element
+  // [UTILITY|STATE:NONE|USAGE:INTERNAL_USED] Checks if an HTML element is a void element (cannot have children)
+  // Used internally by multiple functions and exported but not used by components
   const isVoidElement = (tag) => {
     return htmlSchemas.elements[tag]?.elementTypes?.includes('void') || false;
   };
 
+  // [TREE MANIPULATION|STATE:UPDATES] Core function to update tree state using Immer
   const updateTree = (updateFn) => {
     setTree(prevTree => produce(prevTree, updateFn));
   };
 
+  // [TREE MANIPULATION|STATE:UPDATES] Updates a specific node in the tree by its ID
+  const updateNode = (id, updateFn) => {
+    updateTree(draft => {
+      const findAndUpdate = (node) => {
+        if (node.id === id) {
+          updateFn(node);
+          return true;
+        }
+        return node.childrens.some(findAndUpdate);
+      };
+      findAndUpdate(draft);
+    });
+  };
+
+  // [STYLE MANAGEMENT|STATE:UPDATES] Adds a style object to a node and adds its class name
   const addStyle = (id, classObj) => {
     updateNode(id, (node: any) => {
       node.style.push(classObj);
@@ -47,6 +82,7 @@ export const TreeProvider = ({ children }) => {
     addClass(id, classObj.className);
   };
 
+  // [TREE TRAVERSAL|STATE:NONE] Recursively finds the parent node of a target node
   const findParent = (node, targetId) => {
     if (!node.childrens) return null;
     for (let child of node.childrens) {
@@ -59,6 +95,8 @@ export const TreeProvider = ({ children }) => {
     return null;
   };
 
+  // [STYLE MANAGEMENT|STATE:UPDATES|USAGE:EXPORTED_UNUSED] Updates CSS string for a class in the tree's style object
+  // Exported as 'updateClass' in the context value but not used by components
   const updateClassCss = (className, cssString) => {
     updateTree(draft => {
       const styleEntry = draft.style.find(entry => entry[className] !== undefined);
@@ -70,8 +108,9 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  // Function to apply visualization styles using the flat inlineStyle object
-  const applyVisualizationStyle = (nodeId, styleName, shouldApply) => {
+  // [VISUALIZATION|STATE:UPDATES|USAGE:INTERNAL_ONLY] Applies or removes visual styling to nodes for UI feedback
+  // Used internally by selectionHandler for highlighting selected nodes
+  const applyVisualizationStyle = (nodeId: string, styleName: StyleName, shouldApply: boolean) => {
     if (!nodeId || nodeId === "root") return;
     
     updateNode(nodeId, node => {
@@ -99,6 +138,8 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
+  // [SELECTION MANAGEMENT|STATE:UPDATES|USAGE:EXPORTED_UNUSED] Handles node selection, highlighting, and parent tracking
+  // Exported in context value but not used by components
   const selectionHandler = (node) => {
     if (selection.id !== node.id) {
       // Remove highlight styles from current selection
@@ -127,6 +168,8 @@ export const TreeProvider = ({ children }) => {
     }
   }, [selection, tree]);
 
+  // [ELEMENT OPERATIONS|STATE:UPDATES] Deletes an element from the tree by its ID
+  // Used by the useMixEditorKeyHandler hook
   const deleteElement = (id) => {
     updateTree(draft => {
       const findAndDelete = (node) => {
@@ -138,38 +181,10 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  // Handle element delete with keyboard shortcut
-  const handleKeyDown = (e) => {
-    // Check if the target is an input element - if so, don't handle the backspace
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-      return;
-    }
+  // NOTE: Keyboard event handling moved to useMixEditorKeyHandler hook
 
-    // Check if backspace key is pressed and there's a selected element
-    if (e.key === 'Backspace' && selection && selection.id !== 'root') {
-      e.preventDefault(); // Prevent browser navigation
-      
-      // Ask for confirmation before deleting
-      if (confirm(`Are you sure you want to delete "${selection.title}" (${selection.tag}) and all its children?`)) {
-        deleteElement(selection.id);
-        // After deletion, select the parent
-        if (selectionParent) {
-          setSelection(selectionParent);
-        }
-      }
-    }
-  };
-
-  // Set up keydown event listener
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    
-    // Clean up the event listener when component unmounts
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selection, selectionParent]); // Re-attach when selection or parent changes
-
+  // [ELEMENT OPERATIONS|STATE:UPDATES] Creates a new div element as a child of the specified node
+  // Exported in context value but not used by components
   const createElement = (id) => {
     updateTree(draft => {
       const findAndCreate = (node) => {
@@ -198,55 +213,53 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  const updateNode = (id, updateFn) => {
-    updateTree(draft => {
-      const findAndUpdate = (node) => {
-        if (node.id === id) {
-          updateFn(node);
-          return true;
-        }
-        return node.childrens.some(findAndUpdate);
-      };
-      findAndUpdate(draft);
-    });
-  };
 
+
+  // [STYLE MANAGEMENT|STATE:UPDATES] Updates a class name at a specific index in a node's classes array
   const updateClassName = (id, className, index) => {
     updateNode(id, node => {
       node.classes[index] = className;
     });
   };
 
+  // [STYLE MANAGEMENT|STATE:UPDATES] Adds a class name to a node's classes array
   const addClass = (id, className) => {
     updateNode(id, node => {
       node.classes.push(className);
     });
   };
 
+  // [CONTENT MANAGEMENT|STATE:UPDATES] Updates the text content of a node
   const updateContent = (id, content) => {
     updateNode(id, node => {
       node.content = content;
     });
   };
 
+  // [ELEMENT OPERATIONS|STATE:UPDATES] Updates a node's HTML tag with void element validation
   const updateTag = (id, tag) => {
     updateNode(id, node => {
       // Check if the new tag is a void element and if the node has children
       if (isVoidElement(tag) && node.childrens.length > 0) {
-        console.log(`Cannot update to ${tag} because it's a void element and the current element has children. Move the children outside first.`);
+        addNotification({
+          type: 'warning',
+          message: `Cannot update to ${tag} because it's a void element and the current element has children. Move the children outside first.`,
+          duration: 5000 // 5 seconds
+        });
         return; // Exit without updating the tag
       }
-      
       node.tag = tag;
     });
   };
 
+  // [CONTENT MANAGEMENT|STATE:UPDATES] Updates the display title of a node
   const updateTitle = (id, title) => {
     updateNode(id, node => {
       node.title = title;
     });
   };
 
+  // [STYLE MANAGEMENT|STATE:UPDATES] Removes a specific class name from a node
   const removeClass = (id, className) => {
     updateNode(id, node => {
       if (node.classes) {
@@ -255,7 +268,7 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  // (remember to refractor when we switch to IDs for classes instead of names)
+  // [STYLE MANAGEMENT|STATE:UPDATES] Renames a class throughout the entire tree and its style definitions
   const renameClassesInTree = (oldClassName, newClassName) => {
     updateTree(draft => {
       const updateClassNames = (node) => {
@@ -286,109 +299,113 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  const moveElement = (sourceId, targetId, position) => {
-    updateTree(draft => {
-      // Find and remove the source element
-      let sourceElement;
-      const removeSource = (node) => {
-        if (!node.childrens) return false;
-        for (let i = 0; i <node.childrens.length; i++) {
-          if (node.childrens[i].id === sourceId) {
-            sourceElement = node.childrens[i];
-            node.childrens.splice(i, 1);
-            return true;
-          }
-          if (removeSource(node.childrens[i])) return true;
-        }
-        return false;
-      };
-      removeSource(draft);
-
-      // Insert the element at the new position
-      const insertElement = (node) => {
-        if (node.id === targetId) {
-          if (position === 'inside') {
-            // Check if the target is a void element
-            if (isVoidElement(node.tag)) {
-              console.log(`Cannot place children inside ${node.tag} because it's a void element.`);
-              // Find the parent of the target and place the element after the target instead
-              const parent = findParent(draft, targetId);
-              if (parent) {
-                const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
-                parent.childrens.splice(targetIndex + 1, 0, sourceElement);
-              } else {
-                // If we can't find a parent, add it back to where it came from
-                // This is a failsafe that shouldn't typically be needed
-                const originalParent = findParent(draft, sourceId);
-                if (originalParent) {
-                  originalParent.childrens.push(sourceElement);
-                }
-              }
-              return true;
-            }
-            
-            // Not a void element, proceed normally
-            node.childrens.push(sourceElement);
-          } else {
-            const parent = findParent(draft, targetId);
-            if (parent) {
-              const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
-              parent.childrens.splice(
-                position === 'before' ? targetIndex : targetIndex + 1,
-                0,
-                sourceElement
-              );
-            }
-          }
+  // [DRAG AND DROP|HELPER] Finds and removes an element from the tree by ID
+  // Returns the removed element or undefined if not found
+  const findAndRemoveElement = (tree, id) => {
+    let removedElement;
+    
+    const removeSource = (node) => {
+      if (!node.childrens) return false;
+      
+      for (let i = 0; i < node.childrens.length; i++) {
+        if (node.childrens[i].id === id) {
+          removedElement = node.childrens[i];
+          node.childrens.splice(i, 1);
           return true;
         }
-        return node.childrens?.some(insertElement) || false;
-      };
+        
+        if (removeSource(node.childrens[i])) return true;
+      }
       
-      if (sourceElement) {
-        insertElement(draft);
+      return false;
+    };
+    
+    removeSource(tree);
+    return removedElement;
+  };
+  
+  // [DRAG AND DROP|HELPER] Handles inserting an element inside another element
+  // Accounts for void elements and performs appropriate fallback actions
+  const insertElementInside = (tree, targetId, element, sourceId) => {
+    let success = false;
+    
+    const insert = (node) => {
+      if (node.id === targetId) {
+        // Check if target is a void element
+        if (isVoidElement(node.tag)) {
+          console.log(`Cannot place children inside ${node.tag} because it's a void element.`);
+          // Find parent and place after target instead
+          const parent = findParent(tree, targetId);
+          if (parent) {
+            const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
+            parent.childrens.splice(targetIndex + 1, 0, element);
+            success = true;
+          } else {
+            // Failsafe: add back to original parent
+            const originalParent = findParent(tree, sourceId);
+            if (originalParent) {
+              originalParent.childrens.push(element);
+              success = true;
+            }
+          }
+        } else {
+          // Not a void element, proceed normally
+          if (!node.childrens) node.childrens = [];
+          node.childrens.push(element);
+          success = true;
+        }
+        return true;
+      }
+      return node.childrens?.some(insert) || false;
+    };
+    
+    insert(tree);
+    return success;
+  };
+  
+  // [DRAG AND DROP|HELPER] Handles inserting an element before or after another element
+  const insertElementAdjacentTo = (tree, targetId, element, position) => {
+    let success = false;
+    
+    const insert = (node) => {
+      if (node.id === targetId) {
+        const parent = findParent(tree, targetId);
+        if (parent) {
+          const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
+          const insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
+          parent.childrens.splice(insertIndex, 0, element);
+          success = true;
+        }
+        return true;
+      }
+      return node.childrens?.some(insert) || false;
+    };
+    
+    insert(tree);
+    return success;
+  };
+
+  // [DRAG AND DROP|STATE:UPDATES] Moves an element to a new location in the tree
+  // Main function that orchestrates the move operation using helper functions
+  const moveElement = (sourceId, targetId, position) => {
+    updateTree(draft => {
+      // Step 1: Find and remove the source element
+      const sourceElement = findAndRemoveElement(draft, sourceId);
+      
+      if (!sourceElement) {
+        console.error(`Source element with ID ${sourceId} not found`);
+        return;
+      }
+      
+      // Step 2: Insert the element at the target position
+      if (position === 'inside') {
+        insertElementInside(draft, targetId, sourceElement, sourceId);
+      } else {
+        insertElementAdjacentTo(draft, targetId, sourceElement, position);
       }
     });
   };
 
-  // Temporary function that adds an image element to the tree, used by the IconBrowser in the LeftFloater.
-  const createImageElement = (parentId, imageUrl) => {
-    updateTree(draft => {
-      const findAndAddImage = (node) => {
-        if (node.id === parentId) {
-          // Check if the node is a void element before adding a child
-          if (isVoidElement(node.tag)) {
-            console.log(`Cannot add image to ${node.tag} because it's a void element.`);
-            return false;
-          }
-          
-          // Create a new image element with the specified source URL
-          const newImageElement = {
-            id: uuidv4().substring(0, 8),
-            tag: "img",
-            title: "Image", // More descriptive title
-            classes: [],
-            style: [{"className":"css string"}],
-            inlineStyle: {}, // Initialize inlineStyle
-            content: "",
-            attributes: [
-              { attribute: "src", value: imageUrl },
-              { attribute: "alt", value: "Icon image" } // Add alt text for accessibility
-            ],
-            childrens: [] // Empty since img is a void element
-          };
-          
-          node.childrens.push(newImageElement);
-          return true;
-        }
-        return node.childrens?.some(findAndAddImage) || false;
-      };
-      
-      findAndAddImage(draft);
-    });
-    
-    return true; // Return success indicator
-  };
 
   const value = useMemo(() => ({
     tree,
@@ -400,7 +417,6 @@ export const TreeProvider = ({ children }) => {
     addStyle,
     deleteElement, 
     createElement,
-    createImageElement,
     updateClassName,
     removeClass,
     renameClassesInTree,
@@ -423,10 +439,11 @@ export const TreeProvider = ({ children }) => {
   return (
     <TreeContext.Provider value={value}>
       {children}
-    </TreeContext.Provider>
+     </TreeContext.Provider>
   );
 }
 
+// [CONTEXT HOOK|STATE:NONE] Custom hook to access the tree context with error handling
 export const useTree = () => {
   const context = useContext(TreeContext);
   if (context === undefined) {
