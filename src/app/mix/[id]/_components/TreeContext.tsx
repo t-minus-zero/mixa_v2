@@ -41,7 +41,9 @@ export const TreeProvider = ({ children }) => {
   };
 
   const addStyle = (id, classObj) => {
-    tree.style.push(classObj);
+    updateNode(id, (node: any) => {
+      node.style.push(classObj);
+    });
     addClass(id, classObj.className);
   };
 
