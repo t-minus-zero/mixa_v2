@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
 import { ChevronDown, ChevronRight, Plus, Copy } from 'lucide-react';
+import useDragAndDrop from '../_hooks/useDragAndDrop';
 
 function HtmlElement({ node, level = 0, children }) {
   const {
@@ -24,64 +25,64 @@ function HtmlElement({ node, level = 0, children }) {
   } = useTree();
   
   const [isOpen, setIsOpen] = useState(true);
-  const elementRef = useRef(null);
   const [position, setPosition] = useState(null);
 
-  const handleDragStart = (e) => {
-    e.stopPropagation();
-    setDraggedItem(node);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+  // Define drag event handlers to pass to useDragAndDrop
+  const dragHandlers = {
+    onDragStart: (e) => {
+      setDraggedItem(node);
+    },
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!draggedItem || draggedItem.id === node.id) return;
+    onDragOver: (e) => {
+      if (!draggedItem || draggedItem.id === node.id) return;
 
-    const rect = elementRef.current.getBoundingClientRect();
-    const mouseY = e.clientY;
-    const relativeY = mouseY - rect.top;
-    
-    // Define zones
-    const topZone = rect.height * 0.20;
-    const bottomZone = rect.height * 0.80;
-    
-    if (relativeY < topZone) {
-      setPosition('before');
-    } else if (relativeY > bottomZone) {
-      setPosition('after');
-    } else {
-      setPosition('inside');
-    }
+      const rect = elementRef.current.getBoundingClientRect();
+      const mouseY = e.clientY;
+      const relativeY = mouseY - rect.top;
+      
+      // Define zones
+      const topZone = rect.height * 0.20;
+      const bottomZone = rect.height * 0.80;
+      
+      if (relativeY < topZone) {
+        setPosition('before');
+      } else if (relativeY > bottomZone) {
+        setPosition('after');
+      } else {
+        setPosition('inside');
+      }
 
-    setDropTarget(node);
-  };
+      setDropTarget(node);
+    },
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dropTarget?.id === node.id) {
+    onDragLeave: (e) => {
+      if (dropTarget?.id === node.id) {
+        setDropTarget(null);
+        setPosition(null);
+      }
+    },
+
+    onDrop: (e) => {
+      const sourceId = draggedItem.id;
+      
+      if (draggedItem && dropTarget && position) {
+        moveElement(sourceId, node.id, position);
+      }
+      
+      setDraggedItem(null);
       setDropTarget(null);
       setPosition(null);
     }
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    //const sourceId = e.dataTransfer.getData('text/plain');
-    const sourceId = draggedItem.id;
-    
-    if (draggedItem && dropTarget && position) {
-      moveElement(sourceId, node.id, position);
-    }
-    
-    setDraggedItem(null);
-    setDropTarget(null);
-    setPosition(null);
-  };
+  // Use the drag and drop hook
+  const {
+    elementRef,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop
+  } = useDragAndDrop(dragHandlers);
 
   function changeTitle(elementTitle: string) {
     updateTitle(node.id, elementTitle);
