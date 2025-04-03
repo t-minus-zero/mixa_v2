@@ -41,7 +41,6 @@ export const TreeProvider = ({ children }) => {
   const [selectionParent, setSelectionParent] = useState(tree);
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
-  const [dropPosition, setDropPosition] = useState(null); // 'before', 'after', or 'inside'
 
   const htmlSchemas = {
     elements: htmlTagsSchema,
@@ -429,12 +428,10 @@ export const TreeProvider = ({ children }) => {
     setDraggedItem,
     dropTarget,
     setDropTarget,
-    dropPosition,
-    setDropPosition,
     moveElement,
     htmlSchemas,
     isVoidElement
-  }), [selection, tree, draggedItem, dropTarget, dropPosition, htmlSchemas]);
+  }), [selection, tree, draggedItem, dropTarget, htmlSchemas]);
 
   return (
     <TreeContext.Provider value={value}>

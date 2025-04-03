@@ -20,18 +20,16 @@ function HtmlElement({ node, level = 0, children }) {
     setDraggedItem,
     dropTarget,
     setDropTarget,
-    dropPosition,
-    setDropPosition,
     moveElement,
   } = useTree();
   
   const [isOpen, setIsOpen] = useState(true);
   const elementRef = useRef(null);
+  const [position, setPosition] = useState(null);
 
   const handleDragStart = (e) => {
     e.stopPropagation();
     setDraggedItem(node);
-    e.dataTransfer.setData('text/plain', node.id);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -46,20 +44,18 @@ function HtmlElement({ node, level = 0, children }) {
     const relativeY = mouseY - rect.top;
     
     // Define zones
-    const topZone = rect.height * 0.25;
-    const bottomZone = rect.height * 0.75;
+    const topZone = rect.height * 0.20;
+    const bottomZone = rect.height * 0.80;
     
-    let position;
     if (relativeY < topZone) {
-      position = 'before';
+      setPosition('before');
     } else if (relativeY > bottomZone) {
-      position = 'after';
+      setPosition('after');
     } else {
-      position = 'inside';
+      setPosition('inside');
     }
 
     setDropTarget(node);
-    setDropPosition(position);
   };
 
   const handleDragLeave = (e) => {
@@ -67,7 +63,7 @@ function HtmlElement({ node, level = 0, children }) {
     e.stopPropagation();
     if (dropTarget?.id === node.id) {
       setDropTarget(null);
-      setDropPosition(null);
+      setPosition(null);
     }
   };
 
@@ -75,15 +71,16 @@ function HtmlElement({ node, level = 0, children }) {
     e.preventDefault();
     e.stopPropagation();
     
-    const sourceId = e.dataTransfer.getData('text/plain');
+    //const sourceId = e.dataTransfer.getData('text/plain');
+    const sourceId = draggedItem.id;
     
-    if (draggedItem && dropTarget && dropPosition) {
-      moveElement(sourceId, node.id, dropPosition);
+    if (draggedItem && dropTarget && position) {
+      moveElement(sourceId, node.id, position);
     }
     
     setDraggedItem(null);
     setDropTarget(null);
-    setDropPosition(null);
+    setPosition(null);
   };
 
   function changeTitle(elementTitle: string) {
@@ -91,9 +88,9 @@ function HtmlElement({ node, level = 0, children }) {
   }
 
   const getDropIndicatorStyle = () => {
-    if (dropTarget?.id !== node.id || !dropPosition) return '';
+    if (dropTarget?.id !== node.id || !position) return '';
     
-    switch (dropPosition) {
+    switch (position) {
       case 'before':
         return 'before:absolute before:left-0 before:right-0 before:top-0 before:h-0.5 before:bg-blue-500';
       case 'after':
