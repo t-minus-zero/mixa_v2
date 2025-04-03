@@ -4,6 +4,7 @@ import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid'; 
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
+import { TreeNode } from '../_types/types';
 
 // Define visualization CSS properties for element styling
 type StyleName = 'highlight'; // Add more style names as needed
@@ -298,117 +299,11 @@ export const TreeProvider = ({ children }) => {
     });
   };
 
-  // [DRAG AND DROP|HELPER] Finds and removes an element from the tree by ID
-  // Returns the removed element or undefined if not found
-  const findAndRemoveElement = (tree, id) => {
-    let removedElement;
-    
-    const removeSource = (node) => {
-      if (!node.childrens) return false;
-      
-      for (let i = 0; i < node.childrens.length; i++) {
-        if (node.childrens[i].id === id) {
-          removedElement = node.childrens[i];
-          node.childrens.splice(i, 1);
-          return true;
-        }
-        
-        if (removeSource(node.childrens[i])) return true;
-      }
-      
-      return false;
-    };
-    
-    removeSource(tree);
-    return removedElement;
-  };
-  
-  // [DRAG AND DROP|HELPER] Handles inserting an element inside another element
-  // Accounts for void elements and performs appropriate fallback actions
-  const insertElementInside = (tree, targetId, element, sourceId) => {
-    let success = false;
-    
-    const insert = (node) => {
-      if (node.id === targetId) {
-        // Check if target is a void element
-        if (isVoidElement(node.tag)) {
-          console.log(`Cannot place children inside ${node.tag} because it's a void element.`);
-          // Find parent and place after target instead
-          const parent = findParent(tree, targetId);
-          if (parent) {
-            const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
-            parent.childrens.splice(targetIndex + 1, 0, element);
-            success = true;
-          } else {
-            // Failsafe: add back to original parent
-            const originalParent = findParent(tree, sourceId);
-            if (originalParent) {
-              originalParent.childrens.push(element);
-              success = true;
-            }
-          }
-        } else {
-          // Not a void element, proceed normally
-          if (!node.childrens) node.childrens = [];
-          node.childrens.push(element);
-          success = true;
-        }
-        return true;
-      }
-      return node.childrens?.some(insert) || false;
-    };
-    
-    insert(tree);
-    return success;
-  };
-  
-  // [DRAG AND DROP|HELPER] Handles inserting an element before or after another element
-  const insertElementAdjacentTo = (tree, targetId, element, position) => {
-    let success = false;
-    
-    const insert = (node) => {
-      if (node.id === targetId) {
-        const parent = findParent(tree, targetId);
-        if (parent) {
-          const targetIndex = parent.childrens.findIndex(child => child.id === targetId);
-          const insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
-          parent.childrens.splice(insertIndex, 0, element);
-          success = true;
-        }
-        return true;
-      }
-      return node.childrens?.some(insert) || false;
-    };
-    
-    insert(tree);
-    return success;
-  };
-
-  // [DRAG AND DROP|STATE:UPDATES] Moves an element to a new location in the tree
-  // Main function that orchestrates the move operation using helper functions
-  const moveElement = (sourceId, targetId, position) => {
-    updateTree(draft => {
-      // Step 1: Find and remove the source element
-      const sourceElement = findAndRemoveElement(draft, sourceId);
-      
-      if (!sourceElement) {
-        console.error(`Source element with ID ${sourceId} not found`);
-        return;
-      }
-      
-      // Step 2: Insert the element at the target position
-      if (position === 'inside') {
-        insertElementInside(draft, targetId, sourceElement, sourceId);
-      } else {
-        insertElementAdjacentTo(draft, targetId, sourceElement, position);
-      }
-    });
-  };
-
 
   const value = useMemo(() => ({
     tree,
     setTree,
+    updateTree,
     selection,
     selectionHandler,
     selectionParent,
@@ -428,7 +323,6 @@ export const TreeProvider = ({ children }) => {
     setDraggedItem,
     dropTarget,
     setDropTarget,
-    moveElement,
     htmlSchemas,
     isVoidElement
   }), [selection, tree, draggedItem, dropTarget, htmlSchemas]);

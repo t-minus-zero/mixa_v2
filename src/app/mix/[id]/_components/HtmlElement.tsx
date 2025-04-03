@@ -7,8 +7,10 @@ import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
 import { ChevronDown, ChevronRight, Plus, Copy } from 'lucide-react';
 import useDragAndDrop from '../_hooks/useDragAndDrop';
+import { moveElement } from '../_utils/treeUtils';
+import { useNotifications } from '../../../_contexts/NotificationsContext';
 
-function HtmlElement({ node, level = 0, children }) {
+function HtmlElement({ node, level = 0, children }: { node: any, level?: number, children?: React.ReactNode }) {
   const {
     selection,
     selectionHandler,
@@ -21,8 +23,11 @@ function HtmlElement({ node, level = 0, children }) {
     setDraggedItem,
     dropTarget,
     setDropTarget,
-    moveElement,
+    updateTree,
   } = useTree();
+  
+  // Get notification system
+  const { addNotification } = useNotifications();
   
   const [isOpen, setIsOpen] = useState(true);
   const [position, setPosition] = useState(null);
@@ -63,10 +68,21 @@ function HtmlElement({ node, level = 0, children }) {
     },
 
     onDrop: (e) => {
-      const sourceId = draggedItem.id;
+      const sourceId = draggedItem?.id;
       
       if (draggedItem && dropTarget && position) {
-        moveElement(sourceId, node.id, position);
+        updateTree(tree => {
+          const result = moveElement(tree, sourceId, node.id, position);
+          
+          // Show notification if needed
+          if (result.notification) {
+            addNotification({
+              type: result.notification.type,
+              message: result.notification.message,
+              duration: 5000
+            });
+          }
+        });
       }
       
       setDraggedItem(null);
