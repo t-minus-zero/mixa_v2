@@ -3,6 +3,7 @@
 import React from 'react';
 import { TreeProvider } from './_components/TreeContext';
 import { CssTreeProvider } from './_components/CssTreeContext';
+import { MixEditorProvider } from './_contexts/MixEditorContext';
 import LeftFloater from './_components/LeftFloater';
 import RightFloater from './_components/RightFloater';
 import MixDebugger from './_components/MixDebugger';
@@ -41,12 +42,14 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <CssTreeProvider>
-      <TreeProvider>
-        <div className="relative w-screen h-screen overflow-hidden">
-          {mainContent}
-        </div>
-      </TreeProvider>
-    </CssTreeProvider>
+    <MixEditorProvider>
+      <CssTreeProvider>
+        <TreeProvider>
+          <div className="relative w-screen h-screen overflow-hidden">
+            {mainContent}
+          </div>
+        </TreeProvider>
+      </CssTreeProvider>
+    </MixEditorProvider>
   );
 }

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useTree } from './TreeContext';
 import { useCssTree } from './CssTreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // Helper function to convert kebab-case to camelCase for React styles
 function kebabToCamelCase(kebabString) {
@@ -120,7 +121,7 @@ const RenderTree = ({ node, rootCss }) => {
 };
 
 const HTMLVisualizer = () => {
-    const { tree } = useTree();
+    const { tree } = useMixEditor();
     const { generateCss } = useCssTree();
     
     // Get formatted CSS from CssTreeContext
@@ -142,7 +143,7 @@ const HTMLVisualizer = () => {
     const rootCss = parseCssArray(cssArray);
     
     // Render the tree starting from the root
-    return <RenderTree node={tree} rootCss={rootCss} />;
+    return tree ? <RenderTree node={tree} rootCss={rootCss} /> : null;
 };
 
 export default HTMLVisualizer;

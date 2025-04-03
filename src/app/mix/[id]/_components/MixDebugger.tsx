@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCssTree } from './CssTreeContext';
 import { useTree } from './TreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // Helper function to convert tree to HTML string (adapted from ComponentPreview.tsx)
 function cssToObject(cssString) {
@@ -95,7 +96,7 @@ const CssTreeDebugPage = () => {
 
 // Component to display the HTML tree state
 const HtmlTreeDebugPage = () => {
-  const { tree } = useTree();
+  const { tree } = useMixEditor();
   
   return (
     <pre className="whitespace-pre-wrap break-all">
@@ -106,9 +107,9 @@ const HtmlTreeDebugPage = () => {
 
 // Component to display the generated HTML
 const GeneratedHtmlDebugPage = () => {
-  const { tree } = useTree();
-  const rootCss = parseCssArray(tree.style);
-  const htmlString = nodeToHtmlString(tree, rootCss);
+  const { tree } = useMixEditor();
+  const rootCss = parseCssArray(tree?.style || []);
+  const htmlString = tree ? nodeToHtmlString(tree, rootCss) : '';
   
   return (
     <div>

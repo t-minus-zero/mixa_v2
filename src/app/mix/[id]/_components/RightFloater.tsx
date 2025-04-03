@@ -3,6 +3,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import CssClassElement from './CssClassElement';
 import { useCssTree } from './CssTreeContext';
 import { useTree } from './TreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
+import { TreeNode } from '../_types/types';
 import { v4 as uuidv4 } from 'uuid';
 import HtmlContent from './HtmlContent';
 import { SearchIcon, X } from 'lucide-react';

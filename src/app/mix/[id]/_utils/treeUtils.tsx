@@ -3,6 +3,15 @@ import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { NotificationType } from '../../../_contexts/NotificationsContext';
 import { TreeNode, DropPosition } from '../_types/types';
 
+// Result type for operations that might need to show notifications
+export interface OperationResult {
+  success: boolean;
+  notification?: {
+    type: NotificationType;
+    message: string;
+  };
+}
+
 // [HELPER] Checks if an element is a void element (cannot have children)
 export const isVoidElement = (tag: string): boolean => {
   // Use the imported HTML schemas to determine if an element is void
@@ -67,15 +76,6 @@ export const findAndRemoveElement = (tree: TreeNode, id: string): TreeNode | nul
   removeSource(tree);
   return removedElement;
 };
-
-// Result type for operations that might need to show notifications
-export interface OperationResult {
-  success: boolean;
-  notification?: {
-    type: NotificationType;
-    message: string;
-  };
-}
 
 // [DRAG AND DROP|HELPER] Inserts an element inside another element as a child
 export const insertElementInside = (
@@ -195,5 +195,50 @@ export const moveElement = (
   }
   
   return result;
+};
+
+// [ELEMENT OPERATIONS] Deletes an element from the tree by its ID
+export const deleteElement = (tree: TreeNode, id: string): OperationResult => {
+  // Don't allow deleting the root element
+  if (tree.id === id) {
+    return {
+      success: false,
+      notification: {
+        type: 'error',
+        message: 'Cannot delete the root element'
+      }
+    };
+  }
+  
+  // Find the parent of the element to delete
+  const parent = findParent(tree, id);
+  if (!parent) {
+    return {
+      success: false,
+      notification: {
+        type: 'error',
+        message: `Element with ID ${id} not found`
+      }
+    };
+  }
+  
+  // Find the index of the element in the parent's children
+  const index = parent.childrens.findIndex(child => child.id === id);
+  if (index === -1) {
+    return {
+      success: false,
+      notification: {
+        type: 'error',
+        message: `Element with ID ${id} not found in parent's children`
+      }
+    };
+  }
+  
+  // Remove the element
+  parent.childrens.splice(index, 1);
+  
+  return {
+    success: true
+  };
 };
 

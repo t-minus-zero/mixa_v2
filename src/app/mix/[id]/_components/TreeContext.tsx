@@ -1,10 +1,11 @@
 'use client'
 import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
-import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid'; 
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 import { TreeNode } from '../_types/types';
+import { deleteElement as deleteElementUtil } from '../_utils/treeUtils';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // Define visualization CSS properties for element styling
 type StyleName = 'highlight'; // Add more style names as needed
@@ -22,26 +23,43 @@ const VisualizationCssProperties: VisualizationStyles = {
   // Add other visualization styles as needed
 };
 
-const TreeContext = createContext();
+// Define the context type
+interface TreeContextType {
+  selection: TreeNode;
+  selectionParent: TreeNode;
+  draggedItem: any;
+  dropTarget: any;
+  setSelection: (selection: TreeNode) => void;
+  setDraggedItem: (item: any) => void;
+  setDropTarget: (target: any) => void;
+  isVoidElement: (tag: string) => boolean;
+  updateNode: (id: string, updateFn: (node: TreeNode) => void) => void;
+  deleteElement: (id: string) => void;
+  createElement: (id: string) => void;
+  updateContent: (id: string, content: string) => void;
+  updateTitle: (id: string, title: string) => void;
+  addStyle: (id: string, classObj: any) => void;
+  addClass: (id: string, className: string) => void;
+  removeClass: (id: string, className: string) => void;
+  addCssClass: (className: string, cssString: string) => void;
+  applyVisualizationStyle: (nodeId: string, styleName: StyleName, shouldApply: boolean) => void;
+  htmlSchemas: {
+    elements: any;
+    attributes: any;
+  };
+}
+
+const TreeContext = createContext<TreeContextType | null>(null);
 
 
-export const TreeProvider = ({ children }) => {
+
+export const TreeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { addNotification } = useNotifications();
-  const [tree, setTree] = useState({
-    id: "root", 
-    tag: "div", 
-    title: "root", 
-    classes: [], // List of classes separated by spaces
-    style: [], // Array of style properties (legacy, keeping for backward compatibility)
-    inlineStyle: {}, // Flat object of inline CSS properties
-    content: "", // Text content of object
-    attributes: [{"attribute":"src", "value":"url"}],
-    childrens: []
-  });
-  const [selection, setSelection] = useState(tree);
-  const [selectionParent, setSelectionParent] = useState(tree);
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [dropTarget, setDropTarget] = useState(null);
+  const { tree, updateTree } = useMixEditor();
+  const [selection, setSelection] = useState<TreeNode>(tree);
+  const [selectionParent, setSelectionParent] = useState<TreeNode>(tree);
+  const [draggedItem, setDraggedItem] = useState<any>(null);
+  const [dropTarget, setDropTarget] = useState<any>(null);
 
   const htmlSchemas = {
     elements: htmlTagsSchema,
@@ -55,10 +73,7 @@ export const TreeProvider = ({ children }) => {
     return htmlSchemas.elements[tag]?.elementTypes?.includes('void') || false;
   };
 
-  // [TREE MANIPULATION|STATE:UPDATES] Core function to update tree state using Immer
-  const updateTree = (updateFn) => {
-    setTree(prevTree => produce(prevTree, updateFn));
-  };
+
 
   // [TREE MANIPULATION|STATE:UPDATES] Updates a specific node in the tree by its ID
   const updateNode = (id, updateFn) => {
@@ -76,7 +91,7 @@ export const TreeProvider = ({ children }) => {
 
   // [STYLE MANAGEMENT|STATE:UPDATES] Adds a style object to a node and adds its class name
   const addStyle = (id, classObj) => {
-    updateNode(id, (node: any) => {
+    updateNode(id, (node: TreeNode) => {
       node.style.push(classObj);
     });
     addClass(id, classObj.className);
@@ -113,7 +128,7 @@ export const TreeProvider = ({ children }) => {
   const applyVisualizationStyle = (nodeId: string, styleName: StyleName, shouldApply: boolean) => {
     if (!nodeId || nodeId === "root") return;
     
-    updateNode(nodeId, node => {
+    updateNode(nodeId, (node: TreeNode) => {
       // Initialize inlineStyle if it doesn't exist
       if (!node.inlineStyle) node.inlineStyle = {};
       
@@ -171,13 +186,17 @@ export const TreeProvider = ({ children }) => {
   // [ELEMENT OPERATIONS|STATE:UPDATES] Deletes an element from the tree by its ID
   // Used by the useMixEditorKeyHandler hook
   const deleteElement = (id) => {
-    updateTree(draft => {
-      const findAndDelete = (node) => {
-        if (node.id === id) return true;
-        node.childrens = node.childrens.filter(child => !findAndDelete(child));
-        return false;
-      };
-      findAndDelete(draft);
+    updateTree(tree => {
+      const result = deleteElementUtil(tree, id);
+      
+      // Show notification if there was an error
+      if (!result.success && result.notification) {
+        addNotification({
+          type: result.notification.type,
+          message: result.notification.message,
+          duration: 5000
+        });
+      }
     });
   };
 
@@ -300,44 +319,39 @@ export const TreeProvider = ({ children }) => {
   };
 
 
-  const value = useMemo(() => ({
-    tree,
-    setTree,
-    updateTree,
+  const contextValue: TreeContextType = useMemo(() => ({
     selection,
-    selectionHandler,
     selectionParent,
-    setSelection,
-    addStyle,
-    deleteElement, 
-    createElement,
-    updateClassName,
-    removeClass,
-    renameClassesInTree,
-    updateClass: updateClassCss,
-    addClass,
-    updateContent,
-    updateTag,
-    updateTitle,
     draggedItem,
-    setDraggedItem,
     dropTarget,
+    setSelection,
+    setDraggedItem,
     setDropTarget,
-    htmlSchemas,
-    isVoidElement
-  }), [selection, tree, draggedItem, dropTarget, htmlSchemas]);
+    isVoidElement,
+    updateNode,
+    deleteElement,
+    createElement,
+    updateContent,
+    updateTitle,
+    addStyle,
+    addClass,
+    removeClass,
+    addCssClass: updateClassCss, // Map to the existing function
+    applyVisualizationStyle,
+    htmlSchemas
+  }), [selection, selectionParent, draggedItem, dropTarget, htmlSchemas]);
 
   return (
-    <TreeContext.Provider value={value}>
+    <TreeContext.Provider value={contextValue}>
       {children}
-     </TreeContext.Provider>
+    </TreeContext.Provider>
   );
 }
 
 // [CONTEXT HOOK|STATE:NONE] Custom hook to access the tree context with error handling
 export const useTree = () => {
   const context = useContext(TreeContext);
-  if (context === undefined) {
+  if (context === null) {
     throw new Error('useTree must be used within a TreeProvider');
   }
   return context;

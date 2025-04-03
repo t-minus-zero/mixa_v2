@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "MixaDev/trpc/react";
 import { useTree } from './_components/TreeContext';
+import { useMixEditor } from './_contexts/MixEditorContext';
 import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
 import MixFloaterMenu from './_components/MixFloaterMenu';
@@ -48,8 +49,8 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   const [mixData, setMixData] = useState<MixData | null>(null);
   const [mixTitle, setMixTitle] = useState('');
   const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
-  const { tree, setTree } = useTree();
-  const { cssTree, updateTree } = useCssTree();
+  const { updateTree: updateMixTree } = useMixEditor();
+  const { cssTree, updateTree: updateCssTree } = useCssTree();
   
   const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery({
     id: idAsNumber,
@@ -70,15 +71,16 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       // Handle backwards compatibility
       if (typeof mix.jsonContent === 'object' && mix.jsonContent !== null) {
         // New format with combined data
-        if (mix.jsonContent.treeData) {
-          setTree(mix.jsonContent.treeData);
+        if ('treeData' in mix.jsonContent && mix.jsonContent.treeData) {
+          // Use updateMixTree to set the entire tree
+          updateMixTree(() => (mix.jsonContent as MixJsonContent).treeData);
         }
         
-        if (mix.jsonContent.cssData && mix.jsonContent.cssData.classes) {
-          // Use updateTree to update the cssTree
-          updateTree(draft => {
+        if ('cssData' in mix.jsonContent && mix.jsonContent.cssData && mix.jsonContent.cssData.classes) {
+          // Use updateCssTree to update the cssTree
+          updateCssTree((draft: any) => {
             // Directly set the classes on the draft object
-            draft.classes = mix.jsonContent.cssData.classes;
+            draft.classes = (mix.jsonContent as MixJsonContent).cssData.classes;
           });
         }
 
@@ -90,7 +92,7 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
         }
       } else {
         // Legacy format with only tree data
-        setTree(mix.jsonContent);
+        updateMixTree(() => mix.jsonContent as TreeData);
       }
     }
   }, [mix]);
@@ -104,7 +106,10 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   };
 
   const handleUpdateMix = async () => {
-    if (!tree) {
+    // Get the current tree from MixEditorContext
+    const { tree: mixTree } = useMixEditor();
+    
+    if (!mixTree) {
       addNotification({
         type: 'error',
         message: 'No tree data to update',
@@ -126,13 +131,16 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
     const updatedTree = {
       ...defaultJsonContent,
-      ...tree
+      ...mixTree
     };
     
     // Create the combined data structure with background image
     const combinedData = {
       treeData: updatedTree,
-      cssData: cssTree,
+      cssData: {
+        classes: cssTree.classes
+      },
+      classes: cssTree.classes,
       backgroundImageUrl
     };
 

@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useTree } from './TreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
+import { TreeNode } from '../_types/types';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
@@ -10,21 +12,23 @@ import useDragAndDrop from '../_hooks/useDragAndDrop';
 import { moveElement } from '../_utils/treeUtils';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 
-function HtmlElement({ node, level = 0, children }: { node: any, level?: number, children?: React.ReactNode }) {
+function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: number, children?: React.ReactNode }) {
+  // Get tree operations from TreeContext
   const {
     selection,
-    selectionHandler,
+    selectionParent,
+    draggedItem,
+    dropTarget,
+    setSelection: selectionHandler,
+    setDraggedItem,
+    setDropTarget,
     createElement,
     deleteElement,
-    selectionParent,
     updateTitle,
-    updateTag,
-    draggedItem,
-    setDraggedItem,
-    dropTarget,
-    setDropTarget,
-    updateTree,
   } = useTree();
+  
+  // Get tree state and updateTree from MixEditorContext
+  const { updateTree } = useMixEditor();
   
   // Get notification system
   const { addNotification } = useNotifications();

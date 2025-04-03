@@ -3,23 +3,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import HtmlElement from './HtmlElement';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import { useTree } from './TreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
+import { TreeNode } from '../_types/types';
 import { SearchIcon, X } from 'lucide-react';
 
 
 
-const renderTree = (node: any, level = 0) => (
+const renderTree = (node: TreeNode, level = 0) => (
   <HtmlElement key={node.id} node={node} level={level}>
     {node.childrens && node.childrens.length > 0 && (
       <ul>
-        {node.childrens.map((childNode: any) => renderTree(childNode, level + 1))}
+        {node.childrens.map((childNode: TreeNode) => renderTree(childNode, level + 1))}
       </ul>
     )}
   </HtmlElement>
 );
 
 const LeftFloater = () => {
-  // Explicitly type the context return to avoid TypeScript errors
-  const { tree, selection } = useTree() as { tree: any; selection: any };
+  // Get tree from MixEditorContext and selection from TreeContext
+  const { tree } = useMixEditor();
+  const { selection } = useTree();
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
