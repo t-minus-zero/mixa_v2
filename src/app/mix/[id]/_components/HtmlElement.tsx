@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useTree } from './TreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 import { TreeNode } from '../_types/types';
 import AccordionWrapper from './_fragments/AccordionWrapper';
@@ -9,7 +8,7 @@ import InputClickAndText from './_fragments/InputClickAndText';
 import HtmlTagSelector from './HtmlTagSelector';
 import { ChevronDown, ChevronRight, Plus, Copy } from 'lucide-react';
 import useDragAndDrop from '../_hooks/useDragAndDrop';
-import { moveElement } from '../_utils/treeUtils';
+import { moveElement, updateElementTitle, createElement } from '../_utils/treeUtils';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 
 function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: number, children?: React.ReactNode }) {
@@ -22,10 +21,7 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
     setSelection: selectionHandler,
     setDraggedItem,
     setDropTarget,
-    createElement,
-    deleteElement,
-    updateTitle,
-  } = useTree();
+  } = useMixEditor();
   
   // Get tree state and updateTree from MixEditorContext
   const { updateTree } = useMixEditor();
@@ -105,8 +101,16 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
   } = useDragAndDrop(dragHandlers);
 
   function changeTitle(elementTitle: string) {
-    updateTitle(node.id, elementTitle);
+    updateTree(tree => {
+      updateElementTitle(tree, node.id, elementTitle);
+    });
   }
+
+  const handleAddElement = () => {
+    updateTree(tree => {
+      createElement(tree, node.id);
+    });
+  };
 
   const getDropIndicatorStyle = () => {
     if (dropTarget?.id !== node.id || !position) return '';
@@ -170,7 +174,7 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
           
           {/* Add Button - + */}
           <button
-            onClick={(e) => { e.preventDefault(); createElement(node.id); }}
+            onClick={(e) => { e.preventDefault(); handleAddElement(); }}
             className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-lg bg-zinc-50 text-zinc-700 hover:text-blue-500"
           >
             <Plus size={12} />

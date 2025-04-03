@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
-import { useTree } from './TreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
+import { updateElementTag } from '../_utils/treeUtils';
 
 interface HtmlTagSelectorProps {
   className?: string;
@@ -16,21 +16,15 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
   const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const { htmlSchemas } = useTree();
+  const { htmlSchemas } = useMixEditor();
   const { updateTree } = useMixEditor();
+
 
   // Handle tag selection
   const handleSelectTag = (tagName: string) => {
     // Update the tag using updateTree from MixEditorContext
     updateTree(tree => {
-      const updateNodeTag = (node) => {
-        if (node.id === nodeId) {
-          node.tag = tagName;
-          return true;
-        }
-        return node.childrens?.some(updateNodeTag) || false;
-      };
-      updateNodeTag(tree);
+      updateElementTag(tree, nodeId, tagName);
     });
     
     setIsOpen(false);

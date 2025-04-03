@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCssTree } from './CssTreeContext';
-import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import PropertyElement from './PropertyElement';
 import PropertySelector from './PropertySelector';
 import InputClickAndText from './_fragments/InputClickAndText';
 import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon } from 'lucide-react';
+import { renameClassesInTree, removeClassFromElement } from '../_utils/treeUtils';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // component for a class in the css tree
 // renders a collapsible section with a class name and its properties components
@@ -74,10 +75,10 @@ export default function CssClassElement({ className, children }: CssClassElement
   } = useCssTree();
   
   const { 
-    selection, 
-    removeClass: removeClassFromElement,
-    renameClassesInTree
-  } = useTree();
+    selection
+  } = useMixEditor();
+
+  const {tree, updateTree} = useMixEditor();
   
   const [isOpen, setIsOpen] = useState(false);
   
@@ -92,7 +93,9 @@ export default function CssClassElement({ className, children }: CssClassElement
       
       if (success) {
         // Update all references to this class name in the tree
-        renameClassesInTree(className, newClassName);
+        updateTree(tree => {
+          renameClassesInTree(tree, className, newClassName);
+        });
         console.log(`Renamed class from ${className} to ${newClassName}`);
       } else {
         console.log(`Failed to rename class from ${className} to ${newClassName}`);
@@ -107,7 +110,10 @@ export default function CssClassElement({ className, children }: CssClassElement
     
     // If there's a selected element, also remove the class from it
     if (selection && selection.classes && selection.classes.includes(className)) {
-      removeClassFromElement(selection.id, className);
+      // Update the tree to remove the class from the selected element
+      updateTree(tree => {
+        removeClassFromElement(tree, selection.id, className);
+      });
     }
   };
   

@@ -105,10 +105,11 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     setMixTitle(newName);
   };
 
+  // Get MixEditor context at the component level (not inside a function)
+  const { tree: mixTree } = useMixEditor();
+
   const handleUpdateMix = async () => {
-    // Get the current tree from MixEditorContext
-    const { tree: mixTree } = useMixEditor();
-    
+    // Use the tree from the component-level hook
     if (!mixTree) {
       addNotification({
         type: 'error',

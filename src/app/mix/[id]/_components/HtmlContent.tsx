@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef, MouseEvent, ChangeEvent } from 'react';
-import { useTree } from './TreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import { Eraser, Copy, Check } from 'lucide-react';
+import { useMixEditor } from '../_contexts/MixEditorContext';
+import { updateElementContent } from '../_utils/treeUtils';
+
 
 // Define TreeContext types
 interface TreeNode {
@@ -19,12 +21,12 @@ interface TreeContextType {
 }
 
 const HtmlContent = () => {
-  const { selection, updateContent } = useTree() as TreeContextType;
   const [content, setContent] = useState('');
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { selection, updateTree } = useMixEditor();
 
   // Update local content state when selection changes
   useEffect(() => {
@@ -42,7 +44,9 @@ const HtmlContent = () => {
     
     // Update the content in the tree
     if (selection && selection.id) {
-      updateContent(selection.id, newContent);
+      updateTree(tree => {
+        updateElementContent(tree, selection.id, newContent);
+      });
     }
   };
 

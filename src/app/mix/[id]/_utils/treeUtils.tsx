@@ -2,6 +2,7 @@
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { NotificationType } from '../../../_contexts/NotificationsContext';
 import { TreeNode, DropPosition } from '../_types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 // Result type for operations that might need to show notifications
 export interface OperationResult {
@@ -11,6 +12,45 @@ export interface OperationResult {
     message: string;
   };
 }
+
+// [ELEMENT OPERATIONS|STATE:UPDATES] Creates a new div element as a child of the specified node
+export const createElement = (node: TreeNode, id: string) => {
+      const findAndCreate = (node: TreeNode) => {
+        if (node.id === id) {
+          // Check if the node is a void element
+          if (isVoidElement(node.tag)) {
+            console.log(`Cannot add children to ${node.tag} because it's a void element.`);
+            return false;
+          }
+          
+          node.childrens.push({
+            id: uuidv4().substring(0, 8),
+            tag: "div",
+            title: uuidv4().substring(0, 6),
+            classes: [],
+            style: [{"className":"css string"}],
+            inlineStyle: {}, // Initialize inlineStyle
+            content: "",
+            childrens: []
+          });
+          return true;
+        }
+        return node.childrens.some(findAndCreate);
+      };
+      findAndCreate(node);
+  };
+
+// [TREE MANIPULATION|STATE:UPDATES] Updates a specific node in the tree by its ID
+export const updateNode = (tree: TreeNode, id: string, updateFn: (node: TreeNode) => void) => {
+  const findAndUpdate = (node: TreeNode) => {
+    if (node.id === id) {
+      updateFn(node);
+      return true;
+    }
+    return node.childrens?.some(findAndUpdate) || false;
+  };
+  findAndUpdate(tree);
+};
 
 // [HELPER] Checks if an element is a void element (cannot have children)
 export const isVoidElement = (tag: string): boolean => {
@@ -51,6 +91,77 @@ export const findParent = (tree: TreeNode, id: string): TreeNode | null => {
   }
   
   return null;
+};
+
+// [STYLE MANAGEMENT|STATE:UPDATES] Adds a class name to a node's classes array
+export const addClassToElement = (tree: TreeNode, id: string, className: string) => {
+  updateNode(tree, id, node => {
+    node.classes.push(className);
+  });
+};
+
+// [STYLE MANAGEMENT|STATE:UPDATES] Renames a class throughout the entire tree and its style definitions
+export const renameClassesInTree = (tree: TreeNode, oldClassName: string, newClassName: string) => {
+  const updateClassNames = (node: TreeNode) => {
+    if (node.classes && Array.isArray(node.classes)) {
+      node.classes = node.classes.map(cls => 
+        cls === oldClassName ? newClassName : cls
+      );
+    }
+    // Also update style references if at root level
+    if (node.id === "root" && node.style && Array.isArray(node.style)) {
+      node.style = node.style.map(styleObj => {
+        if (styleObj[oldClassName]) {
+          const newStyleObj = {};
+          newStyleObj[newClassName] = styleObj[oldClassName];
+          return newStyleObj;
+        }
+        return styleObj;
+      });
+    }
+    
+    if (node.childrens && Array.isArray(node.childrens)) {
+      node.childrens.forEach(updateClassNames);
+    }
+  };
+      
+    updateClassNames(tree);
+
+};
+
+// [CONTENT MANAGEMENT|STATE:UPDATES] Updates the display title of a node
+export const updateElementTitle = (tree: TreeNode, id: string, title: string) => {
+  updateNode(tree, id, node => {
+    node.title = title;
+  });
+};
+
+// [STYLE MANAGEMENT|STATE:UPDATES] Removes a specific class name from a node
+export const removeClassFromElement = (tree: TreeNode, id: string, className: string) => {
+  updateNode(tree, id, node => {
+    if (node.classes) {
+      node.classes = node.classes.filter(cls => cls !== className);
+    }
+  });
+};
+
+// [CONTENT MANAGEMENT|STATE:UPDATES] Updates the text content of a node
+export const updateElementContent = (tree: TreeNode, id: string, content: string) => {
+  updateNode(tree, id, node => {
+    node.content = content;
+  });
+};
+
+// [ELEMENT OPERATIONS|STATE:UPDATES] Updates a node's HTML tag with void element validation
+export const updateElementTag = (tree: TreeNode, id: string, tag: string) => {
+  updateNode(tree, id, node => {
+    // Check if the new tag is a void element and if the node has children
+    if (isVoidElement(tag) && node.childrens.length > 0) {
+      return
+    } else {
+      node.tag = tag;
+    }
+  });
 };
 
 // [DRAG AND DROP|HELPER] Finds and removes an element from the tree

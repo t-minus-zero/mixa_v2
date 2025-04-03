@@ -2,19 +2,17 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import CssClassElement from './CssClassElement';
 import { useCssTree } from './CssTreeContext';
-import { useTree } from './TreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
-import { TreeNode } from '../_types/types';
 import { v4 as uuidv4 } from 'uuid';
 import HtmlContent from './HtmlContent';
 import { SearchIcon, X } from 'lucide-react';
 import AccordionWrapper from './_fragments/AccordionWrapper';
+import { addClassToElement } from '../_utils/treeUtils';
 
 // Add Class Button Component
 const AddClassButton = ({ isForSelectedElement }) => {
   const { addClass, selectClass } = useCssTree();
-  const { selection, setSelection } = useTree();
-  const { addClass: addClassToElement } = useTree();
+  const { tree, updateTree, selection, setSelection } = useMixEditor();
   
   const handleAddClass = () => {
     // Generate a new class name
@@ -25,13 +23,9 @@ const AddClassButton = ({ isForSelectedElement }) => {
     
     // If we're in selected element mode, also add the class to the selected element
     if (isForSelectedElement && selection) {
-      addClassToElement(selection.id, newClassName);
-      
-      // Force a re-render of the selection by creating a new reference
-      setSelection({...selection});
-      
-      // Also select the newly created class in the CSS tree
-      selectClass(newClassName);
+      updateTree(tree => {
+        addClassToElement(tree, selection.id, newClassName);
+      });
       
       console.log(`Added class "${newClassName}" to selected element`);
     } else {
@@ -194,11 +188,9 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
 
 const RightFloater = () => {
   const { cssTree } = useCssTree();
-  const { selection } = useTree();
+  const { selection, updateTree, setSelection } = useMixEditor();
   const { addClass } = useCssTree();
   const { selectClass } = useCssTree();
-  const { updateTree } = useTree();
-  const { setSelection } = useTree();
   
   // State for toggling between all classes and selected element's classes
   const [showAllClasses, setShowAllClasses] = useState(false);
