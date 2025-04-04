@@ -62,7 +62,7 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
   )
 }
 
-export default function CssClassElement({ className, children }: CssClassElementProps) {
+export default function CssClassElement({ id, className }: { id: string, className: string }) {
   const { 
     cssTree, 
     addClass, 
@@ -82,8 +82,8 @@ export default function CssClassElement({ className, children }: CssClassElement
   
   const [isOpen, setIsOpen] = useState(false);
   
-  // Get the class object from the context using className
-  const classObj = cssTree.classes[className];
+  // Get the class object from the context by finding it in the array by ID
+  const classObj = cssTree.classes.find((cls: { id: string }) => cls.id === id);
   
   // Handle updating class name (remember to refractor when we switch to IDs for classes instead of names)
   const handleUpdateClassName = (newClassName) => {

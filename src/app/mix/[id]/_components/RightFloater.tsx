@@ -171,8 +171,8 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
             </div>
           ) : (
             <ul className="w-full gap-2 flex flex-col p-2">
-              {classesToDisplay.map((className) => (
-                <CssClassElement key={className} className={className} />
+              {classesToDisplay.map((cls) => (
+                <CssClassElement key={cls.id} id={cls.id} className={cls.name} />
               ))}
             </ul>
           )}
@@ -200,19 +200,25 @@ const RightFloater = () => {
   // Get classes to display based on current mode and selection
   const classesToDisplay = useMemo(() => {
     // First get the base list of classes based on view mode
-    let classes = [];
-    
+    let classesIds = [];
     if (showAllClasses) {
-      classes = Object.keys(cssTree.classes);
+      classesIds = cssTree.classes.map((cssClass: { id: string }) => cssClass.id);
     } else {
-      classes = selection && selection.classes ? selection.classes : [];
+      classesIds = selection && selection.classes ? selection.classes : [];
     }
+
+    let classes = []; // [{id: string, name: string}]
+
+    classes = classesIds.map((id: string) => {
+      const cssClass = cssTree.classes.find((cls: { id: string, name: string }) => cls.id === id);
+      return cssClass ? { id: cssClass.id, name: cssClass.name } : { id, name: id };
+    });
     
     // Then filter by search term if one exists
     if (searchInput.trim()) {
       const search = searchInput.toLowerCase().trim();
-      classes = classes.filter(className => 
-        className.toLowerCase().includes(search)
+      classes = classes.filter((cls: { id: string, name: string }) => 
+        cls.name.toLowerCase().includes(search)
       );
     }
     
