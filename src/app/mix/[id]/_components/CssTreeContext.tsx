@@ -2,14 +2,24 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
-
 import { CssTree, CssClass, CssValueNode, CssValue } from '../_types/types';
 import { cssSchema } from '../_schemas/css';
 import { inputsSchema } from '../_schemas/inputs';
-import { generateStyleFromTree, generateStyleFromClass, formatStyleProperty, defaultCssTree, isReference, extractReferenceKey, processValue } from '../_utils/treeUtils';
+import { 
+  generateStyleFromTree, 
+  generateStyleFromClass, 
+  formatStyleProperty, 
+  defaultCssTree, 
+  isReference, 
+  extractReferenceKey, 
+  processValue,
+  findClassById,
+  findClassByName,
+  getClassIdByName
+} from '../_utils/treeUtils';
 
 // Simple CSS tree structure with classes and properties
-const CssTreeContext = createContext();
+const CssTreeContext = createContext<CssTreeContextType | undefined>(undefined);
 
 export const CssTreeProvider = ({ children }) => {
 
@@ -18,13 +28,22 @@ export const CssTreeProvider = ({ children }) => {
 
   // Separate state for selections
   const [selectedClass, setSelectedClass] = useState('default');
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState<CssValueNode | null>(null);
 
   // Schemas definition
   const cssSchemas = {
     inputTypes: inputsSchema,
     properties: cssSchema
   }
+
+
+  const updateTree = (updateFn) => {
+    setCssTree(prevTree => {
+      // Apply the update function to get the new tree
+      const updatedTree = produce(prevTree, updateFn);
+      return updatedTree;
+    });
+  };
 
   // converted
   const generateCssFromTree = (cssTree: CssTree) => {
@@ -39,21 +58,20 @@ export const CssTreeProvider = ({ children }) => {
   const formatProperty = (value: CssValue, type: string) => {
     return formatStyleProperty(value, type);
   }
-
-  // Update tree using Immer for immutable updates
-  const updateTree = (updateFn) => {
-    setCssTree(prevTree => produce(prevTree, updateFn));
-  };
-
-
+  
   // Class operations
-  const addClass = (className, addToSelected = false) => {
+  const addClass = (className?: string, addToSelected = false) => {
     // Create a new class name if none is provided
     const newClassName = className || uuidv4().substring(0, 6);
     
     updateTree(draft => {
-      if (!draft.classes[newClassName]) {
-        draft.classes[newClassName] = {
+      // Check if class with this name already exists
+      const existingClass = findClassByName(draft, newClassName);
+      
+      if (!existingClass) {
+        // Create new class with ID and add to array
+        const newClass: CssClass = {
+          id: uuidv4(),
           name: newClassName,
           properties: [
             {
@@ -63,28 +81,30 @@ export const CssTreeProvider = ({ children }) => {
             }
           ]
         };
+        
+        draft.classes.push(newClass);
       }
     });
     
     return newClassName; // Return the class name (useful when generating a new one)
   };
 
-  // (remember to refractor when we switch to IDs for classes instead of names)
-  const renameClass = (oldClassName, newClassName) => {
+  // Rename a class by updating its name property
+  const renameClass = (oldClassName: string, newClassName: string) => {
+    const oldClass = findClassByName(cssTree, oldClassName);
+    const newClassExists = findClassByName(cssTree, newClassName);
+    
     if (!oldClassName || !newClassName || oldClassName === newClassName || 
-        !cssTree.classes[oldClassName] || cssTree.classes[newClassName]) {
+        !oldClass || newClassExists) {
       return false; // Invalid input or class already exists
     }
 
     updateTree(draft => {
-      // Create new class with the new name but same properties
-      draft.classes[newClassName] = {
-        ...draft.classes[oldClassName],
-        name: newClassName
-      };
-      
-      // Delete the old class
-      delete draft.classes[oldClassName];
+      // Find the class in the array and update its name
+      const classIndex = draft.classes.findIndex((c: CssClass) => c.name === oldClassName);
+      if (classIndex !== -1) {
+        draft.classes[classIndex].name = newClassName;
+      }
     });
 
     // Update selected class if it's the one being renamed
@@ -95,30 +115,34 @@ export const CssTreeProvider = ({ children }) => {
     return true;
   };
 
-  const removeClass = (className) => {
+  const removeClass = (className: string) => {
     updateTree(draft => {
-      delete draft.classes[className];
+      // Filter out the class with the given name
+      draft.classes = draft.classes.filter((c: CssClass) => c.name !== className);
     });
     
     // Update selected class if it's the one being deleted
     if (selectedClass === className) {
-      const firstAvailableClass = Object.keys(cssTree.classes)[0] || null;
+      const firstAvailableClass = cssTree.classes[0]?.name || '';
       setSelectedClass(firstAvailableClass);
     }
   };
 
-  const selectClass = (className) => {
-    setSelectedClass(className);
+  const selectClass = (className: string) => {
+    setSelectedClass(className || '');
     setSelectedProperty(null); // Clear property selection when changing class
   };
 
   // Property operations
-  const addProperty = (className, propertyType) => {
+  const addProperty = (className: string, propertyType: string) => {
     updateTree(draft => {
-      if (draft.classes[className]) {
+      // Find the class by name
+      const classObj = findClassByName(draft, className);
+      
+      if (classObj) {
         // Get default value from schema
-        const schema = cssSchemas.properties[propertyType];
-        const inputTypeSchema = schema.inputs;
+        const schema = cssSchemas.properties[propertyType as keyof typeof cssSchemas.properties];
+        const inputTypeSchema = schema?.inputs;
         let defaultValue = inputTypeSchema?.default || '';
         
         // Create new property with ID
@@ -128,15 +152,18 @@ export const CssTreeProvider = ({ children }) => {
           value: processValue(defaultValue),
         };
         
-        draft.classes[className].properties.push(newProperty);
+        classObj.properties.push(newProperty);
       }
     });
   };
 
-  const removeProperty = (className, propertyId) => {
+  const removeProperty = (className: string, propertyId: string) => {
     updateTree(draft => {
-      if (draft.classes[className]) {
-        draft.classes[className].properties = draft.classes[className].properties.filter(
+      // Find the class by name
+      const classObj = findClassByName(draft, className);
+      
+      if (classObj) {
+        classObj.properties = classObj.properties.filter(
           prop => prop.id !== propertyId
         );
       }
@@ -149,42 +176,42 @@ export const CssTreeProvider = ({ children }) => {
   };
 
   // Find property by ID in any class
-  const findPropertyById = (propertyId) => {
-    for (const className in cssTree.classes) {
-      for (const property of cssTree.classes[className].properties) {
+  const findPropertyById = (propertyId: string) => {
+    for (const classObj of cssTree.classes) {
+      for (const property of classObj.properties) {
         if (property.id === propertyId) {
-          return { className, property };
+          return { className: classObj.name, property };
         }
       }
     }
     return null;
   };
 
-  const updateProperty = (idList, updates) => {
+  const updateProperty = (idList: string[], updates: Partial<CssValueNode>) => {
     updateTree(draft => {
-      for (const className in draft.classes) {
-        const propertyIndex = draft.classes[className].properties.findIndex(
+      for (const classObj of draft.classes) {
+        const propertyIndex = classObj.properties.findIndex(
           prop => prop.id === idList[0]
         );
         
         if (propertyIndex !== -1) {
-          Object.assign(draft.classes[className].properties[propertyIndex], updates);
+          Object.assign(classObj.properties[propertyIndex], updates);
           return;
         }
       }
     });
   };
 
-  const updatePropertyValue = (idList, value) => {
+  const updatePropertyValue = (idList: string[], value: any) => {
   
     updateTree(draft => {
-      for (const className in draft.classes) {
-        const propertyIndex = draft.classes[className].properties.findIndex(
+      for (const classObj of draft.classes) {
+        const propertyIndex = classObj.properties.findIndex(
           prop => prop.id === idList[0]
         );
         
         if (propertyIndex !== -1) {
-          let property = draft.classes[className].properties[propertyIndex];
+          let property = classObj.properties[propertyIndex];
           updateNestedProperty(property, idList, 1, value);
           break;
         }

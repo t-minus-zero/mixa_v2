@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { api } from "MixaDev/trpc/react";
-import { useTree } from './_components/TreeContext';
 import { useMixEditor } from './_contexts/MixEditorContext';
 import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
@@ -10,6 +9,9 @@ import MixFloaterMenu from './_components/MixFloaterMenu';
 import ResizableContainer from '../../_components/Resize/ResizableContainer';
 import { useNotifications } from '../../_contexts/NotificationsContext';
 import TitleMenu from '../../dashboard/_components/TitleMenu';
+import { CssClass } from './_types/types';
+import { loadMixData, latestFormatVersion } from './_utils/mixUtils';
+
 
 // Define interfaces for type safety
 interface TreeData {
@@ -23,9 +25,10 @@ interface TreeData {
 }
 
 interface MixJsonContent {
+  version: string;
   treeData: TreeData;
-  cssData: { classes: Record<string, any> };
-  backgroundImageUrl?: string;
+  cssData: { classes: CssClass[] };
+
 }
 
 interface MixData {
@@ -46,11 +49,12 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     throw new Error("Invalid mix id");
   }
 
-  const [mixData, setMixData] = useState<MixData | null>(null);
+
   const [mixTitle, setMixTitle] = useState('');
-  const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
+  const [mixData, setMixData] = useState<MixData | null>(null);
   const { updateTree: updateMixTree } = useMixEditor();
   const { cssTree, updateTree: updateCssTree } = useCssTree();
+  const { addNotification } = useNotifications();
   
   const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery({
     id: idAsNumber,
@@ -62,42 +66,25 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   // It does not depend on local state variables to avoid circular dependencies
   useEffect(() => {
     if (mix) {
-      setMixData(mix);
-      // Only set the title if it hasn't been manually changed
-      if (!mixTitle || mixTitle === '') {
-        setMixTitle(mix.name || 'Untitled Mix');
-      }
+      const jsonContent = mix.jsonContent as any;
       
-      // Handle backwards compatibility
-      if (typeof mix.jsonContent === 'object' && mix.jsonContent !== null) {
-        // New format with combined data
-        if ('treeData' in mix.jsonContent && mix.jsonContent.treeData) {
-          // Use updateMixTree to set the entire tree
-          updateMixTree(() => (mix.jsonContent as MixJsonContent).treeData);
-        }
-        
-        if ('cssData' in mix.jsonContent && mix.jsonContent.cssData && mix.jsonContent.cssData.classes) {
-          // Use updateCssTree to update the cssTree
-          updateCssTree((draft: any) => {
-            // Directly set the classes on the draft object
-            draft.classes = (mix.jsonContent as MixJsonContent).cssData.classes;
-          });
-        }
+      setMixTitle(mix.name || 'Untitled Mix');
 
-        // Load background image if exists
-        // Using optional chaining to safely access the property
-        if ('backgroundImageUrl' in mix.jsonContent && 
-            typeof mix.jsonContent.backgroundImageUrl === 'string') {
-          setBackgroundImageUrl(mix.jsonContent.backgroundImageUrl);
-        }
-      } else {
-        // Legacy format with only tree data
-        updateMixTree(() => mix.jsonContent as TreeData);
-      }
+      // Convert the mix to the latest format
+      const mixData = loadMixData(jsonContent);
+      
+      // Update the version in the state with the actual version used
+      updateMixTree(() => mixData.treeData);
+      updateCssTree(() => mixData.cssData);
+
+      addNotification({
+        type: 'info',
+        message: `Converted mix data's format version to: ${mixData.version }`,
+        duration: 2000
+      });
+      
     }
   }, [mix]);
-
-  const { addNotification } = useNotifications();
 
   // Handle mix name change - just updates the local state without saving to the server
   const handleMixNameChange = (newName: string) => {
@@ -120,29 +107,12 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       return;
     }
 
-    const defaultJsonContent = {
-      id: '',
-      tag: '',
-      title: '',
-      classes: [],
-      style: [],
-      content: '',
-      childrens: []
-    };
-
-    const updatedTree = {
-      ...defaultJsonContent,
-      ...mixTree
-    };
-    
     // Create the combined data structure with background image
+    // Now we can use the array-based structure directly since we updated the API schema
     const combinedData = {
-      treeData: updatedTree,
-      cssData: {
-        classes: cssTree.classes
-      },
-      classes: cssTree.classes,
-      backgroundImageUrl
+      version: latestFormatVersion,
+      treeData: mixTree,
+      cssData: cssTree
     };
 
     try {
@@ -186,13 +156,6 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     }
   };
 
-  // Handle background image update
-  const handleBackgroundImageChange = (url: string) => {
-    setBackgroundImageUrl(url);
-  };
-
-  // Handle image URL input
-
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -226,8 +189,6 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
           maxHeight: 'calc(100vh - 1rem)', 
           maxWidth: 'calc(100vw - 1rem)' 
         }}
-        backgroundImageUrl={backgroundImageUrl}
-        onBackgroundImageChange={handleBackgroundImageChange}
       >
         <HTMLVisualizer />
       </ResizableContainer>

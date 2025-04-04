@@ -360,8 +360,9 @@ export const deleteElement = (tree: TreeNode, id: string): OperationResult => {
 
 export const defaultCssTree: CssTree =
   {
-    classes: {
-      "default": {
+    classes: [
+      {
+        id: uuidv4(),
         name: "default",
         properties: [
           {
@@ -436,18 +437,24 @@ export const defaultCssTree: CssTree =
           }
         ]
       }
-    }
+    ]
   };
 
 // CSS utility functions
 export const generateStyleFromTree = (cssTree: CssTree) => {
   const result: { className: string; cssString: string }[] = [];
   
-  // For each class in the tree, generate an object with classname and css string
-  Object.keys(cssTree.classes).forEach(className => {
-    const cssString = generateStyleFromClass(cssTree.classes[className], className);
-    result.push({ className, cssString });
-  });
+  // We now only support array-based structure
+  if (cssTree.classes && Array.isArray(cssTree.classes)) {
+    // Process each class in the array
+    cssTree.classes.forEach(classObj => {
+      if (classObj && classObj.name) {
+        // Use the class's name property directly
+        const cssString = generateStyleFromClass(classObj, classObj.name);
+        result.push({ className: classObj.name, cssString });
+      }
+    });
+  }
   
   return result;
 };
@@ -549,9 +556,10 @@ export const processValue = (value: any) => {
   }
 
   return value;
-}
+};
 
-// Helper functions for references
+
+
 export const isReference = (value: string) => {
   return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
 };
@@ -563,34 +571,50 @@ export const extractReferenceKey = (value: string) => {
 
 // [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by ID
 export const findClassById = (cssTree: CssTree, classId: string): CssClass | undefined => {
-  // For object-based structure (current implementation)
-  for (const key in cssTree.classes) {
-    if (cssTree.classes[key].id === classId) {
-      return cssTree.classes[key];
+  // Compatibility layer to handle both object and array structures
+  if (Array.isArray(cssTree.classes)) {
+    // New array-based structure
+    return cssTree.classes.find(cssClass => cssClass.id === classId);
+  } else {
+    // Legacy object-based structure
+    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
+    for (const key in classesObj) {
+      if (classesObj[key].id === classId) {
+        return classesObj[key];
+      }
     }
+    return undefined;
   }
-  
-  return undefined;
-  
-  // For array-based structure (future implementation)
-  // return cssTree.classes.find(cssClass => cssClass.id === classId);
 };
 
 // [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by name
 export const findClassByName = (cssTree: CssTree, className: string): CssClass | undefined => {
-  // For object-based structure (current implementation)
-  return cssTree.classes[className];
-  
-  // For array-based structure (future implementation)
-  // return cssTree.classes.find(cssClass => cssClass.name === className);
+  // Compatibility layer to handle both object and array structures
+  if (Array.isArray(cssTree.classes)) {
+    // New array-based structure
+    return cssTree.classes.find(cssClass => cssClass.name === className);
+  } else {
+    // Legacy object-based structure
+    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
+    return className in classesObj ? classesObj[className] : undefined;
+  }
 };
 
 // [CSS CLASS OPERATIONS|NO STATE] Get class ID by name
 export const getClassIdByName = (cssTree: CssTree, className: string): string | undefined => {
-  // For object-based structure (current implementation)
-  return cssTree.classes[className]?.id;
-  
-  // For array-based structure (future implementation)
-  // const cssClass = cssTree.classes.find(cssClass => cssClass.name === className);
-  // return cssClass?.id;
+  // Compatibility layer to handle both object and array structures
+  if (Array.isArray(cssTree.classes)) {
+    // New array-based structure
+    const cssClass = cssTree.classes.find(cssClass => cssClass.name === className);
+    return cssClass?.id;
+  } else {
+    // Legacy object-based structure
+    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
+    return classesObj[className]?.id;
+  }
 };
+
+
+
+  
+  

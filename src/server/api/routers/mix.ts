@@ -3,6 +3,46 @@ import { createTRPCRouter, publicProcedure } from "MixaDev/server/api/trpc";
 import { mixes } from "MixaDev/server/db/schema";
 import { eq } from 'drizzle-orm/expressions';
 
+// Define Zod schemas for validation
+
+// CSS Value Node schema
+const cssValueNodeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  value: z.any(),
+  type: z.string().optional(),
+});
+
+// CSS Class schema
+const cssClassSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  properties: z.array(cssValueNodeSchema)
+});
+
+// CSS Tree schema
+const cssTreeSchema = z.object({
+  classes: z.array(cssClassSchema)
+});
+
+// Tree Node schema
+const treeNodeSchema = z.object({
+  id: z.string(),
+  tag: z.string(),
+  title: z.string(),
+  classes: z.array(z.string()),
+  style: z.array(z.any()),
+  content: z.string(),
+  childrens: z.array(z.any().optional())
+});
+
+// Mix JSON Content schema
+const mixJsonContentSchema = z.object({
+  version: z.number(),
+  treeData: treeNodeSchema,
+  cssData: cssTreeSchema
+});
+
 // Utility functions for JSON handling
 function stringifyObject(obj: object): string {
   try {
@@ -73,15 +113,7 @@ export const mixRouter = createTRPCRouter({
     .input(z.object({
       name: z.string().optional(),
       mixType: z.string().optional(),
-      jsonContent: z.object({
-        id: z.string(),
-        tag: z.string(),
-        title: z.string(),
-        classes: z.array(z.string()),
-        style: z.array(z.any()),
-        content: z.string(),
-        childrens: z.array(z.any())
-      })
+      jsonContent: mixJsonContentSchema
     }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -106,20 +138,7 @@ export const mixRouter = createTRPCRouter({
       id: z.number(),
       name: z.string().optional(),
       mixType: z.string().optional(),
-      jsonContent: z.object({
-        treeData: z.object({
-          id: z.string(),
-          tag: z.string(),
-          title: z.string(),
-          classes: z.array(z.string()),
-          style: z.array(z.any()),
-          content: z.string(),
-          childrens: z.array(z.any())
-        }),
-        cssData: z.object({
-          classes: z.record(z.string(), z.any())
-        })
-      })
+      jsonContent: mixJsonContentSchema
     }))
     .mutation(async ({ ctx, input }) => {
       try {

@@ -34,12 +34,6 @@ export interface CssClass {
 }
 
 // CSS Tree Structure
-// Array-based approach (for future use)
-// export interface CssTree {
-//   classes: CssClass[];
-// }
-
-// Object-based approach (current implementation)
 export interface CssTree {
-  classes: Record<string, CssClass>;
+  classes: CssClass[];
 }
