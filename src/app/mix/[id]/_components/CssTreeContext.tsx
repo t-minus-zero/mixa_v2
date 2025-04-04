@@ -3,180 +3,42 @@ import React, { createContext, useState, useContext, useMemo } from 'react';
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CssTree, CssClass, CssValueNode, CssValue } from '../_types/types';
 import { cssSchema } from '../_schemas/css';
 import { inputsSchema } from '../_schemas/inputs';
+import { generateStyleFromTree, generateStyleFromClass, formatStyleProperty, defaultCssTree, isReference, extractReferenceKey, processValue } from '../_utils/treeUtils';
 
 // Simple CSS tree structure with classes and properties
 const CssTreeContext = createContext();
 
 export const CssTreeProvider = ({ children }) => {
+
+  // CSS tree state
+  const [cssTree, setCssTree] = useState<CssTree>(defaultCssTree);
+
+  // Separate state for selections
+  const [selectedClass, setSelectedClass] = useState('default');
+  const [selectedProperty, setSelectedProperty] = useState(null);
+
   // Schemas definition
   const cssSchemas = {
     inputTypes: inputsSchema,
     properties: cssSchema
   }
 
-  // CSS utility functions
-  const generateCssFromTree = (cssTree) => {
-    const result = [];
-    
-    // For each class in the tree, generate an object with classname and css string
-    Object.keys(cssTree.classes).forEach(className => {
-      const cssString = generateClassCss(cssTree.classes[className], className);
-      result.push({ className, cssString });
-    });
-    
-    return result;
+  // converted
+  const generateCssFromTree = (cssTree: CssTree) => {
+    return generateStyleFromTree(cssTree);
+  };
+  // converted
+  const generateClassCss = (classObj: CssClass, className: string) => {
+    return generateStyleFromClass(classObj, className);
   }
 
-  const generateClassCss = (classObj, className) => {
-    let cssString = `.${className} {`;
-    
-    // Process each property in the class
-    classObj.properties.forEach(propObj => {
-      // Get the property schema
-      const propertySchema = cssSchemas.properties[propObj.type];
-      
-      if (propertySchema) {
-        // Format the property value using formatProperty
-        const formattedValue = formatProperty(propObj.value, propObj.type);
-        
-        // Apply the property format from the schema
-        const formattedProperty = propertySchema.format.replace('{value}', formattedValue);
-        cssString += ` ${formattedProperty}`;
-      }
-    });
-    
-    cssString += ' }';
-    return cssString;
+  // converted
+  const formatProperty = (value: CssValue, type: string) => {
+    return formatStyleProperty(value, type);
   }
-
-  const formatProperty = (value, type) => {
-    // If value is primitive (string, number), return it directly
-    if (typeof value !== 'object') {
-      return value;
-    }
-    
-    // If value is an array, it should be processed in the context of its parent type
-    if (Array.isArray(value)) {
-      // Default separator is space if no type is provided
-      const separator = '';
-      return value.map(item => formatProperty(item.value, item.type)).join(separator);
-    }
-    
-    // If value is an object with type and value
-    if (value.type && value.value !== undefined) {
-      // Get the input type schema
-      const inputTypeSchema = cssSchemas.inputTypes[value.type];
-      if (!inputTypeSchema) {
-        return value.value; // Fallback if no schema found
-      }
-      
-      let formattedValue;
-      
-      // Handle array values using the current type's separator
-      if (Array.isArray(value.value)) {
-        // Get separator from current schema, default to space
-        const separator = inputTypeSchema.separator || '';
-        formattedValue = value.value.map(item => 
-          formatProperty(item.value, item.type)
-        ).join(separator);
-      } else {
-        formattedValue = formatProperty(value.value, value.type);
-      }
-      
-      // Apply the format from the input type schema
-      return inputTypeSchema.format.replace('{value}', formattedValue);
-    }
-    
-    // Fallback
-    return String(value);
-  }
-
-  // CSS tree state is agnostic from the TreeContext
-  const [cssTree, setCssTree] = useState({
-    classes: {
-      "default": {
-        name: "default",
-        properties: [
-          {
-            id: uuidv4(),
-            type: "display",
-            value: 'grid'
-          },
-          {
-            id: uuidv4(),
-            type: "gridTemplateColumns",
-            value: {
-              id: uuidv4(),
-              type: 'globalKeyword',
-              value: 'initial',
-            },
-          },
-          {
-            id: uuidv4(),
-            type: "gridTemplateRows",
-            value: {
-              id: uuidv4(),
-              type: 'trackList',
-              value: [
-                {
-                  id: uuidv4(),
-                  type: 'trackKeyword',
-                  value: 'auto'
-                },
-                {
-                  id: uuidv4(),
-                  type: 'fraction',
-                  value: 1
-                },
-                {
-                  id: uuidv4(),
-                  type: 'dimension',
-                  value: [
-                    {
-                      id: uuidv4(),
-                      type: 'number',
-                      value: 15
-                    },
-                    {
-                      id: uuidv4(),
-                      type: 'unit',
-                      value: 'px'
-                    }
-                  ]
-                }
-              ]
-            }
-          },
-          {
-            id: uuidv4(),
-            type: "gridGap",
-            value: {
-              id: uuidv4(),
-              type: 'dimension',
-              value: [
-                {
-                  id: uuidv4(),
-                  type: 'number',
-                  value: 15
-                },
-                {
-                  id: uuidv4(),
-                  type: 'unit',
-                  value: 'px'
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  });
-  
-  // Separate state for selections, similar to TreeContext
-  const [selectedClass, setSelectedClass] = useState('default');
-  const [selectedProperty, setSelectedProperty] = useState(null);
 
   // Update tree using Immer for immutable updates
   const updateTree = (updateFn) => {
@@ -330,41 +192,6 @@ export const CssTreeProvider = ({ children }) => {
     });
   };
 
-  const processValue = (value) => {
-
-    if (Array.isArray(value)) {
-      return value.map(item => processValue(item));
-    }
-
-    if (isReference(value)) {
-      const inputType = extractReferenceKey(value);
-      const inputTypeSchema = cssSchemas.inputTypes[inputType];
-      let newType = inputTypeSchema.inputType;
-      if (['selection', 'list', 'composite', 'number'].includes(newType)) {
-        newType = inputType;
-      }
-      const newValue = {
-        id: uuidv4(),
-        type: newType,
-        value: processValue(inputTypeSchema.default),
-      };
-      return newValue;
-    }
-
-    // When we load a default we need to give it an id
-    // First check if value is an object if it is we check if it has id
-    if (typeof value === 'object' && value !== null && !('id' in value)) {
-      const newValue = {
-        id: uuidv4(),
-        type: value.type,
-        value: processValue(value.value),
-      };
-      return newValue;
-    }
-
-    return value;
-  }
-
   // Helper function to update a nested property by following an ID path
   const updateNestedProperty = (prop, ids, index, value) => {
     // If we've reached the target property, update its value
@@ -391,16 +218,6 @@ export const CssTreeProvider = ({ children }) => {
     }
   };
 
-  // Helper functions for references
-  const isReference = (value) => {
-    return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
-  };
-
-  const extractReferenceKey = (value) => {
-    if (!isReference(value)) return null;
-    return value.substring(1, value.length - 1);
-  };
-
   // Generate CSS from the tree
   
 
@@ -418,9 +235,6 @@ export const CssTreeProvider = ({ children }) => {
     updateProperty,
     updatePropertyValue,
     findPropertyById,
-    // Reference helpers
-    isReference,
-    extractReferenceKey,
     // CSS generation
     generateCss: () => generateCssFromTree(cssTree),
     // Schemas

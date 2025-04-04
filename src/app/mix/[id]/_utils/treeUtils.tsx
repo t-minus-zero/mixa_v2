@@ -1,8 +1,11 @@
 // Import HTML schemas and notification types
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
+import { cssSchema } from '../_schemas/css';
+import { inputsSchema } from '../_schemas/inputs';
 import { NotificationType } from '../../../_contexts/NotificationsContext';
-import { TreeNode, DropPosition } from '../_types/types';
+import { TreeNode, DropPosition, CssTree, CssClass, CssValueNode, CssValue } from '../_types/types';
 import { v4 as uuidv4 } from 'uuid';
+
 
 // Result type for operations that might need to show notifications
 export interface OperationResult {
@@ -353,3 +356,241 @@ export const deleteElement = (tree: TreeNode, id: string): OperationResult => {
   };
 };
 
+// --- cssTree ---
+
+export const defaultCssTree: CssTree =
+  {
+    classes: {
+      "default": {
+        name: "default",
+        properties: [
+          {
+            id: uuidv4(),
+            type: "display",
+            value: 'grid'
+          },
+          {
+            id: uuidv4(),
+            type: "gridTemplateColumns",
+            value: {
+              id: uuidv4(),
+              type: 'globalKeyword',
+              value: 'initial',
+            },
+          },
+          {
+            id: uuidv4(),
+            type: "gridTemplateRows",
+            value: {
+              id: uuidv4(),
+              type: 'trackList',
+              value: [
+                {
+                  id: uuidv4(),
+                  type: 'trackKeyword',
+                  value: 'auto'
+                },
+                {
+                  id: uuidv4(),
+                  type: 'fraction',
+                  value: 1
+                },
+                {
+                  id: uuidv4(),
+                  type: 'dimension',
+                  value: [
+                    {
+                      id: uuidv4(),
+                      type: 'number',
+                      value: 15
+                    },
+                    {
+                      id: uuidv4(),
+                      type: 'unit',
+                      value: 'px'
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            id: uuidv4(),
+            type: "gridGap",
+            value: {
+              id: uuidv4(),
+              type: 'dimension',
+              value: [
+                {
+                  id: uuidv4(),
+                  type: 'number',
+                  value: 15
+                },
+                {
+                  id: uuidv4(),
+                  type: 'unit',
+                  value: 'px'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  };
+
+// CSS utility functions
+export const generateStyleFromTree = (cssTree: CssTree) => {
+  const result: { className: string; cssString: string }[] = [];
+  
+  // For each class in the tree, generate an object with classname and css string
+  Object.keys(cssTree.classes).forEach(className => {
+    const cssString = generateStyleFromClass(cssTree.classes[className], className);
+    result.push({ className, cssString });
+  });
+  
+  return result;
+};
+
+export const generateStyleFromClass = (classObj: CssClass, className: string) => {
+  let cssString = `.${className} {`;
+  
+  // Process each property in the class
+  classObj.properties.forEach(propObj => {
+    // Get the property schema
+    const propertySchema = cssSchema[propObj.type];
+    
+    if (propertySchema) {
+      // Format the property value using formatProperty
+      const formattedValue = formatStyleProperty(propObj.value, propObj.type);
+      
+      // Apply the property format from the schema
+      const formattedProperty = propertySchema.format.replace('{value}', formattedValue);
+      cssString += ` ${formattedProperty}`;
+    }
+  });
+  
+  cssString += ' }';
+  return cssString;
+};
+
+export const formatStyleProperty = (value: CssValue, type: string) => {
+    // If value is primitive (string, number), return it directly
+    if (typeof value !== 'object') {
+      return value;
+    }
+    
+    // If value is an array, it should be processed in the context of its parent type
+    if (Array.isArray(value)) {
+      // Default separator is space if no type is provided
+      const separator = '';
+      return value.map(item => formatStyleProperty(item.value, item.type)).join(separator);
+    }
+    
+    // If value is an object with type and value
+    if (value.type && value.value !== undefined) {
+      // Get the input type schema
+      const inputTypeSchema = inputsSchema[value.type];             
+      if (!inputTypeSchema) {
+        return value.value; // Fallback if no schema found
+      }
+      
+      let formattedValue;
+      
+      // Handle array values using the current type's separator
+      if (Array.isArray(value.value)) {
+        // Get separator from current schema, default to space
+        const separator = inputTypeSchema.separator || '';
+        formattedValue = value.value.map(item => 
+          formatStyleProperty(item.value, item.type)
+        ).join(separator);
+      } else {
+        formattedValue = formatStyleProperty(value.value, value.type);
+      }
+      
+      // Apply the format from the input type schema
+      return inputTypeSchema.format.replace('{value}', formattedValue);
+    }
+    
+    // Fallback
+    return String(value);
+  };
+
+export const processValue = (value: any) => {
+
+  if (Array.isArray(value)) {
+    return value.map(item => processValue(item));
+  }
+
+  if (isReference(value)) {
+    const inputType = extractReferenceKey(value);
+    const inputTypeSchema = inputsSchema[inputType];
+    let newType = inputTypeSchema.inputType;
+    if (['selection', 'list', 'composite', 'number'].includes(newType)) {
+      newType = inputType;
+    }
+    const newValue = {
+      id: uuidv4(),
+      type: newType,
+      value: processValue(inputTypeSchema.default),
+    };
+    return newValue;
+  }
+
+  // When we load a default we need to give it an id
+  // First check if value is an object if it is we check if it has id
+  if (typeof value === 'object' && value !== null && !('id' in value)) {
+    const newValue = {
+      id: uuidv4(),
+      type: value.type,
+      value: processValue(value.value),
+    };
+    return newValue;
+  }
+
+  return value;
+}
+
+// Helper functions for references
+export const isReference = (value: string) => {
+  return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
+};
+
+export const extractReferenceKey = (value: string) => {
+  if (!isReference(value)) return null;
+  return value.substring(1, value.length - 1);
+};
+
+// [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by ID
+export const findClassById = (cssTree: CssTree, classId: string): CssClass | undefined => {
+  // For object-based structure (current implementation)
+  for (const key in cssTree.classes) {
+    if (cssTree.classes[key].id === classId) {
+      return cssTree.classes[key];
+    }
+  }
+  
+  return undefined;
+  
+  // For array-based structure (future implementation)
+  // return cssTree.classes.find(cssClass => cssClass.id === classId);
+};
+
+// [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by name
+export const findClassByName = (cssTree: CssTree, className: string): CssClass | undefined => {
+  // For object-based structure (current implementation)
+  return cssTree.classes[className];
+  
+  // For array-based structure (future implementation)
+  // return cssTree.classes.find(cssClass => cssClass.name === className);
+};
+
+// [CSS CLASS OPERATIONS|NO STATE] Get class ID by name
+export const getClassIdByName = (cssTree: CssTree, className: string): string | undefined => {
+  // For object-based structure (current implementation)
+  return cssTree.classes[className]?.id;
+  
+  // For array-based structure (future implementation)
+  // const cssClass = cssTree.classes.find(cssClass => cssClass.name === className);
+  // return cssClass?.id;
+};

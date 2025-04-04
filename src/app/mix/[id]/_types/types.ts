@@ -13,3 +13,33 @@ export interface TreeNode {
 
 // Define position types for drag and drop operations
 export type DropPosition = 'before' | 'after' | 'inside';
+
+// CSS Types
+
+// Base type for any CSS value node (property or nested value)
+export interface CssValueNode {
+  id: string;
+  type: string;
+  value: CssValue;
+}
+
+// CSS value can be a primitive, object, or array
+export type CssValue = string | number | CssValueNode | CssValueNode[];
+
+// CSS Class
+export interface CssClass {
+  id: string;
+  name: string;
+  properties: CssValueNode[];
+}
+
+// CSS Tree Structure
+// Array-based approach (for future use)
+// export interface CssTree {
+//   classes: CssClass[];
+// }
+
+// Object-based approach (current implementation)
+export interface CssTree {
+  classes: Record<string, CssClass>;
+}
