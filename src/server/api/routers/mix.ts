@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm/expressions';
 // CSS Value Node schema
 const cssValueNodeSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().optional(), // Made name optional to match the current structure
   value: z.any(),
   type: z.string().optional(),
 });

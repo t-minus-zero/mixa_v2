@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import AiChat from './_components/AiChat';
 
 export default function KITPage() {
   return (

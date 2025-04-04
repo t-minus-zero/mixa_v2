@@ -1,6 +1,5 @@
 'use client'
 import React from 'react';
-import { useTree } from './TreeContext';
 import { useCssTree } from './CssTreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 

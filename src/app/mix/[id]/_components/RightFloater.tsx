@@ -50,7 +50,7 @@ const AddClassButton = ({ isForSelectedElement }) => {
 
 // Define interface for ClassesFloater props
 interface ClassesFloaterProps {
-  classesToDisplay: string[];
+  classesToDisplay: Array<{id: string, name: string}>;
   showAllClasses: boolean;
   setShowAllClasses: (show: boolean) => void;
   searchText: string;

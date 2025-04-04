@@ -71,11 +71,11 @@ export const CssTreeProvider = ({ children }) => {
       if (!existingClass) {
         // Create new class with ID and add to array
         const newClass: CssClass = {
-          id: uuidv4(),
+          id: uuidv4().substring(0, 8),
           name: newClassName,
           properties: [
             {
-              id: uuidv4(),
+              id: uuidv4().substring(0, 8),
               type: "display",
               value: 'flex'
             }

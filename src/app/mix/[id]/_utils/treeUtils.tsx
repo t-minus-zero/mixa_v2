@@ -448,10 +448,10 @@ export const generateStyleFromTree = (cssTree: CssTree) => {
   if (cssTree.classes && Array.isArray(cssTree.classes)) {
     // Process each class in the array
     cssTree.classes.forEach(classObj => {
-      if (classObj && classObj.name) {
+      if (classObj && classObj.id) {
         // Use the class's name property directly
-        const cssString = generateStyleFromClass(classObj, classObj.name);
-        result.push({ className: classObj.name, cssString });
+        const cssString = generateStyleFromClass(classObj, classObj.id);
+        result.push({ className: classObj.id, cssString });
       }
     });
   }
@@ -459,8 +459,8 @@ export const generateStyleFromTree = (cssTree: CssTree) => {
   return result;
 };
 
-export const generateStyleFromClass = (classObj: CssClass, className: string) => {
-  let cssString = `.${className} {`;
+export const generateStyleFromClass = (classObj: CssClass, classId: string) => {
+  let cssString = `.${classId} {`;
   
   // Process each property in the class
   classObj.properties.forEach(propObj => {
