@@ -87,7 +87,7 @@ const CssTreeDebugPage = () => {
   const { cssTree } = useMixEditor();
   
   return (
-    <pre className="whitespace-pre-wrap break-all">
+    <pre className="whitespace-pre-wrap break-all text-xs p-2 bg-zinc-100/90 rounded border border-zinc-200 shadow-inner font-mono text-zinc-800">
       {JSON.stringify(cssTree, null, 2)}
     </pre>
   );
@@ -98,7 +98,7 @@ const HtmlTreeDebugPage = () => {
   const { tree } = useMixEditor();
   
   return (
-    <pre className="whitespace-pre-wrap break-all">
+    <pre className="whitespace-pre-wrap break-all text-xs p-2 bg-zinc-100/90 rounded border border-zinc-200 shadow-inner font-mono text-zinc-800">
       {JSON.stringify(tree, null, 2)}
     </pre>
   );
@@ -113,7 +113,7 @@ const GeneratedHtmlDebugPage = () => {
   return (
     <div>
       <pre 
-        className="whitespace-pre-wrap break-all bg-gray-900 p-3 rounded text-green-300"
+        className="whitespace-pre-wrap break-all bg-zinc-100/90 p-2 rounded text-zinc-800 text-xs border border-zinc-200 shadow-inner font-mono"
       >
         {htmlString}
       </pre>
@@ -129,10 +129,65 @@ const CssDebugPage = () => {
   return (
     <div>
       {generatedCss.map((item, index) => (
-        <div key={index} className="mb-4">
-          <div className="font-bold text-green-400">{item.className}</div>
-          <pre className="whitespace-pre-wrap break-all bg-gray-900 p-2 rounded">
+        <div key={index} className="mb-3">
+          <div className="font-medium text-xs text-blue-600 mb-1 px-1">{item.className}</div>
+          <pre className="whitespace-pre-wrap break-all bg-zinc-100/90 p-2 rounded text-zinc-800 text-xs border border-zinc-200 shadow-inner font-mono">
             {item.cssString}
+          </pre>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Component to display all state variables from MixEditorContext
+const StateDebugPage = () => {
+  const mixEditor = useMixEditor();
+  
+  // Extract specific properties we don't want to display directly
+  const { tree, cssTree, htmlSchemas, ...restState } = mixEditor;
+  
+  // Format specific state variables
+  const formatValue = (key: string, value: any) => {
+    // For selection and selectionParent, show ID and classes
+    if (key === 'selection' && value && typeof value === 'object' && value.id) {
+      return { 
+        id: value.id,
+        classes: value.classes || []
+      };
+    }
+    if (key === 'selectionParent' && value && typeof value === 'object' && value.id) {
+      return { 
+        id: value.id,
+        classes: value.classes || []
+      };
+    }
+    // For draggedItem, only show ID
+    if (key === 'draggedItem' && value && typeof value === 'object' && value.id) {
+      return { id: value.id };
+    }
+    // For dropTarget, only show ID
+    if (key === 'dropTarget' && value && typeof value === 'object' && value.id) {
+      return { id: value.id };
+    }
+    if (typeof value === 'function') {
+      return '[Function]';
+    }
+    return value;
+  };
+  
+  // Get all state keys excluding functions
+  const stateKeys = Object.keys(restState).filter(key => {
+    return typeof restState[key] !== 'function';
+  });
+  
+  return (
+    <div className="space-y-3">
+      {stateKeys.map(key => (
+        <div key={key} className="mb-3">
+          <div className="font-medium text-xs text-blue-600 mb-1 px-1">{key}</div>
+          <pre className="whitespace-pre-wrap break-all text-xs p-2 bg-zinc-100/90 rounded border border-zinc-200 shadow-inner font-mono text-zinc-800">
+            {JSON.stringify(formatValue(key, restState[key]), null, 2)}
           </pre>
         </div>
       ))}
@@ -146,16 +201,17 @@ const DebuggerTabs = ({ activeTab, onTabChange }) => {
     { id: 'htmlTree', label: 'HTML Tree' },
     { id: 'generatedHtml', label: 'Generated HTML' },
     { id: 'cssTree', label: 'CSS Tree' },
-    { id: 'css', label: 'Generated CSS' }
+    { id: 'css', label: 'Generated CSS' },
+    { id: 'state', label: 'State Variables' }
     // More tabs can be added here in the future
   ];
   
   return (
-    <div className="flex mb-2 border-b border-gray-700 flex-wrap">
+    <div className="flex border-b border-zinc-200 flex-wrap">
       {tabs.map(tab => (
         <button 
           key={tab.id}
-          className={`py-1 px-3 ${activeTab === tab.id ? 'bg-gray-700 rounded-t' : ''}`}
+          className={`py-1.5 px-3 text-xs ${activeTab === tab.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-zinc-500 hover:text-zinc-800'}`}
           onClick={() => onTabChange(tab.id)}
         >
           {tab.label}
@@ -167,41 +223,32 @@ const DebuggerTabs = ({ activeTab, onTabChange }) => {
 
 // Main debugger component
 const MixDebugger = () => {
-  const [expanded, setExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState('htmlTree');
+  const [activeTab, setActiveTab] = useState('state');
   
   // Map of tab IDs to their respective components
   const tabComponents = {
     'htmlTree': <HtmlTreeDebugPage />,
     'generatedHtml': <GeneratedHtmlDebugPage />,
     'cssTree': <CssTreeDebugPage />,
-    'css': <CssDebugPage />
+    'css': <CssDebugPage />,
+    'state': <StateDebugPage />
     // More tabs can be added here in the future
   };
   
   return (
-    <div className="fixed top-4 left-4 z-50 bg-black bg-opacity-80 text-white text-xs rounded-lg shadow-lg">
-      <div className="p-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
-        <div className="flex items-center justify-between">
-          <span className="font-bold">Mix Debugger</span>
-          <span>{expanded ? '▼' : '▶'}</span>
-        </div>
+    <div className="w-full h-full flex flex-col bg-zinc-50/75 backdrop-blur-md text-zinc-800 text-xs border-l border-zinc-200 shadow-sm">
+      {/* Tab navigation - fixed at top */}
+      <div className="sticky top-0 bg-zinc-50/95 border-b border-zinc-200 z-10">
+        <DebuggerTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
       </div>
       
-      {expanded && (
-        <div className="p-2 max-h-[80vh] overflow-auto max-w-[500px]">
-          {/* Tab navigation */}
-          <DebuggerTabs 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-          />
-          
-          {/* Tab content */}
-          <div className="mt-2">
-            {tabComponents[activeTab]}
-          </div>
-        </div>
-      )}
+      {/* Tab content - scrollable */}
+      <div className="flex-grow overflow-auto p-2">
+        {tabComponents[activeTab]}
+      </div>
     </div>
   );
 };

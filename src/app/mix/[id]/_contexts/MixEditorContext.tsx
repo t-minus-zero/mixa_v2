@@ -36,6 +36,13 @@ const MixEditorContext = createContext<MixEditorContextType | null>(null);
 export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { addNotification } = useNotifications();
 
+  const [mixMetadata, setMixMetadata] = useState({
+    id: 0,
+    name: '',
+  });
+
+  const [codePageOpen, setCodePageOpen] = useState(false);
+
   const [tree, setTree] = useState<TreeNode>(defaultTreeNode);
   const [cssTree, setCssTree] = useState(defaultCssTree);
 
@@ -89,17 +96,20 @@ export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     selectedClass,
     selectedProperty,
     setSelectedProperty,
-    
     setDraggedItem,
     setDropTarget,
-    htmlSchemas
+    htmlSchemas,
+    mixMetadata,
+    setMixMetadata,
+    codePageOpen,
+    setCodePageOpen
   };
 
   return (
     <MixEditorContext.Provider value={contextValue}>
       {children}
     </MixEditorContext.Provider>
-  );
+  ); 
 };
 
 // Create a hook to use the context

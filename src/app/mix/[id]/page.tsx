@@ -49,14 +49,25 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   }
 
 
-  const [mixTitle, setMixTitle] = useState('');
   const [mixData, setMixData] = useState<MixData | null>(null);
-  const { updateTree, cssTree, updateCssTree } = useMixEditor();
+  const { updateTree, cssTree, updateCssTree, mixMetadata, setMixMetadata } = useMixEditor();
   const { addNotification } = useNotifications();
   
-  const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery({
-    id: idAsNumber,
-  });
+  const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery(
+    {
+      id: idAsNumber,
+    },
+    {
+      // Keep data cached and treat it as fresh for 5 minutes
+      staleTime: 5 * 60 * 1000,
+      // Don't refetch on window focus
+      refetchOnWindowFocus: false,
+      // Don't refetch when component remounts
+      refetchOnMount: true,
+      // Don't refetch on reconnect
+      refetchOnReconnect: false,
+    }
+  );
 
   const replaceMixMutation = api.mixRouter.replaceMixById.useMutation();
 
@@ -66,8 +77,15 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
     if (mix) {
       const jsonContent = mix.jsonContent as any;
       
-      setMixTitle(mix.name || 'Untitled Mix');
+      // Update the mix metadata
+      setMixMetadata({
+        id: mix.id,
+        name: mix.name || 'Untitled Mix'
+      });
 
+      // Get current version before conversion
+      const currentVersion = jsonContent.version || 1.0;
+      
       // Convert the mix to the latest format
       const mixData = loadMixData(jsonContent);
       
@@ -75,87 +93,23 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       updateTree(() => mixData.treeData);
       updateCssTree(() => mixData.cssData);
 
-      addNotification({
-        type: 'info',
-        message: `Converted mix data's format version to: ${mixData.version }`,
-        duration: 2000
-      });
+      // Only show notification if version actually changed
+      if (currentVersion < mixData.version) {
+        addNotification({
+          type: 'info',
+          message: `Converted mix data's format version from ${currentVersion} to ${mixData.version}`,
+          duration: 2000
+        });
+      }
       
     }
   }, [mix]);
 
-  // Handle mix name change - just updates the local state without saving to the server
-  const handleMixNameChange = (newName: string) => {
-    // Simply update the local state for immediate feedback
-    setMixTitle(newName);
-  };
-
-  // Get MixEditor context at the component level (not inside a function)
-  const { tree: mixTree } = useMixEditor();
-
-  const handleUpdateMix = async () => {
-    // Use the tree from the component-level hook
-    if (!mixTree) {
-      addNotification({
-        type: 'error',
-        message: 'No tree data to update',
-        duration: 3000
-      });
-      console.error("No tree data to update");
-      return;
-    }
-
-    // Create the combined data structure with background image
-    // Now we can use the array-based structure directly since we updated the API schema
-    const combinedData = {
-      version: latestFormatVersion,
-      treeData: mixTree,
-      cssData: cssTree
-    };
-
-    try {
-      // Show in-progress notification
-      addNotification({
-        type: 'info',
-        message: 'Saving mix...',
-        duration: 2000
-      });
-
-      const updatedMix = await replaceMixMutation.mutateAsync({
-        id: idAsNumber,
-        jsonContent: combinedData,
-        name: mixTitle  // Include the current name from state
-      });
-      
-      // Handle the returned data properly
-      if (updatedMix && !Array.isArray(updatedMix)) {
-        setMixData(updatedMix as unknown as MixData);
-      }
-      
-      // Show success notification
-      addNotification({
-        type: 'success',
-        message: 'Mix saved successfully!',
-        duration: 3000
-      });
-      
-      return Promise.resolve();
-    } catch (error) {
-      console.error("Failed to update mix:", error);
-      
-      // Show error notification
-      addNotification({
-        type: 'error',
-        message: `Failed to save mix: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        duration: 5000
-      });
-      
-      return Promise.reject(error);
-    }
-  };
+  // Name changes and saving are now handled directly in MixFloaterMenu component
+  // which uses the mixMetadata from context
 
 
-  if (isLoading) {
+  if (mix === undefined) {
     return <div>Loading...</div>;
   }
   if (error) {
@@ -164,25 +118,21 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      {/* Title Menu with Mix Floater controls */}
-      <div className="absolute top-4 left-4 right-4 z-20">
-        <TitleMenu 
-          title={mixTitle}
-          controls={
-            <MixFloaterMenu 
-              mixName={mixTitle}
-              onMixNameChange={handleMixNameChange}
-              onSave={handleUpdateMix}
-            />
-          }
-        />
-      </div>
+      {/* Title Menu with Mix Floater controls - now using context directly */}
+      <MixFloaterMenu />
       
       <ResizableContainer 
         initialWidth={400} 
         initialHeight={400}
         minWidth={200} 
         minHeight={200}
+        backgroundImageUrl={mixMetadata.backgroundImageUrl}
+        onBackgroundImageChange={(newUrl) => {
+          setMixMetadata((prev: {id: number; name: string; backgroundImageUrl?: string}) => ({
+            ...prev,
+            backgroundImageUrl: newUrl
+          }));
+        }}
         style={{ 
           maxHeight: 'calc(100vh - 1rem)', 
           maxWidth: 'calc(100vw - 1rem)' 
