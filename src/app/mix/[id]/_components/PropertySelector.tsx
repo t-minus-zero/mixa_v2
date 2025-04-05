@@ -2,18 +2,13 @@
 
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
-import { useCssTree } from './CssTreeContext';
+import {htmlSchemas } from '../_contexts/MixEditorContext';
 
 // Define types for CSS schema
 interface CssPropertySchema {
   label: string;
   description?: string;
   inputs?: any;
-  [key: string]: any;
-}
-
-interface CssSchemas {
-  properties: Record<string, CssPropertySchema>;
   [key: string]: any;
 }
 
@@ -29,7 +24,7 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
   const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const { cssSchemas } = useCssTree() as { cssSchemas: CssSchemas };
+  const cssSchemas = htmlSchemas.properties;
 
   // Handle property selection
   const handleSelectProperty = (propertyType: string) => {
@@ -42,7 +37,7 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
   };
 
   // Filter properties based on search text
-  const filteredProperties = Object.entries(cssSchemas.properties).filter(
+  const filteredProperties = Object.entries(cssSchemas).filter(
     ([propertyType, propertySchema]) => {
       const searchText = filterText.toLowerCase();
       return (

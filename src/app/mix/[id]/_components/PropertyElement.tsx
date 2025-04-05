@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { useCssTree } from './CssTreeContext';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import TextInput from './_fragments/TextInput';
 import SelectInput from './_fragments/SelectInput';
@@ -9,24 +9,23 @@ import NumberInput from './_fragments/NumberInput';
 import ListInput from './_fragments/ListInput';
 import CompositeInput from './_fragments/CompositeInput';
 import { X, Copy } from 'lucide-react';
+import { htmlSchemas } from '../_contexts/MixEditorContext';
+import { formatStyleProperty, updatePropertyValue, removeProperty, getLabelsOfPropertyOptions } from '../_utils/treeUtils';
 
 // Component for property in the css tree
 // Renders a collapsible section with a property name and its value editor
 export default function PropertyElement({ classId, property }) {
   const [open, setOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const { 
-    formatProperty, 
-    cssSchemas, 
-    updatePropertyValue,
-    removeProperty 
-  } = useCssTree();
+  const { cssTree, updateCssTree } = useMixEditor();
+  const properties = htmlSchemas.properties;
+  const inputTypes = htmlSchemas.inputTypes;
 
   // Renders the appropriate input component based on the property type and schema
   const renderPropertyInput = (idList, property) => {
     // Try to get property schema first
     console.log(property.type);
-    let propertySchema = cssSchemas.properties[property.type]?.inputs || cssSchemas.inputTypes[property.type];
+    let propertySchema = properties[property.type]?.inputs || inputTypes[property.type];
     
     if (propertySchema === undefined) {
         return <div className="text-xs text-red-500">Unknown type: {property.type}</div>;
@@ -39,7 +38,9 @@ export default function PropertyElement({ classId, property }) {
             <NumberInput 
                 value={property.value} 
                 onChange={(e) => {
-                    updatePropertyValue(idList, e.target.value);
+                    updateCssTree(cssTree => {
+                        updatePropertyValue(cssTree, idList, e.target.value);
+                    });
                 }}
             />
         )
@@ -49,7 +50,9 @@ export default function PropertyElement({ classId, property }) {
             <TextInput 
                 value={property.value.toString()} 
                 onChange={(e) => {
-                    updatePropertyValue(idList, e.target.value);
+                    updateCssTree(cssTree => {
+                        updatePropertyValue(cssTree, idList, e.target.value);
+                    });
                 }}
             />
         )
@@ -63,7 +66,9 @@ export default function PropertyElement({ classId, property }) {
                 value={Array.isArray(property.value) ? property.value : [property.value.toString()]} 
                 onChange={(newValues) => {
                     // Direct update with the array of values
-                    updatePropertyValue(idList, newValues);
+                    updateCssTree(cssTree => {
+                        updatePropertyValue(cssTree, idList, newValues);
+                    });
                 }}
                 options={propertySchema.options || []}
                 renderItem={(item, index) => {
@@ -82,9 +87,11 @@ export default function PropertyElement({ classId, property }) {
             <SelectInput 
                 value={property.value.toString()} 
                 onChange={(e) => {
-                    updatePropertyValue(idList, e.target.value);
+                    updateCssTree(cssTree => {
+                        updatePropertyValue(cssTree, idList, e.target.value);
+                    });
                 }}
-                options={propertySchema.options}
+                options={propertySchema.options || []}
             >
                 {
                     // If value is an array, render each item
@@ -104,7 +111,9 @@ export default function PropertyElement({ classId, property }) {
                 value={Array.isArray(property.value) ? property.value : [property.value.toString()]} 
                 onChange={(newValues) => {
                     // Direct update with the array of values
-                    updatePropertyValue(idList, newValues);
+                    updateCssTree(cssTree => {
+                        updatePropertyValue(cssTree, idList, newValues);
+                    });
                 }}
                 options={propertySchema.options || []}
                 renderItem={(item, index) => {
@@ -123,12 +132,14 @@ export default function PropertyElement({ classId, property }) {
     }
   };
 
-  let propertySchema = cssSchemas.properties[property.type]
+  let propertySchema = properties[property.type]
 
   // Handle property removal
   const handleRemoveProperty = (e) => {
     e.stopPropagation(); // Prevent triggering the accordion toggle
-    removeProperty(classId, property.id);
+    updateCssTree(cssTree => {
+        removeProperty(cssTree, classId, property.id);
+    });
   };
 
   return (
@@ -145,7 +156,7 @@ export default function PropertyElement({ classId, property }) {
         <div className="flex items-center">
           {!isHovering && (
             <span className="text-xxs text-zinc-500 mr-2">
-              {property && property.value ? formatProperty(property.value, property.type) : 'No value'}
+              {property && property.value ? formatStyleProperty(property.value, property.type) : 'No value'}
             </span>
           )}
           
@@ -157,7 +168,7 @@ export default function PropertyElement({ classId, property }) {
                 onClick={(e) => {
                   e.stopPropagation(); 
                   if (property && property.value) {
-                    navigator.clipboard.writeText(formatProperty(property.value, property.type));
+                    navigator.clipboard.writeText(formatStyleProperty(property.value, property.type));
                   }
                 }}
                 aria-label="Copy property value"

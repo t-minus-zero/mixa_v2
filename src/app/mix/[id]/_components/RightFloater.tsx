@@ -1,37 +1,36 @@
 'use client'
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import CssClassElement from './CssClassElement';
-import { useCssTree } from './CssTreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 import { v4 as uuidv4 } from 'uuid';
 import HtmlContent from './HtmlContent';
-import { SearchIcon, X } from 'lucide-react';
+import { SearchIcon, X, Plus } from 'lucide-react';
 import AccordionWrapper from './_fragments/AccordionWrapper';
-import { addClassToElement } from '../_utils/treeUtils';
+import { addClassToElement, addClass, findNodeById } from '../_utils/treeUtils';
 
 // Add Class Button Component
 const AddClassButton = ({ isForSelectedElement }) => {
-  const { addClass, selectClass } = useCssTree();
-  const { tree, updateTree, selection, setSelection } = useMixEditor();
+  const { tree, updateTree, selection, updateCssTree, cssTree, selectClass } = useMixEditor();
   
-  const handleAddClass = () => {
-    // Generate a new class name
-    const newClassName = uuidv4().substring(0, 6);
+  const handleAddClass = async () => {
+    // Generate a new class ID
+    const newClassId = uuidv4().substring(0, 6);
     
-    // Add the class to the CSS Tree
-    addClass(newClassName);
+    // First update the CSS tree with the new class
+    updateCssTree(cssTree => {
+      addClass(cssTree, newClassId);
+    });
     
     // If we're in selected element mode, also add the class to the selected element
     if (isForSelectedElement && selection) {
-      updateTree(tree => {
-        addClassToElement(tree, selection.id, newClassName);
-      });
-      
-      console.log(`Added class "${newClassName}" to selected element`);
-    } else {
-      // Just select the new class in the CSS tree
-      selectClass(newClassName);
-      console.log(`Created new class: "${newClassName}"`);
+      // Small timeout to ensure the CSS tree is updated first
+      setTimeout(() => {
+        updateTree(tree => {
+          addClassToElement(tree, selection.id, newClassId);
+        });
+        
+        console.log(`Added class with id "${newClassId}" to selected element`);
+      }, 0);
     }
   };
   
@@ -40,9 +39,7 @@ const AddClassButton = ({ isForSelectedElement }) => {
       onClick={handleAddClass}
       className="w-full border border-zinc-200 rounded-lg text-zinc-500 hover:bg-zinc-50/50 hover:text-blue-400 py-2 px-4 text-xs transition-colors flex items-center justify-center"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
+      <Plus size={16} />
       {isForSelectedElement ? 'Add Class to Selected Element' : 'Add New Class'}
     </button>
   );
@@ -57,13 +54,15 @@ interface ClassesFloaterProps {
   setSearchText: (text: string) => void;
 }
 
-const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, searchText, setSearchText }: ClassesFloaterProps) => {
+const ClassesFloater = () => {
+  const { selection, updateTree, setSelection, updateCssTree, cssTree, addClass, selectClass, tree } = useMixEditor();
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [showAllClasses, setShowAllClasses] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
   
   const toggleAccordion = () => {
-    // Only toggle if not in search mode
     if (!isSearchMode) {
       setIsAccordionOpen(!isAccordionOpen);
     }
@@ -73,7 +72,6 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
     e.stopPropagation();
     setIsSearchMode(!isSearchMode);
     if (!isSearchMode) {
-      // When entering search mode, ensure accordion is open
       setIsAccordionOpen(true);
       // Focus search input after rendering
       setTimeout(() => {
@@ -81,12 +79,12 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
       }, 0);
     } else {
       // When exiting search mode, clear search text
-      setSearchText('');
+      setSearchInput('');
     }
   };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
+    setSearchInput(e.target.value);
   };
   
   // Toggle between showing all classes or just selected element's classes
@@ -94,11 +92,36 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
     e.stopPropagation();
     setShowAllClasses(!showAllClasses);
   };
+
+  // Get classes to display based on current mode and selection
+  const classesToDisplay = (() => {
+    // Start with all classes from cssTree
+    let classes = [...cssTree.classes];
+    
+    // Filter by selection if not showing all classes
+    if (!showAllClasses && selection) {
+      // Get fresh reference to the current selection from the tree
+      // This ensures we always have the latest version of the selection
+      const currentNode = findNodeById(tree, selection.id);
+      const selectionClassIds = currentNode ? currentNode.classes : [];
+      classes = classes.filter(cssClass => selectionClassIds.includes(cssClass.id));
+    }
+    
+    // Then filter by search term if one exists
+    if (searchInput.trim()) {
+      const search = searchInput.toLowerCase().trim();
+      classes = classes.filter(cssClass => 
+        cssClass.name.toLowerCase().includes(search)
+      );
+    }
+    
+    return classes;
+  })();
   
   // Handle clicks outside of the search area to exit search mode
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (isSearchMode && searchText === '' && 
+      if (isSearchMode && searchInput === '' && 
           searchInputRef.current && 
           !searchInputRef.current.contains(e.target as Node)) {
         setIsSearchMode(false);
@@ -109,7 +132,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isSearchMode, searchText]);
+  }, [isSearchMode, searchInput]);
 
   return (
     <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-32'}`}>
@@ -126,7 +149,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
                 <input
                   ref={searchInputRef}
                   type="text"
-                  value={searchText}
+                  value={searchInput}
                   onChange={handleSearchChange}
                   className="w-full text-sm bg-transparent outline-none"
                   placeholder="Search..."
@@ -172,7 +195,7 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
           ) : (
             <ul className="w-full gap-2 flex flex-col p-2">
               {classesToDisplay.map((cls) => (
-                <CssClassElement key={cls.id} id={cls.id} className={cls.name} />
+                <CssClassElement key={cls.id} cls={cls} />
               ))}
             </ul>
           )}
@@ -187,59 +210,17 @@ const ClassesFloater = ({ classesToDisplay, showAllClasses, setShowAllClasses, s
 };
 
 const RightFloater = () => {
-  const { cssTree } = useCssTree();
   const { selection, updateTree, setSelection } = useMixEditor();
-  const { addClass } = useCssTree();
-  const { selectClass } = useCssTree();
-  
-  // State for toggling between all classes and selected element's classes
-  const [showAllClasses, setShowAllClasses] = useState(false);
-  // State for search input
-  const [searchInput, setSearchInput] = useState('');
-  
-  // Get classes to display based on current mode and selection
-  const classesToDisplay = useMemo(() => {
-    // First get the base list of classes based on view mode
-    let classesIds = [];
-    if (showAllClasses) {
-      classesIds = cssTree.classes.map((cssClass: { id: string }) => cssClass.id);
-    } else {
-      classesIds = selection && selection.classes ? selection.classes : [];
-    }
-
-    let classes = []; // [{id: string, name: string}]
-
-    classes = classesIds.map((id: string) => {
-      const cssClass = cssTree.classes.find((cls: { id: string, name: string }) => cls.id === id);
-      return cssClass ? { id: cssClass.id, name: cssClass.name } : { id, name: id };
-    });
-    
-    // Then filter by search term if one exists
-    if (searchInput.trim()) {
-      const search = searchInput.toLowerCase().trim();
-      classes = classes.filter((cls: { id: string, name: string }) => 
-        cls.name.toLowerCase().includes(search)
-      );
-    }
-    
-    return classes;
-  }, [cssTree.classes, selection, showAllClasses, searchInput]);
 
   return (
     <div 
       className="h-full w-full w-64 flex flex-col justify-between items-end group/tree">
       <div className="flex flex-col items-end max-h-[calc(100vh-6rem)] overflow-hidden">
-        <ClassesFloater 
-          classesToDisplay={classesToDisplay}
-          showAllClasses={showAllClasses}
-          setShowAllClasses={setShowAllClasses}
-          searchText={searchInput}
-          setSearchText={setSearchInput}
-        />
+        <ClassesFloater />
 
         
         {/* Add HtmlContent component when an element is selected */}
-        {selection && !showAllClasses && <HtmlContent />}
+        {selection && <HtmlContent />}
       </div>
     </div>
   );

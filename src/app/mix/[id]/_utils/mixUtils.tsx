@@ -43,7 +43,7 @@ export const updateMixData = (mixJsonContent: MixJsonContent): MixJsonContent =>
 
 // --- Conversion fo V1.0 to V2.0 ---
 
-const updateTreeClasses = (node: TreeNode, newClasses: CssClass[]) => {
+export const updateTreeClasses = (node: TreeNode, newClasses: CssClass[]) => {
     for (const className of node.classes) {
         const newClassName = newClasses.find(cls => cls.name === className)?.id;
         if (newClassName) {

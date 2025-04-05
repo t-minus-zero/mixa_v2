@@ -5,6 +5,8 @@ import { inputsSchema } from '../_schemas/inputs';
 import { NotificationType } from '../../../_contexts/NotificationsContext';
 import { TreeNode, DropPosition, CssTree, CssClass, CssValueNode, CssValue } from '../_types/types';
 import { v4 as uuidv4 } from 'uuid';
+import { number } from 'zod';
+
 
 
 // Result type for operations that might need to show notifications
@@ -55,6 +57,17 @@ export const updateNode = (tree: TreeNode, id: string, updateFn: (node: TreeNode
   findAndUpdate(tree);
 };
 
+export const updateAllNodes = (tree: TreeNode, updateFn: (node: TreeNode) => void): boolean => {
+  const processNode = (node: TreeNode) => {
+    updateFn(node);
+    if (node.childrens && node.childrens.length > 0) {
+      node.childrens.forEach(childNode => processNode(childNode));
+    }
+  };
+  processNode(tree);
+  return true;
+};
+
 // [HELPER] Checks if an element is a void element (cannot have children)
 export const isVoidElement = (tag: string): boolean => {
   // Use the imported HTML schemas to determine if an element is void
@@ -97,9 +110,9 @@ export const findParent = (tree: TreeNode, id: string): TreeNode | null => {
 };
 
 // [STYLE MANAGEMENT|STATE:UPDATES] Adds a class name to a node's classes array
-export const addClassToElement = (tree: TreeNode, id: string, className: string) => {
+export const addClassToElement = (tree: TreeNode, id: string, classId: string) => {
   updateNode(tree, id, node => {
-    node.classes.push(className);
+    node.classes.push(classId);
   });
 };
 
@@ -144,6 +157,14 @@ export const removeClassFromElement = (tree: TreeNode, id: string, className: st
   updateNode(tree, id, node => {
     if (node.classes) {
       node.classes = node.classes.filter(cls => cls !== className);
+    }
+  });
+};
+
+export const removeClassFromTreeElements = (tree: TreeNode, classId: string) => {
+  updateAllNodes(tree, node => {
+    if (node.classes) {
+      node.classes = node.classes.filter(cls => cls !== classId);
     }
   });
 };
@@ -481,7 +502,7 @@ export const generateStyleFromClass = (classObj: CssClass, classId: string) => {
   return cssString;
 };
 
-export const formatStyleProperty = (value: CssValue, type: string) => {
+export const formatStyleProperty = (value: CssValue, type: string): any => {
     // If value is primitive (string, number), return it directly
     if (typeof value !== 'object') {
       return value;
@@ -523,6 +544,96 @@ export const formatStyleProperty = (value: CssValue, type: string) => {
     return String(value);
   };
 
+
+
+export const isReference = (value: string) => {
+  return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
+};
+
+export const extractReferenceKey = (value: string) => {
+  if (!isReference(value)) return null;
+  return value.substring(1, value.length - 1);
+};
+
+// Find a CSS class by ID - returns index
+export const findClassById = (cssTree: CssTree, classId: string): number | undefined => {
+  // Only handling array-based structure
+  const index = cssTree.classes.findIndex(cssClass => cssClass.id === classId);
+  if (index !== -1) {
+    return index;
+  }
+  return undefined;
+};
+
+// Find a CSS class by name - returns index
+export const findClassByName = (cssTree: CssTree, className: string): number | undefined => {
+  // Only handling array-based structure
+  const index = cssTree.classes.findIndex(cssClass => cssClass.name === className);
+  if (index !== -1) {
+    return index;
+  }
+  return undefined;
+};
+
+// Class operations
+export const addClass = (cssTree: CssTree, classId: string, addToSelected = false) => {
+  // Check if class with this ID already exists
+  const existingClass = findClassById(cssTree, classId);
+  if (!existingClass) {
+    // Create new class with ID and add to array
+    const newClass: CssClass = {
+        id: classId,
+        name: uuidv4().substring(0, 6),
+        properties: [
+          {
+            id: uuidv4().substring(0, 4),
+            type: "display",
+            value: 'grid'
+          }
+        ]
+      };
+      cssTree.classes.push(newClass);
+      return {success: true, message: 'Class added successfully', value: newClass};
+    }
+  
+    return {success: true, message: 'Class added successfully', value: cssTree};
+};
+
+  // Rename a class by updating its name property
+export const renameClass = (cssTree: CssTree, id: string, oldClassName: string, newClassName: string) => {
+
+  if(!cssTree || !id || !oldClassName || !newClassName || oldClassName === newClassName) {
+    return {success: false, message: 'Invalid input'}; // Invalid input
+  }
+  const newClassNameExists = findClassByName(cssTree, newClassName);
+  if (newClassNameExists) {
+    return {success: false, message: 'New class name already exists'}; // New class name already exists
+  }
+  const currentClassIndex = findClassById(cssTree, id);
+  if (!currentClassIndex) {
+    return {success: false, message: 'Class to change name of not found'}; // Invalid input or class already exists
+  }
+  
+  cssTree.classes[currentClassIndex].name = newClassName;
+
+
+  return {success: true, message: 'Class renamed successfully', value: cssTree};
+};
+  
+export const removeClass = (cssTree: CssTree, id: string) => {
+  // Filter out the class with the given name
+  const index = findClassById(cssTree, id);
+  if (!index) {
+    return {success: false, message: 'Class to delete not found'}; // Invalid input or class already exists
+  }
+  
+  cssTree.classes.splice(index, 1);
+  
+  return {success: true, message: 'Class deleted successfully', value: cssTree};
+};
+
+// CSS Properties utility functions
+
 export const processValue = (value: any) => {
 
   if (Array.isArray(value)) {
@@ -558,63 +669,166 @@ export const processValue = (value: any) => {
   return value;
 };
 
+// Property operations
+export const addProperty = (cssTree: CssTree, classId: string, propertyType: string) => {
+    // Find the class by id
+    const classIndex = findClassById(cssTree, classId);
+    if (!classIndex) {
+      return {success: false, message: 'Class not found'}; // Invalid input or class already exists
+    }
+    const classObj = cssTree.classes[classIndex];
+    
+    if (classObj) {
+      // Get default value from schema
+      const propertySchema = cssSchema[propertyType as keyof typeof cssSchema];
+      const inputTypeSchema = propertySchema?.inputs;
+      let defaultValue = inputTypeSchema?.default || '';
+      
+      // Create new property with ID
+      const newProperty = {
+        id: uuidv4(),
+        type: propertyType,
+        value: processValue(defaultValue),
+      };
+      
+      classObj.properties.push(newProperty);
+      cssTree.classes[classIndex] = classObj;
+    }
 
-
-export const isReference = (value: string) => {
-  return typeof value === 'string' && value.startsWith('{') && value.endsWith('}');
+    return {success: true, message: 'Property added successfully', value: cssTree};
 };
 
-export const extractReferenceKey = (value: string) => {
-  if (!isReference(value)) return null;
-  return value.substring(1, value.length - 1);
-};
+export const removeProperty = (cssTree: CssTree, classId: string, propertyId: string) => {
 
-// [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by ID
-export const findClassById = (cssTree: CssTree, classId: string): CssClass | undefined => {
-  // Compatibility layer to handle both object and array structures
-  if (Array.isArray(cssTree.classes)) {
-    // New array-based structure
-    return cssTree.classes.find(cssClass => cssClass.id === classId);
-  } else {
-    // Legacy object-based structure
-    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
-    for (const key in classesObj) {
-      if (classesObj[key].id === classId) {
-        return classesObj[key];
+  const classIndex = findClassById(cssTree, classId);
+  if (!classIndex) {
+    return {success: false, message: 'Class not found'}; // Invalid input or class already exists
+  }
+  const classObj = cssTree.classes[classIndex];
+  
+  if (classObj) {
+    classObj.properties = classObj.properties.filter(
+      prop => prop.id !== propertyId
+    );
+    cssTree.classes[classIndex] = classObj;
+  }
+
+  return {success: true, message: 'Property removed successfully', value: cssTree};
+};
+  
+// Find property by ID in any class
+export const findPropertyById = (cssTree: CssTree, propertyId: string): { classIndex: number, propertyIndex: number } | undefined => {
+  for (let i = 0; i < cssTree.classes.length; i++) {
+    const classObj = cssTree.classes[i];
+    if (classObj && classObj.properties) {
+      for (let j = 0; j < classObj.properties.length; j++) {
+        const property = classObj.properties[j];
+        if (property && property.id === propertyId) {
+          return { classIndex: i, propertyIndex: j };
+        }
       }
     }
-    return undefined;
   }
+  return undefined;
 };
 
-// [CSS CLASS OPERATIONS|NO STATE] Find a CSS class by name
-export const findClassByName = (cssTree: CssTree, className: string): CssClass | undefined => {
-  // Compatibility layer to handle both object and array structures
-  if (Array.isArray(cssTree.classes)) {
-    // New array-based structure
-    return cssTree.classes.find(cssClass => cssClass.name === className);
-  } else {
-    // Legacy object-based structure
-    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
-    return className in classesObj ? classesObj[className] : undefined;
+export const updateProperty = (cssTree: CssTree, idList: string[], updates: Partial<CssValueNode>) => {
+  // Ensure we have a valid property ID from the list
+  const propertyId = idList?.[0];
+  if (!cssTree || !propertyId || !updates) {
+    return {success: false, message: 'Invalid input'};
   }
+
+  // Find the property and its indices using the dedicated function
+  const location = findPropertyById(cssTree, propertyId);
+  // Check if the property was found
+  if (location) {
+    const { classIndex, propertyIndex } = location;
+    
+    // Access the target property using the found indices
+    const targetClass = cssTree.classes[classIndex];
+    if (targetClass && targetClass.properties) {
+        const targetProperty = targetClass.properties[propertyIndex];
+        
+        // Ensure the property exists at the indices before updating
+        if (targetProperty) {
+          Object.assign(targetProperty, updates);
+          return {success: true, message: 'Property updated successfully', value: cssTree};
+        }
+    }
+  }
+  // Return failure if the property was not found or indices were invalid
+  return {success: false, message: 'Property not found or invalid state'};
 };
 
-// [CSS CLASS OPERATIONS|NO STATE] Get class ID by name
-export const getClassIdByName = (cssTree: CssTree, className: string): string | undefined => {
-  // Compatibility layer to handle both object and array structures
-  if (Array.isArray(cssTree.classes)) {
-    // New array-based structure
-    const cssClass = cssTree.classes.find(cssClass => cssClass.name === className);
-    return cssClass?.id;
-  } else {
-    // Legacy object-based structure
-    const classesObj = cssTree.classes as unknown as Record<string, CssClass>;
-    return classesObj[className]?.id;
+export const updatePropertyValue = (cssTree: CssTree, idList: string[], value: any) => {
+
+  const propertyId = idList?.[0];
+  if (!cssTree || !propertyId || !value) {
+    return {success: false, message: 'Invalid input'};
   }
+  const location = findPropertyById(cssTree, propertyId);
+  if (location) {
+    const { classIndex, propertyIndex } = location;
+    const prop = cssTree.classes?.[classIndex].properties[propertyIndex];
+    return updateNestedProperty(prop, idList, 1, value);
+  }
+  return {success: false, message: 'Property not found or invalid state'};
+
+};
+
+// Helper function to update a nested property by following an ID path
+export const updateNestedProperty = (prop: CssValueNode, idList: string[], index: number, value: any) => {
+
+  if (!prop) {
+    console.log('Property not found or invalid state');
+    return {success: false, message: 'Property not found or invalid state'};
+  }
+// If we've reached the target property, update its value
+    if (index >= idList.length) {
+      // Check if value is a reference before setting it
+      prop.value = processValue(value);
+      return {success: true, message: 'Property value updated successfully', value: prop};
+    }
+    
+    // Find the nested property with the next ID
+    const nextId = idList[index];
+    if (Array.isArray(prop.value)) {
+      const itemIndex = prop.value.findIndex(item => item.id === nextId);
+      if (itemIndex !== -1) {
+        return updateNestedProperty(prop.value[itemIndex], idList, index + 1, value);
+      }
+    } else if (prop.value && typeof prop.value === 'object') {
+      if (prop.value.id === nextId) {
+        return updateNestedProperty(prop.value, idList, index + 1, value);
+      }
+    } else if (index === idList.length - 1) {
+      // Direct value update (non-object)
+      prop.value = processValue(value);
+    }
+
+    return {success: true, message: 'Property value updated successfully', value: prop};
 };
 
 
+// --- Property Utils ---
+export const getLabelsOfPropertyOptions = (propertyOptions: string[]) => {
 
-  
-  
+  if (!propertyOptions || propertyOptions.length === 0) {
+    return [];
+  }
+
+  let labels: string[] = [];
+
+  for (const option of propertyOptions) {
+    if (isReference(option)) {
+      const optionKey = extractReferenceKey(option);
+      const label = inputsSchema[optionKey]?.label;
+      labels.push(label || optionKey);
+    } else {
+      labels.push(option);
+    }
+  }
+
+  return labels;
+}

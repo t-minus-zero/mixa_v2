@@ -1,7 +1,6 @@
 "use client"
 
 import React from 'react';
-import { CssTreeProvider } from './_components/CssTreeContext';
 import { MixEditorProvider } from './_contexts/MixEditorContext';
 import LeftFloater from './_components/LeftFloater';
 import RightFloater from './_components/RightFloater';
@@ -42,11 +41,9 @@ export default function MixLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <MixEditorProvider>
-      <CssTreeProvider>
-          <div className="relative w-screen h-screen overflow-hidden">
-            {mainContent}
-          </div>
-      </CssTreeProvider>
+      <div className="relative w-screen h-screen overflow-hidden">
+        {mainContent}
+      </div>
     </MixEditorProvider>
   );
 }

@@ -5,7 +5,9 @@ import { produce } from 'immer';
 import { TreeNode } from '../_types/types';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
-import {findParent} from '../_utils/treeUtils';
+import { cssSchema } from '../_schemas/css';
+import { inputsSchema } from '../_schemas/inputs';
+import {findParent, defaultCssTree} from '../_utils/treeUtils';
 
 // Define the default tree node
 const defaultTreeNode: TreeNode = {
@@ -20,27 +22,11 @@ const defaultTreeNode: TreeNode = {
   childrens: []
 };
 
-// Define the context type
-interface MixEditorContextType {
-  tree: TreeNode;
-  updateTree: (updateFn: (tree: TreeNode) => void) => void;
-  selection: TreeNode;
-  selectionParent: TreeNode;
-  draggedItem: any;
-  dropTarget: any;
-  setSelection: (selection: TreeNode) => void;
-  setSelectionParent: (parent: TreeNode) => void;
-  setDraggedItem: (item: any) => void;
-  setDropTarget: (target: any) => void;
-  htmlSchemas: {
-    elements: any;
-    attributes: any;
-  };
-}
-
 export const htmlSchemas = {
   elements: htmlTagsSchema,
-  attributes: htmlAttributesSchema
+  attributes: htmlAttributesSchema,
+  properties: cssSchema,
+  inputTypes: inputsSchema
 }
 
 // Create the context
@@ -49,8 +35,15 @@ const MixEditorContext = createContext<MixEditorContextType | null>(null);
 // Create the provider component
 export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { addNotification } = useNotifications();
+
   const [tree, setTree] = useState<TreeNode>(defaultTreeNode);
+  const [cssTree, setCssTree] = useState(defaultCssTree);
+
+
   const [selection, setSelection] = useState<TreeNode>(defaultTreeNode);
+  const [selectedClass, setSelectedClass] = useState('default');
+  const [selectedProperty, setSelectedProperty] = useState<CssValueNode | null>(null);
+
   const [selectionParent, setSelectionParent] = useState<TreeNode>(defaultTreeNode);
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [dropTarget, setDropTarget] = useState<any>(null);
@@ -58,8 +51,19 @@ export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Core function to update tree state using Immer
   const updateTree = (updateFn: (tree: TreeNode) => void) => {
     setTree(prevTree => produce(prevTree, updateFn));
+    return true;
   };
-  
+
+  const updateCssTree = (updateFn: (cssTree: CssTree) => void) => {
+    setCssTree(prevTree => produce(prevTree, updateFn));
+    return true;
+  };
+
+  const selectClass = (className: string) => {
+    setSelectedClass(className || '');
+    setSelectedProperty(null); // Clear property selection when changing class
+  };
+
   useEffect(() => {
     if (selection.id !== tree.id) {
       const parent = findParent(tree, selection.id);
@@ -73,12 +77,19 @@ export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const contextValue: MixEditorContextType = {
     tree,
     updateTree,
+    cssTree,
+    updateCssTree,
     selection,
     selectionParent,
     draggedItem,
     dropTarget,
     setSelection,
     setSelectionParent,
+    selectClass,
+    selectedClass,
+    selectedProperty,
+    setSelectedProperty,
+    
     setDraggedItem,
     setDropTarget,
     htmlSchemas

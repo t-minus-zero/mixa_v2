@@ -2,272 +2,380 @@
 export const htmlAttributesSchema = {
   // Global attributes
   id: {
-    name: 'id',
+    label: 'ID',
     description: 'Unique identifier for an element',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'id="{value}"',
+    default: ''
   },
   class: {
-    name: 'class',
+    label: 'Class',
     description: 'CSS class name(s)',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'class="{value}"',
+    default: ''
   },
   title: {
-    name: 'title',
+    label: 'Title',
     description: 'Advisory information',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'title="{value}"',
+    default: ''
   },
   style: {
-    name: 'style',
+    label: 'Style',
     description: 'Inline CSS styles',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'style="{value}"',
+    default: ''
   },
   tabindex: {
-    name: 'tabindex',
+    label: 'Tab Index',
     description: 'Tab order of an element',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'tabindex="{value}"',
+    default: 0
   },
   hidden: {
-    name: 'hidden',
+    label: 'Hidden',
     description: 'Hides an element',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['hidden', ''],
+    format: '{value}',
+    default: false
   },
   
   // Link attributes
   href: {
-    name: 'href',
+    label: 'Href',
     description: 'URL/address of the link',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'href="{value}"',
+    default: '#'
   },
   target: {
-    name: 'target',
+    label: 'Target',
     description: 'Where to open the link',
-    inputType: 'select',
-    options: ['_self', '_blank', '_parent', '_top']
+    inputType: 'selection',
+    options: ['_self', '_blank', '_parent', '_top'],
+    format: 'target="{value}"',
+    default: '_self'
   },
   rel: {
-    name: 'rel',
+    label: 'Rel',
     description: 'Relationship of linked document',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'rel="{value}"',
+    default: ''
   },
   download: {
-    name: 'download',
+    label: 'Download',
     description: 'Download link destination',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'download="{value}"',
+    default: ''
   },
   
   // Form attributes
   action: {
-    name: 'action',
+    label: 'Action',
     description: 'Where to send form data',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'action="{value}"',
+    default: ''
   },
   method: {
-    name: 'method',
+    label: 'Method',
     description: 'HTTP method to use',
-    inputType: 'select',
-    options: ['get', 'post']
+    inputType: 'selection',
+    options: ['get', 'post'],
+    format: 'method="{value}"',
+    default: 'get'
   },
   enctype: {
-    name: 'enctype',
+    label: 'Encoding Type',
     description: 'How form data is encoded',
-    inputType: 'select',
-    options: ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain']
+    inputType: 'selection',
+    options: ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain'],
+    format: 'enctype="{value}"',
+    default: 'application/x-www-form-urlencoded'
   },
   name: {
-    name: 'name',
+    label: 'Name',
     description: 'Name of the form element',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'name="{value}"',
+    default: ''
   },
   value: {
-    name: 'value',
+    label: 'Value',
     description: 'Value of the form element',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'value="{value}"',
+    default: ''
   },
   placeholder: {
-    name: 'placeholder',
+    label: 'Placeholder',
     description: 'Hint text for input',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'placeholder="{value}"',
+    default: ''
   },
   required: {
-    name: 'required',
+    label: 'Required',
     description: 'Field is required',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['required', ''],
+    format: '{value}',
+    default: false
   },
   disabled: {
-    name: 'disabled',
+    label: 'Disabled',
     description: 'Element is disabled',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['disabled', ''],
+    format: '{value}',
+    default: false
   },
   readonly: {
-    name: 'readonly',
+    label: 'Read Only',
     description: 'Field is read-only',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['readonly', ''],
+    format: '{value}',
+    default: false
+  },
+  autocomplete: {
+    label: 'Autocomplete',
+    description: 'Form autocomplete setting',
+    inputType: 'boolean',
+    options: ['on', 'off'],
+    format: 'autocomplete="{value}"',
+    default: 'off'
+  },
+  autofocus: {
+    label: 'Autofocus',
+    description: 'Element should get focus',
+    inputType: 'boolean',
+    options: ['autofocus', ''],
+    format: '{value}',
+    default: false
   },
   type: {
-    name: 'type',
+    label: 'Type',
     description: 'Type of input control',
-    inputType: 'select',
-    options: ['text', 'password', 'email', 'number', 'checkbox', 'radio', 'submit', 'button', 'file', 'date', 'time', 'color', 'range', 'hidden', 'search', 'tel', 'url', 'month', 'week']
+    inputType: 'selection',
+    options: ['text', 'password', 'email', 'number', 'checkbox', 'radio', 'submit', 'button', 'file', 'date', 'time', 'color', 'range', 'hidden', 'search', 'tel', 'url', 'month', 'week'],
+    format: 'type="{value}"',
+    default: 'text'
   },
   
   // Image and media attributes
   src: {
-    name: 'src',
+    label: 'Source',
     description: 'Source URL for media',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'src="{value}"',
+    default: ''
   },
   alt: {
-    name: 'alt',
+    label: 'Alt Text',
     description: 'Alternative text',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'alt="{value}"',
+    default: ''
   },
   width: {
-    name: 'width',
+    label: 'Width',
     description: 'Width of the element',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'width="{value}"',
+    default: 0
   },
   height: {
-    name: 'height',
+    label: 'Height',
     description: 'Height of the element',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'height="{value}"',
+    default: 0
   },
   loading: {
-    name: 'loading',
+    label: 'Loading',
     description: 'How the image should be loaded',
-    inputType: 'select',
-    options: ['eager', 'lazy']
+    inputType: 'selection',
+    options: ['eager', 'lazy'],
+    format: 'loading="{value}"',
+    default: 'eager'
   },
   controls: {
-    name: 'controls',
+    label: 'Controls',
     description: 'Show media controls',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['controls', ''],
+    format: '{value}',
+    default: false
   },
   autoplay: {
-    name: 'autoplay',
+    label: 'Autoplay',
     description: 'Automatically start playback',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['autoplay', ''],
+    format: '{value}',
+    default: false
   },
   loop: {
-    name: 'loop',
+    label: 'Loop',
     description: 'Loop the media',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['loop', ''],
+    format: '{value}',
+    default: false
   },
   muted: {
-    name: 'muted',
+    label: 'Muted',
     description: 'Mute the media',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['muted', ''],
+    format: '{value}',
+    default: false
   },
   poster: {
-    name: 'poster',
+    label: 'Poster',
     description: 'Thumbnail image URL',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'poster="{value}"',
+    default: ''
   },
   
   // Table attributes
   colspan: {
-    name: 'colspan',
+    label: 'Column Span',
     description: 'Number of columns to span',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'colspan="{value}"',
+    default: 1
   },
   rowspan: {
-    name: 'rowspan',
+    label: 'Row Span',
     description: 'Number of rows to span',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'rowspan="{value}"',
+    default: 1
   },
   scope: {
-    name: 'scope',
+    label: 'Scope',
     description: 'Scope of header cell',
-    inputType: 'select',
-    options: ['row', 'col', 'rowgroup', 'colgroup']
+    inputType: 'selection',
+    options: ['row', 'col', 'rowgroup', 'colgroup'],
+    format: 'scope="{value}"',
+    default: 'col'
   },
   
   // List attributes
   start: {
-    name: 'start',
+    label: 'Start',
     description: 'Starting number for list',
-    inputType: 'number'
+    inputType: 'number',
+    format: 'start="{value}"',
+    default: 1
   },
   reversed: {
-    name: 'reversed',
+    label: 'Reversed',
     description: 'Reverse the order of list',
-    inputType: 'boolean'
+    inputType: 'boolean',
+    options: ['reversed', ''],
+    format: '{value}',
+    default: false
   },
   
-  // Other attributes
-  autocomplete: {
-    name: 'autocomplete',
-    description: 'Form autocomplete setting',
-    inputType: 'select',
-    options: ['on', 'off']
-  },
-  autofocus: {
-    name: 'autofocus',
-    description: 'Element should get focus',
-    inputType: 'boolean'
-  },
+  // Other attributes - removed duplicates of autocomplete and autofocus
   form: {
-    name: 'form',
+    label: 'Form',
     description: 'Form the element belongs to',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'form="{value}"',
+    default: ''
   },
   formaction: {
-    name: 'formaction',
+    label: 'Form Action',
     description: 'URL for form submission',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'formaction="{value}"',
+    default: ''
   },
   formmethod: {
-    name: 'formmethod',
+    label: 'Form Method',
     description: 'HTTP method for form',
-    inputType: 'select',
-    options: ['get', 'post']
+    inputType: 'selection',
+    options: ['get', 'post'],
+    format: 'formmethod="{value}"',
+    default: 'get'
   },
   
   // ARIA attributes (grouped)
   'aria': {
-    name: 'aria-*',
+    label: 'ARIA',
     description: 'ARIA attribute (accessibility)',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'aria-*="{value}"',
+    default: ''
   },
   'role': {
-    name: 'role',
+    label: 'Role',
     description: 'ARIA role',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'role="{value}"',
+    default: ''
   },
   'data': {
-    name: 'data-*',
+    label: 'Data',
     description: 'Custom data attribute',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'data-*="{value}"',
+    default: ''
   },
   
   // SVG specific attributes
   'viewBox': {
-    name: 'viewBox',
+    label: 'View Box',
     description: 'SVG viewport coordinates',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'viewBox="{value}"',
+    default: '0 0 100 100'
   },
   'xmlns': {
-    name: 'xmlns',
+    label: 'XML Namespace',
     description: 'XML namespace',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'xmlns="{value}"',
+    default: 'http://www.w3.org/2000/svg'
   },
   'd': {
-    name: 'd',
+    label: 'Path Data',
     description: 'SVG path data',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'd="{value}"',
+    default: ''
   },
   'fill': {
-    name: 'fill',
+    label: 'Fill',
     description: 'Fill color',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'fill="{value}"',
+    default: 'none'
   },
   'stroke': {
-    name: 'stroke',
+    label: 'Stroke',
     description: 'Stroke color',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'stroke="{value}"',
+    default: 'black'
   },
   'stroke-width': {
-    name: 'stroke-width',
+    label: 'Stroke Width',
     description: 'Width of the stroke',
-    inputType: 'string'
+    inputType: 'string',
+    format: 'stroke-width="{value}"',
+    default: '1'
   }
 };

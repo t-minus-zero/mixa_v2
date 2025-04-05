@@ -1,13 +1,12 @@
  "use client"
 
 import React, { useState, useEffect } from 'react';
-import { useCssTree } from './CssTreeContext';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import PropertyElement from './PropertyElement';
 import PropertySelector from './PropertySelector';
 import InputClickAndText from './_fragments/InputClickAndText';
 import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon } from 'lucide-react';
-import { renameClassesInTree, removeClassFromElement } from '../_utils/treeUtils';
+import { renameClassesInTree, removeClassFromTreeElements, removeClass, renameClass, addProperty } from '../_utils/treeUtils';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // component for a class in the css tree
@@ -62,65 +61,48 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
   )
 }
 
-export default function CssClassElement({ id, className }: { id: string, className: string }) {
-  const { 
-    cssTree, 
-    addClass, 
-    removeClass, 
-    selectClass, 
-    addProperty,
-    generateCss,
-    cssSchemas, //inputTypes and properties schemas
-    renameClass
-  } = useCssTree();
+export default function CssClassElement({ cls }) {
   
   const { 
-    selection
+    tree,
+    updateTree,
+    selection,
+    cssTree,
+    updateCssTree
   } = useMixEditor();
-
-  const {tree, updateTree} = useMixEditor();
   
   const [isOpen, setIsOpen] = useState(false);
   
-  // Get the class object from the context by finding it in the array by ID
-  const classObj = cssTree.classes.find((cls: { id: string }) => cls.id === id);
-  
   // Handle updating class name (remember to refractor when we switch to IDs for classes instead of names)
-  const handleUpdateClassName = (newClassName) => {
-    if (newClassName !== className && newClassName.trim()) {
-      // Rename the class in CssTreeContext
-      const success = renameClass(className, newClassName);
-      
-      if (success) {
-        // Update all references to this class name in the tree
-        updateTree(tree => {
-          renameClassesInTree(tree, className, newClassName);
-        });
-        console.log(`Renamed class from ${className} to ${newClassName}`);
-      } else {
-        console.log(`Failed to rename class from ${className} to ${newClassName}`);
-      }
+  const handleUpdateClassName = (newClassName: string) => {
+    if (newClassName !== cls.name && newClassName.trim()) {
+
+      updateCssTree(cssTree => {
+        renameClass(cssTree, cls.id, cls.name, newClassName);
+      });
     }
   };
   
   // Handle deleting class
   const handleDeleteClass = () => {
-    // Remove class from CssTree
-    removeClass(className);
     
-    // If there's a selected element, also remove the class from it
-    if (selection && selection.classes && selection.classes.includes(className)) {
-      // Update the tree to remove the class from the selected element
-      updateTree(tree => {
-        removeClassFromElement(tree, selection.id, className);
-      });
-    }
+    // Remove class from all tree elements
+    updateTree(tree => {
+      removeClassFromTreeElements(tree, cls.id);
+    });
+
+    // Remove class from CssTree
+    updateCssTree(cssTree => {
+      removeClass(cssTree, cls.id);
+    });
   };
   
   // Handle property selection from PropertySelector
   const handleAddProperty = (propertyType) => {
     // Add the property to the class
-    addProperty(className, propertyType);
+    updateCssTree(cssTree => {
+      addProperty(cssTree, cls.id, propertyType);
+    });
     
     // Expand the accordion to show the newly added property
     if (!isOpen) {
@@ -128,10 +110,10 @@ export default function CssClassElement({ id, className }: { id: string, classNa
     }
   };
   
-  if (!classObj) {
+  if (!cls) {
     return (
       <div className="p-2 text-sm text-gray-500">
-        No class found for {className}
+        No class found for {cls.name}
       </div>
     );
   }
@@ -142,7 +124,7 @@ export default function CssClassElement({ id, className }: { id: string, classNa
         className={`relative flex flex-start group ${isOpen ? 'bg-blue-100/50' : 'bg-transparent'}`}
       >
         <TitleWithButtons 
-          className={className}
+          className={cls.name}
           onToggle={() => setIsOpen(!isOpen)}
           openStatus={isOpen}
           onDelete={handleDeleteClass}
@@ -152,10 +134,10 @@ export default function CssClassElement({ id, className }: { id: string, classNa
       <AccordionWrapper openStatus={isOpen}>
         <div className="border-t border-zinc-200">
           {/* Properties list */}
-          {classObj.properties && Array.isArray(classObj.properties) && classObj.properties.map((property) => (
+          {cls.properties && Array.isArray(cls.properties) && cls.properties.map((property) => (
             <div key={property.id} className="">
               <PropertyElement
-                classId={className}
+                classId={cls.id}
                 property={property}
               />
             </div>
@@ -163,7 +145,7 @@ export default function CssClassElement({ id, className }: { id: string, classNa
           
           {/* Property selector */}
           <PropertySelector
-            className={className}
+            className={cls.name}
             onAddProperty={handleAddProperty}
           />
         </div>

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { api } from "MixaDev/trpc/react";
 import { useMixEditor } from './_contexts/MixEditorContext';
-import { useCssTree } from './_components/CssTreeContext';
 import HTMLVisualizer from './_components/ComponentPreview';
 import MixFloaterMenu from './_components/MixFloaterMenu';
 import ResizableContainer from '../../_components/Resize/ResizableContainer';
@@ -52,8 +51,7 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
 
   const [mixTitle, setMixTitle] = useState('');
   const [mixData, setMixData] = useState<MixData | null>(null);
-  const { updateTree: updateMixTree } = useMixEditor();
-  const { cssTree, updateTree: updateCssTree } = useCssTree();
+  const { updateTree, cssTree, updateCssTree } = useMixEditor();
   const { addNotification } = useNotifications();
   
   const { data: mix, error, isLoading } = api.mixRouter.getMixById.useQuery({
@@ -74,7 +72,7 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
       const mixData = loadMixData(jsonContent);
       
       // Update the version in the state with the actual version used
-      updateMixTree(() => mixData.treeData);
+      updateTree(() => mixData.treeData);
       updateCssTree(() => mixData.cssData);
 
       addNotification({

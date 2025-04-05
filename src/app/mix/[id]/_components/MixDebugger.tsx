@@ -1,8 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { useCssTree } from './CssTreeContext';
-import { useTree } from './TreeContext';
 import { useMixEditor } from '../_contexts/MixEditorContext';
+import {generateStyleFromTree} from '../_utils/treeUtils';
 
 // Helper function to convert tree to HTML string (adapted from ComponentPreview.tsx)
 function cssToObject(cssString) {
@@ -85,7 +84,7 @@ function nodeToHtmlString(node, rootCss, indentLevel = 0) {
 
 // Component to display the raw CSS tree state
 const CssTreeDebugPage = () => {
-  const { cssTree } = useCssTree();
+  const { cssTree } = useMixEditor();
   
   return (
     <pre className="whitespace-pre-wrap break-all">
@@ -124,8 +123,8 @@ const GeneratedHtmlDebugPage = () => {
 
 // Component to display the generated CSS
 const CssDebugPage = () => {
-  const { generateCss } = useCssTree();
-  const generatedCss = generateCss();
+  const { cssTree } = useMixEditor();
+  const generatedCss = generateStyleFromTree(cssTree);
   
   return (
     <div>
