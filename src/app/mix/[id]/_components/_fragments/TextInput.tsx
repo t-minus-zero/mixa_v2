@@ -31,8 +31,6 @@ export default function TextInput({
       onClick={handleClick}
       placeholder={placeholder}
       className="
-        text-xs
-        text-gray-500
         bg-transparent 
         outline-none 
         w-32

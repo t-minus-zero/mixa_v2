@@ -97,8 +97,8 @@ export default function MixFloaterMenu() {
 
   return (
     <div className="absolute top-2 right-2 z-20">
-      <div className="flex items-center gap-2 bg-zinc-50/75 backdrop-blur-md px-3 py-2 rounded-lg shadow-sm border border-zinc-200">
-        <div className="flex items-center pr-2 border-r border-zinc-200">
+      <div className="flex items-center gap-2 bg-white/75 backdrop-blur-md px-3 py-2 rounded-lg">
+        <div className="flex items-center pr-2 text-xs text-gray-900">
           <TextInput
             value={name}
             onChange={handleNameChange}
@@ -113,26 +113,26 @@ export default function MixFloaterMenu() {
             className={`p-1.5 ${
               isSaving 
                 ? 'text-zinc-400 bg-zinc-100' 
-                : 'text-zinc-500 hover:text-green-500 hover:bg-green-50'
+                : 'text-zinc-900 hover:text-green-500 hover:bg-green-50'
             } rounded-md transition-colors`}
             title="Save Mix"
           >
-            <Save size={16} className={isSaving ? 'animate-pulse' : ''} />
+            <Save size={16} strokeWidth={1.5} className={isSaving ? 'animate-pulse' : ''} />
           </button>
           
           <button
             onClick={() => setCodePageOpen(!codePageOpen)}
-            className={`p-1.5 ${codePageOpen ? 'text-blue-600 bg-blue-50' : 'text-zinc-500 hover:text-blue-600 hover:bg-blue-50'} rounded-md transition-colors`}
+            className={`p-1.5 ${codePageOpen ? 'text-blue-600 bg-blue-50' : 'text-zinc-900 hover:text-blue-600 hover:bg-blue-50'} rounded-md transition-colors`}
             title={codePageOpen ? "Hide Code" : "View Code"}
           >
-            <Code size={16} />
+            <Code size={16} strokeWidth={1.5} />
           </button>
           
           <button
-            className="p-1.5 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            className="p-1.5 text-zinc-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
             title="Settings"
           >
-            <Bolt size={16} />
+            <Bolt size={16} strokeWidth={1.5} />
           </button>
           
           {/* AI Chat button removed as we no longer need it */}

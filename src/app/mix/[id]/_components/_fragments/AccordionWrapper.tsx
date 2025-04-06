@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 
-export default function AccordionWrapper({ children, openStatus }: { children: React.ReactNode, openStatus: boolean }) {
+export default function AccordionWrapper({ children, openStatus, fading=false }: { children: React.ReactNode, openStatus: boolean, fading?: boolean }) {
     const [isOpen, setIsOpen] = useState(openStatus);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function AccordionWrapper({ children, openStatus }: { children: R
             }}
           className="overflow-hidden">
           {children}
-        </div>
+    </div>
     </div>
   );
 }

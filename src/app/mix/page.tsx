@@ -18,7 +18,7 @@ export default function NewMixPage() {
           tag: 'div',
           title: 'New Mix',
           classes: ["NewClass"],
-          style: [{"NewClass": "width: 100%; height: 100%; background-color: rgba(200,200,200,1); border-radius: 24px; display: flex; justify-content: center; align-items: center;"}],
+          style: [{"NewClass": "width: 100%; height: 100%; border-radius: 24px; display: flex; justify-content: center; align-items: center;"}],
           content: 'New Content',
           childrens: []
         };

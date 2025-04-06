@@ -117,7 +117,7 @@ export default function MixModal({ params: { id: mixId } }: { params: { id: stri
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full bg-white flex items-center justify-center overflow-hidden">
       {/* Title Menu with Mix Floater controls - now using context directly */}
       <MixFloaterMenu />
       

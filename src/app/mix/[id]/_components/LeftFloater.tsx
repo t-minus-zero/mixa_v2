@@ -2,11 +2,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import HtmlElement from './HtmlElement';
 import AccordionWrapper from './_fragments/AccordionWrapper';
+import ResizableSection from './_fragments/ResizableSection';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 import { TreeNode } from '../_types/types';
 import { SearchIcon, X } from 'lucide-react';
-
-
 
 const renderTree = (node: TreeNode, level = 0) => (
   <HtmlElement key={node.id} node={node} level={level}>
@@ -72,17 +71,24 @@ const LeftFloater = () => {
   };
   
   return (
-    <div className="h-full w-full min-w-64 py-4 flex flex-col justify-between group/tree">
 
-      {/* Layers section */}
-      <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-r-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-y-scroll transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-32'}`}>
-       
-        {/* Header with title or search */}
-        <div 
-          className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer border-b border-zinc-200" 
-          onClick={toggleAccordion}
-        >
-          <div className='flex flex-row items-center flex-grow px-2'>
+    <div className="relative flex flex-col bg-white/75 rounded-r-xl overflow-hidden backdrop-blur-md max-h-[100vh] w-full transition-all duration-300">
+      
+      <ResizableSection
+        data-main-layer
+        defaultWidth={isAccordionOpen ? 256 : 128}
+        minWidth={128}
+        maxWidth={512}
+        className="h-full flex flex-col justify-between group/tree relative"
+      >
+        {/* Layers section */}
+        <div className="relative w-full h-full transition-all duration-300">
+          {/* Header with title or search */}
+          <div 
+            className="w-full p-1 flex flex-row items-center justify-start transition-colors cursor-pointer border-zinc-200" 
+            onClick={toggleAccordion}
+          >
+            <div className='flex flex-row items-center flex-grow px-2'>
             {isSearchMode ? (
               // Search input
               <div className='cursor-text w-full' onClick={(e) => e.stopPropagation()}>
@@ -102,27 +108,26 @@ const LeftFloater = () => {
               </div>
             )}
           </div>
-          <div className='flex flex-row items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity'>
-            {/* Search/Close button */}
-            <button 
-              className={`w-6 h-6 flex items-center justify-center ${isSearchMode ? 'text-zinc-400 hover:text-red-500' : 'text-zinc-400 hover:text-zinc-600'}`}
-              onClick={toggleSearch}
-            >
-              {isSearchMode ? <X size={16} /> : <SearchIcon size={16} />}
-            </button>
+            <div data-main-layer-hover className='flex flex-row items-center justify-end opacity-0 transition-opacity'>
+              {/* Search/Close button */}
+              <button 
+                className={`w-6 h-6 flex items-center justify-center ${isSearchMode ? 'text-zinc-400 hover:text-red-500' : 'text-zinc-900 hover:text-zinc-600'}`}
+                onClick={toggleSearch}
+              >
+                {isSearchMode ? <X size={16} strokeWidth={1.5} /> : <SearchIcon size={16} strokeWidth={1.5} />}
+              </button>
+            </div>
+        </div>
+
+          <div className="relative h-full max-h-[100vh] overflow-y-scroll">
+            <AccordionWrapper openStatus={isSearchMode || isAccordionOpen}>
+              <ul className="p-2">
+                {renderTree(tree)}
+              </ul>
+            </AccordionWrapper>
           </div>
         </div>
-
-        <div className="h-full overflow-y-scroll max-h-[75vh]">
-          <AccordionWrapper openStatus={isSearchMode || isAccordionOpen}>
-            <ul className="p-2">
-              {renderTree(tree)}
-            </ul>
-          </AccordionWrapper>
-        </div>
-      </div>
-      
-
+      </ResizableSection>
     </div>
   );
 }
