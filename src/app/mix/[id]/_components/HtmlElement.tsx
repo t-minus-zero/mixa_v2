@@ -135,7 +135,7 @@ function HtmlElement({ node, level = 0, parentNode, children }: { node: TreeNode
         ${selectionParent && selectionParent.id === node.id ? 'bg-gray-100/80' : ''}
         ${selection.id === node.id ? 'bg-gray-900 text-white' : 'text-gray-900 border-transparent'}
         ${getDropIndicatorStyle()}
-        relative rounded-lg
+        relative rounded-3xl
       `}
       style={{ marginLeft: level / 5 + "rem" }}
       draggable="true"
@@ -151,12 +151,12 @@ function HtmlElement({ node, level = 0, parentNode, children }: { node: TreeNode
         className={`
           ${selection.id === node.id ? '' : ''}
           ${draggedItem?.id === node.id ? 'opacity-50' : ''}
-          tracking-tight text-xs relative group w-full h-full flex flex-row items-center rounded-lg flex-start border border-transparent
+          tracking-tight py-0.5 px-1 text-xs relative group w-full h-full flex flex-row items-center rounded-3xl flex-start border border-transparent
         `}
       >
         <button
           onClick={(e) => {e.preventDefault; setIsOpen(!isOpen)}}
-          className={"flex items-center justify-center w-6 hover:bg-zinc-100/50 h-6 rounded-lg"}
+          className={"flex items-center justify-center w-6 hover:bg-zinc-100/50 h-6 rounded-3xl"}
         > 
           {node.childrens && node.childrens.length > 0 &&
             (isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />)
@@ -164,10 +164,10 @@ function HtmlElement({ node, level = 0, parentNode, children }: { node: TreeNode
         </button>
         <HtmlTagSelector nodeId={node.id} currentTag={node.tag || 'div'} />
         <InputClickAndText id={node.id} initValue={node.title} updateValue={changeTitle} />
-        <div className="absolute right-0 flex items-center">
+        <div className="absolute right-1 flex items-center">
           {/* Copy Button */}
           <button
-            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/50 text-xs"
+            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-3xl hover:bg-white/50 text-xs"
           >
             <Copy size={12} />
           </button>
@@ -175,13 +175,13 @@ function HtmlElement({ node, level = 0, parentNode, children }: { node: TreeNode
           {/* Add Button - + */}
           <button
             onClick={(e) => { e.preventDefault(); handleAddElement(); }}
-            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/50"
+            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-3xl hover:bg-white/50"
           >
             <Plus size={12} />
           </button>
         </div>
       </div>
-      <div className={`${selection.id === node.id ? 'bg-white/90 rounded-lg' : ''}`}>
+      <div className={`${selection.id === node.id ? 'bg-white/90 rounded-3xl' : ''}`}>
         <AccordionWrapper openStatus={isOpen}>{children}</AccordionWrapper>
       </div>
     </li>

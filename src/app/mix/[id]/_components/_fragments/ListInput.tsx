@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
-import { ChevronUp, ChevronDown, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, X, Plus } from 'lucide-react';
 
 interface ListInputProps {
   value: string[];
@@ -82,23 +82,32 @@ export default function ListInput({
   };
 
   return (
-    <div className="w-full" ref={listRef}>
+    <div className="w-full p-2" ref={listRef}>
       {/* List items */}
       {value.length > 0 && (
         <>
           {value.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center ">
+            <div key={`${item}-${index}`} className="flex items-center group">
               
               
               {/* Item controls */}
-              <div className="w-full flex flex-row items-center justify-between">
-                <div className="flex flex-row">
+              <div className="w-full flex flex-row items-center justify-between relative gap-2">
+                <div className="absolute left-0 flex flex-row opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-100 rounded-3xl z-20">
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    className="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-red-500"
+                    onClick={() => handleRemoveItem(index)}
+                  >
+                    <X size={12} />
+                  </button>
+                  
                   {/* Stacked move up/down buttons */}
-                  <div className="relative w-6 h-6 flex flex-col">
+                  <div className="relative w-4 h-6 flex flex-col">
                     {/* Move up button - top half */}
                     <button
                       type="button"
-                      className={`absolute top-0 w-full h-1/2 flex items-center justify-center ${index === 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-100'}`}
+                      className={`absolute top-0 w-full h-1/2 rounded flex items-center justify-center ${index === 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-200'}`}
                       onClick={() => handleMoveUp(index)}
                       disabled={index === 0}
                     >
@@ -108,26 +117,20 @@ export default function ListInput({
                     {/* Move down button - bottom half */}
                     <button
                       type="button"
-                      className={`absolute bottom-0 w-full h-1/2 flex items-center justify-center ${index === value.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-100'}`}
+                      className={`absolute bottom-0 w-full h-1/2 rounded flex items-center justify-center ${index === value.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-200'}`}
                       onClick={() => handleMoveDown(index)}
                       disabled={index === value.length - 1}
                     >
                       <ChevronDown size={10} />
                     </button>
                   </div>
-                  {/* Remove button */}
-                  <button
-                    type="button"
-                    className="p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-red-500"
-                    onClick={() => handleRemoveItem(index)}
-                  >
-                    <X size={12} />
-                  </button>
+                  
                 </div>
+                <p className="text-xxs px-2 flex-grow text-gray-500 "> {index+1} </p>
 
                 {/* Item content - either custom rendered or default */}
                 <div className="">
-                  {renderItem ? renderItem(item, index) : <div className="text-xs">{item}</div>}
+                  {renderItem ? renderItem(item, index) : <div className="text-xs text-nowrap">{item}</div>}
                 </div>
 
               </div>
@@ -136,18 +139,14 @@ export default function ListInput({
 
           {/* Add new item button */}
           {value.length < max && (
-            <div className="flex w-full">
+            <div className="flex flex-row gap-1 items-center justify-center w-full text-gray-500 px-1">
               <button
                 ref={addButtonRef}
                 type="button"
-                className="w-full flex items-center justify-center p-1 rounded text-gray-500 hover:bg-gray-100"
+                className="flex items-center justify-center p-1 rounded-3xl hover:text-gray-900  hover:bg-white/50"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                <span className="text-xs mr-1">{placeholder}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+                <Plus size={12} />
               </button>
             </div>
           )}

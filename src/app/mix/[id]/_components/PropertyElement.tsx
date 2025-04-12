@@ -9,7 +9,7 @@ import NumberInput from './_fragments/NumberInput';
 import ListInput from './_fragments/ListInput';
 import OptionSelector from './_fragments/OptionSelector';
 import CompositeInput from './_fragments/CompositeInput';
-import { X, Copy, EllipsisVertical, Shapes, ChevronsUpDown } from 'lucide-react';
+import { X, Copy, EllipsisVertical, Shapes, ChevronsUpDown, Hexagon, GitCompare } from 'lucide-react';
 import { htmlSchemas } from '../_contexts/MixEditorContext';
 import { formatStyleProperty, updatePropertyValue, removeProperty, getLabelsOfPropertyOptions } from '../_utils/treeUtils';
 
@@ -34,27 +34,6 @@ export default function PropertyElement({ classId, property }) {
     if (propertySchema === undefined) {
         return <div className="text-xs text-red-500">Unknown type: {property.type}</div>;
     }
-
-    if (depth && (idList.length < depth[0] || idList.length > depth[1])) {
-      return(
-        <>
-        {Array.isArray(property.value) ? 
-          property.value.map((item) => renderPropertyInput([...idList, item.id], item, depth))
-          // If value is an object with type and value, render it recursively
-          : typeof property.value === 'object' && property.value !== null ?
-              renderPropertyInput([...idList, property.value.id], property.value, depth)
-          // Otherwise just show the value as text
-          : null}
-        </>
-      )
-    }
-  
-
-  if(idList.length == 1 && property.options?.includes('{globalKeyword}')){
-    return(
-      <span className="text-xs">{property.value}</span>
-    )
-  }
 
 
   // Now render based on the found schema
@@ -128,7 +107,7 @@ export default function PropertyElement({ classId, property }) {
                       : typeof property.value === 'object' && property.value !== null ?
                           renderPropertyInput([...idList, property.value.id], property.value, depth)
                       // Otherwise just show the value as text
-                      : <span className="text-xs">{property.value}</span>
+                      : <span className="text-xs text-nowrap">{property.value}</span>
                   }
               </SelectInput>
           )
@@ -139,38 +118,40 @@ export default function PropertyElement({ classId, property }) {
           isArray = true;
         }
         const isList = property.value.type === 'trackList'
+        const isString = typeof property.value === 'string'
+        const depth = idList.length;
         return(
-          <div className={`flex ${isList ? 'flex-col' : 'flex-row items-center'}`}>
-            <div className={'flex justify-center items-center'}>
-            <OptionSelector 
-                onChange={(id) => {
-                    updateCssTree(cssTree => {
-                        updatePropertyValue(cssTree, idList, id);
-                    });
-                }}
-                options={propertySchema.options || []}
-            >
-              {typeof property.value === 'string' ? (
-                <div className="flex flex-row gap-0.5 items-center py-2 px-3">
-                  <span className="text-xs">{property.value}</span>
-                  <ChevronsUpDown size={10} className="text-gray-500" />
-                </div>  
-              ) : (
-                <div className="flex flex-row gap-0.5 items-center bg-white/50 p-2 rounded-3xl">
-                  {false && <ChevronsUpDown size={10} className="text-gray-500" />}
-                  <Shapes size={14} className="text-zinc-700" />
-                  {isList && <span className="px-1 text-xs">{property.value.type}</span>}
-                </div>
-              )}
-            </OptionSelector>
+          <div className={`flex rounded-3xl group ${isList ? 'flex-row items-center' : 'flex-row items-center'} ${depth === 1 ? 'bg-white/50' : ''} ${depth === 1 || !isString ? 'border border-gray-200' : ''}`}>
+            <div className={'flex justify-center items-center' + (isList ? ' w-full' : 'w-full')}>
+              <OptionSelector 
+                  onChange={(id) => {
+                      updateCssTree(cssTree => {
+                          updatePropertyValue(cssTree, idList, id);
+                      });
+                  }}
+                  options={propertySchema.options || []}
+              >
+                {typeof property.value === 'string' ? (
+                  <div className={'flex flex-row gap-0.5 items-center ' + (depth === 1 ? ' py-2 px-3' : 'py-2 px-1')}>
+                    <span className="text-xs">{property.value}</span>
+                    <ChevronsUpDown size={10} className="text-gray-500" />
+                  </div>  
+                ) : (
+                  <div className={'transition-all duration-300 w-0 rounded-3xl overflow-hidden group-hover:w-6'}>
+                    <div className="w-6 flex items-center justify-center"><GitCompare size={14} className="text-zinc-700" /></div>
+                  </div>
+                )}
+              </OptionSelector>
             </div>
-            { true &&
-                // If value is an object with type and value, render it recursively
-                typeof property.value === 'object' && property.value !== null ?
-                    renderPropertyInput([...idList, property.value.id], property.value, depth)
-                // Otherwise just show the value as text
-                : null
-            }
+            <div className='bg-gray-100 rounded-3xl'>
+              { true &&
+                  // If value is an object with type and value, render it recursively
+                  typeof property.value === 'object' && property.value !== null ?
+                      renderPropertyInput([...idList, property.value.id], property.value, depth)
+                  // Otherwise just show the value as text
+                  : null
+              }
+            </div>
           </div>
         )
     }if(propertySchema.inputType === 'list'){
@@ -189,7 +170,7 @@ export default function PropertyElement({ classId, property }) {
                       if (typeof item === 'object' && item !== null) {
                           return renderPropertyInput([...idList, item.id], item, depth);
                       } else {
-                          return <span className="text-xs">{item}</span>;
+                          return <span className="text-xs text-nowrap w-full">{item}</span>;
                       }
                   }}
               />
@@ -220,29 +201,29 @@ export default function PropertyElement({ classId, property }) {
       onMouseLeave={() => setIsHovering(false)}
     >
       <div 
-        className="w-full grid grid-cols-[1fr,3fr] justify-between items-center cursor-pointer px-2 py-1 rounded"
+        className="w-full flex flex-row items-center justify-between cursor-pointer px-2 py-1 rounded"
         onClick={() => setOpen(!open)}
       >
 
-        <div className="flex flex-col h-full justify-center">
-          <span className="text-xxs font-semibold text-gray-700 pl-2 uppercase">{propertySchema.label}</span>
+        <div className="flex flex-row items-center h-full justify-start gap-1">
+          <button
+              className="text-zinc-700 w-2 hover:bg-gray-100/50 transition-colors"
+              onClick={()=>{console.log('Open options')}}
+              aria-label="Open options"
+            >
+            {isHovering &&<EllipsisVertical size={12} />}
+          </button> 
+          <span className="text-xxs font-semibold text-gray-700 uppercase">{propertySchema.label}</span>
         </div>
 
-        <div className="flex flex-row justify-end gap-1">
-          <div className="flex items-center bg-gray-100 rounded-3xl overflow-hidden">
+        <div className="flex flex-row justify-end">
+          <div className="flex items-center rounded-3xl overflow-hidden">
             {property.value ? (
               renderPropertyInput([property.id], property, depth1)
             ) : (
               <span className="text-xxs text-zinc-400">No value to edit</span>
             )}
           </div>
-          <button
-            className="text-zinc-700 w-2 hover:bg-gray-100/50 transition-colors"
-            onClick={()=>{console.log('Open options')}}
-            aria-label="Open options"
-          >
-            {isHovering &&<EllipsisVertical size={12} />}
-          </button>
         </div>
 
       </div>

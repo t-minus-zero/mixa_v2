@@ -644,7 +644,7 @@ export const processValue = (value: any) => {
     const inputType = extractReferenceKey(value);
     const inputTypeSchema = inputsSchema[inputType];
     let newType = inputTypeSchema.inputType;
-    if (['selection', 'list', 'composite', 'number'].includes(newType)) {
+    if (['selection', 'option', 'list', 'composite', 'number'].includes(newType)) {
       newType = inputType;
     }
     const newValue = {

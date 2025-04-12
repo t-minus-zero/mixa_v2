@@ -20,7 +20,7 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
   const [isVisible, setIsVisible] = useState(true);
   
   return (
-    <div className="w-full px-2 py-2 flex flex-row items-center justify-start group rounded-md cursor-pointer" onClick={onToggle}>
+    <div className="w-full px-2 py-2 flex flex-row items-center justify-start group cursor-pointer" onClick={onToggle}>
       
       {/* Renamble name */}
       <div className='flex flex-row items-center flex-grow pl-2 text-xs font-medium' >
@@ -119,9 +119,9 @@ export default function CssClassElement({ cls }) {
   }
   
   return (
-    <li className={`w-full rounded-3xl bg-gray-100/50 ${isOpen ? '' : ''}`}>
+    <li className={`w-full rounded-3xl bg-gray-100/50 overflow-hidden ${isOpen ? 'bg-gray-200/50' : ''}`}>
       <div 
-        className={`relative flex flex-start rounded-lg group hover:bg-white/50 ${isOpen ? '' : 'bg-transparent'}`}
+        className={`relative flex flex-start rounded-lg group`}
       >
         <TitleWithButtons 
           className={cls.name}
@@ -132,7 +132,7 @@ export default function CssClassElement({ cls }) {
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
-        <div className="rounded-lg">
+        <div className=" bg-white/50 rounded-3xl">
           {/* Properties list */}
           {cls.properties && Array.isArray(cls.properties) && cls.properties.map((property) => (
             <div key={property.id} className="">

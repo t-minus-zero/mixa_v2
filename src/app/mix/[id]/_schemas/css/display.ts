@@ -9,14 +9,14 @@ export const cssDisplaySchema = {
       requirement: { property: "display", value: ["flex", "inline-flex"] },
       default: "row",
       label: "Flex Direction",
-      inputs: { inputType: "selection", options: ["row", "row-reverse", "column", "column-reverse"], default: "row", format: "{value}" },
+      inputs: { inputType: "option", options: ["row", "row-reverse", "column", "column-reverse"], default: "row", format: "{value}" },
       format: "flex-direction: {value};"
     },
     flexWrap: {
       requirement: { property: "display", value: ["flex", "inline-flex"] },
       default: "nowrap",
       label: "Flex Wrap",
-      inputs: { inputType: "selection", options: ["nowrap", "wrap", "wrap-reverse"], default: "nowrap", format: "{value}" },
+      inputs: { inputType: "option", options: ["nowrap", "wrap", "wrap-reverse"], default: "nowrap", format: "{value}" },
       format: "flex-wrap: {value};"
     },
     flexGrow: {
@@ -51,49 +51,49 @@ export const cssDisplaySchema = {
       requirement: { property: "display", value: ["grid", "flex"] },
       default: "0",
       label: "Gap",
-      inputs: { inputType: "selection", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
+      inputs: { inputType: "option", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
       format: "gap: {value};"
     },
     alignItems: {
       requirement: { property: "display", value: ["flex", "grid", "inline-flex", "inline-grid"] },
       default: "none",
       label: "Align Items",
-      inputs: { inputType: "selection", options: ["none", "flex-start", "flex-end", "center", "stretch", "baseline"], default: "center", format: "{value}" },
+      inputs: { inputType: "option", options: ["none", "flex-start", "flex-end", "center", "stretch", "baseline"], default: "center", format: "{value}" },
       format: "align-items: {value};"
     },
     alignContent: {
       requirement: { property: "display", value: ["flex", "grid", "inline-flex", "inline-grid"] },
       default: "normal",
       label: "Align Content",
-      inputs: { inputType: "selection", options: ["normal", "flex-start", "flex-end", "center", "stretch", "space-between", "space-around"], default: "normal", format: "{value}" },
+      inputs: { inputType: "option", options: ["normal", "flex-start", "flex-end", "center", "stretch", "space-between", "space-around"], default: "normal", format: "{value}" },
       format: "align-content: {value};"
     },
     alignSelf: {
       requirement: { property: "display", value: ["flex", "grid", "inline-flex", "inline-grid"] },
       default: "auto",
       label: "Align Self",
-      inputs: { inputType: "selection", options: ["auto", "flex-start", "flex-end", "center", "stretch", "baseline"], default: "auto", format: "{value}" },
+      inputs: { inputType: "option", options: ["auto", "flex-start", "flex-end", "center", "stretch", "baseline"], default: "auto", format: "{value}" },
       format: "align-self: {value};"
     },
     justifyContent: {
       requirement: { property: "display", value: ["flex", "grid", "inline-flex", "inline-grid"] },
       default: "none",
       label: "Justify Content",
-      inputs: { inputType: "selection", options: ["none", "flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"], default: "center", format: "{value}" },
+      inputs: { inputType: "option", options: ["none", "flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"], default: "center", format: "{value}" },
       format: "justify-content: {value};"
     },
     justifyItems: {
       requirement: { property: "display", value: ["grid", "inline-grid"] },
       default: "normal",
       label: "Justify Items",
-      inputs: { inputType: "selection", options: ["normal", "start", "end", "center", "stretch"], default: "normal", format: "{value}" },
+      inputs: { inputType: "option", options: ["normal", "start", "end", "center", "stretch"], default: "normal", format: "{value}" },
       format: "justify-items: {value};"
     },
     justifySelf: {
       requirement: { property: "display", value: ["grid", "inline-grid"] },
       default: "auto",
       label: "Justify Self",
-      inputs: { inputType: "selection", options: ["auto", "start", "end", "center", "stretch"], default: "auto", format: "{value}" },
+      inputs: { inputType: "option", options: ["auto", "start", "end", "center", "stretch"], default: "auto", format: "{value}" },
       format: "justify-self: {value};"
     },
     order: {
@@ -112,32 +112,32 @@ export const cssDisplaySchema = {
     borderWidth: {
       default: "0",
       label: "Border Width",
-      inputs: { inputType: "selection", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
+      inputs: { inputType: "option", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
       format: "border-width: {value};"
     },
     borderStyle: {
       default: "none",
       label: "Border Style",
-      inputs: { inputType: "selection", options: ["none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset", "{globalKeyword}"], default: "none", format: "{value}" },
+      inputs: { inputType: "option", options: ["none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset", "{globalKeyword}"], default: "none", format: "{value}" },
       format: "border-style: {value};"
     },
     borderColor: {
       default: "currentColor",
       label: "Border Color",
-      inputs: { inputType: "selection", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}", "{color}"], default: "currentColor", format: "{value}" },
+      inputs: { inputType: "option", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}", "{color}"], default: "currentColor", format: "{value}" },
       format: "border-color: {value};"
     },
     borderRadius: {
       default: "0",
       label: "Border Radius",
-      inputs: { inputType: "selection", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
+      inputs: { inputType: "option", options: ["{globalKeyword}", "{dimension}"], default: "{dimension}", format: "{value}" },
       format: "border-radius: {value};"
     },
     borderBottom: {
       default: "none",
       label: "Border Bottom",
       inputs: { 
-        inputType: "selection", 
+        inputType: "option", 
         options: [
           "auto",
           "{globalKeyword}",
@@ -151,7 +151,7 @@ export const cssDisplaySchema = {
     backdropFilter: {
       default: "none",
       label: "Backdrop Filter",
-      inputs: { inputType: "selection", default: "{backdropFilterBlur}", format: "{value}" , options: ["none", "{backdropFilterBlur}", "{globalKeyword}"] },
+      inputs: { inputType: "option", default: "{backdropFilterBlur}", format: "{value}" , options: ["none", "{backdropFilterBlur}", "{globalKeyword}"] },
       format: "backdrop-filter: blur({value});"
     },
     // New Types
@@ -159,7 +159,7 @@ export const cssDisplaySchema = {
       default: "none",
       label: "Border",
       inputs: { 
-        inputType: "selection", 
+        inputType: "option", 
         options: [
           "auto",
           "{globalKeyword}",

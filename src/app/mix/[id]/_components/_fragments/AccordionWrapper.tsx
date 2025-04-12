@@ -24,7 +24,7 @@ export default function AccordionWrapper({ children, openStatus, fading=false }:
             }}
           className="overflow-hidden">
           {children}
-    </div>
+        </div>
     </div>
   );
 }

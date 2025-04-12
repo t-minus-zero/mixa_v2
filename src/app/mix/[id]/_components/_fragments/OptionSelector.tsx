@@ -52,7 +52,7 @@ export default function OptionSelector({
 
   return (
     <div 
-      className={`relative flex items-center rounded-lg overflow-hidden group ${className} ${isOpen ? '' : ''}`} 
+      className={`relative w-full flex items-center rounded-lg overflow-hidden group ${className} ${isOpen ? '' : ''}`} 
       ref={containerRef}
       onClick={() => setIsOpen(!isOpen)}
     >
@@ -80,10 +80,10 @@ export default function OptionSelector({
         offset={2}
         autoAdjust={true}
         maxHeight={200}
-        className="bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto z-50"
+        className="bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto z-50 min-w-[8rem]"
         zIndex={50}
       >
-        <div className="py-1">
+        <div className="">
           {options.map((option) => (
             <div 
               key={option} 

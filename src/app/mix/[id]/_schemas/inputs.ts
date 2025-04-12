@@ -17,19 +17,19 @@ export const inputsSchema = {
         options: ['none', 'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'match-parent', 'auto'],
      },
     trackKeyword: { 
-        label: 'Track Keyword', inputType: 'selection', default: 'max-content', format: '{value}',
+        label: 'Track Keyword', inputType: 'option', default: 'max-content', format: '{value}',
         options: ['auto', 'max-content', 'min-content'],
      },
     repeatType: { 
-        label: 'Repeat Type', inputType: 'selection', default: 'auto-fill', format: '{value}',
+        label: 'Repeat Type', inputType: 'option', default: 'auto-fill', format: '{value}',
         options: ['auto-fit', 'auto-fill', '{count}'],  
        },
     size: { 
-        label: 'Size', inputType: 'selection', default: '{dimension}', format: '{value}',
+        label: 'Size', inputType: 'option', default: '{dimension}', format: '{value}',
         options: ['{fraction}', '{dimension}'],  
     },
     minMaxList:{
-        label: 'Min Max List', inputType: 'selection', format: '{value}', default: '{size}',
+        label: 'Min Max List', inputType: 'option', format: '{value}', default: '{size}',
         options: ['{size}', '{trackKeyword}']
     },
     minMaxFx: { 
@@ -53,7 +53,7 @@ export const inputsSchema = {
         options: ['{trackKeyword}', '{fraction}', '{dimension}', '{repeatFx}'] 
     },
     individual: { 
-        label: 'Individual', inputType: 'selection', default: 'normal', format: '{value}',
+        label: 'Individual', inputType: 'option', default: 'normal', format: '{value}',
         options: ['normal', 'stretch', 'center', 'flex-start', 'flex-end', 'start', 'end', 'self-start', 'self-end']
     },
     //NewTypes
