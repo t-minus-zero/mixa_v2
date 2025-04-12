@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, ReactNode } from 'react';
+import React, { useState, useRef, useEffect, ReactNode, useId } from 'react';
 
 interface ResizableSectionProps {
   children: ReactNode;
@@ -26,14 +26,16 @@ const ResizableSection: React.FC<ResizableSectionProps> = ({
   const [width, setWidth] = useState<number>(defaultWidth);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const uniqueId = useId().replace(/:/g, '-');
   
-  // Custom styles for the resize handle
+  // Custom styles for the resize handle with unique ID to avoid conflicts
   const customStyles = `
-    .resizable-section-container:hover .resize-handle-indicator {
+    #resizable-${uniqueId}:hover .resize-handle-indicator-${uniqueId},
+    #resizable-${uniqueId}:hover .radial-gradient-${uniqueId} {
       opacity: 1;
     }
 
-    .resize-handle {
+    .resize-handle-${uniqueId} {
       position: absolute;
       ${handlePosition === 'right' ? 'right: -5px;' : ''}
       ${handlePosition === 'left' ? 'left: -5px;' : ''}
@@ -47,7 +49,7 @@ const ResizableSection: React.FC<ResizableSectionProps> = ({
       align-items: center;
     }
     
-    .resize-handle-indicator {
+    .resize-handle-indicator-${uniqueId} {
       ${direction === 'horizontal' ? 'width: 1px; height: 100%;' : 'height: 1px; width: 100%;'}
       opacity: 0;
       transition: opacity 0.2s ease;
@@ -57,9 +59,43 @@ const ResizableSection: React.FC<ResizableSectionProps> = ({
       }
     }
     
-    .resize-handle.resizing .resize-handle-indicator {
+    .resize-handle-${uniqueId}.resizing .resize-handle-indicator-${uniqueId} {
       opacity: 1;
     }
+    
+    .gradient-container-${uniqueId} {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: visible; /* Changed from hidden to allow the gradient to extend outside if needed */
+    }
+    
+    .radial-gradient-${uniqueId} {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    /* Create separate style rules for left and right gradients to avoid conditional CSS issues */
+    ${handlePosition === 'left' ? `
+    .radial-gradient-${uniqueId} {
+      background: radial-gradient(circle at left center, rgba(160, 160, 160, 0.15) 0%, rgba(160, 160, 160, 0.03) 30%, rgba(160, 160, 160, 0) 60%);
+    }
+    ` : `
+    .radial-gradient-${uniqueId} {
+      background: radial-gradient(circle at right center, rgba(160, 160, 160, 0.15) 0%, rgba(160, 160, 160, 0.03) 30%, rgba(160, 160, 160, 0) 60%);
+    }
+    `}
   `;
   
   // Direct DOM manipulation for resizing
@@ -136,17 +172,23 @@ const ResizableSection: React.FC<ResizableSectionProps> = ({
     <>
       <style>{customStyles}</style>
       <div 
+        id={`resizable-${uniqueId}`}
         ref={containerRef}
-        className={`relative h-full resizable-section-container ${className}`}
+        className={`relative h-full ${className}`}
         style={direction === 'horizontal' ? { width: `${width}px` } : { height: `${width}px` }}
       >
-        {children}
+        <div className={`gradient-container-${uniqueId}`}>
+          <div className={`radial-gradient-${uniqueId}`} />
+          <div className="relative z-10 w-full h-full flex-grow">
+            {children}
+          </div>
+        </div>
         
         <div 
-          className={`resize-handle ${isResizing ? 'resizing' : ''}`} 
+          className={`resize-handle-${uniqueId} ${isResizing ? 'resizing' : ''}`} 
           onMouseDown={handleResizeMouseDown}
         >
-          <div className="resize-handle-indicator" />
+          <div className={`resize-handle-indicator-${uniqueId}`} />
         </div>
       </div>
     </>

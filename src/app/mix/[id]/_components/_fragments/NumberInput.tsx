@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, useRef, useEffect, MouseEvent } from 'react';
+import { ChangeEvent, useRef, useEffect, MouseEvent, useState } from 'react';
 
 interface NumberInputProps {
   value: string;
@@ -13,6 +13,9 @@ export default function NumberInput({ value, onChange, min, max }: NumberInputPr
   const inputRef = useRef<HTMLInputElement>(null);
   const isDraggingRef = useRef(false);
   const lastXRef = useRef(0);
+  
+  // Calculate width based on character count with minimum width of 1.5ch
+  const [inputWidth, setInputWidth] = useState('1.5ch'); // Default minimum width
 
   // Handle click to select all text
   const handleClick = () => {
@@ -65,6 +68,15 @@ export default function NumberInput({ value, onChange, min, max }: NumberInputPr
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
+  
+  // Update width based on character count
+  useEffect(() => {
+    // Get the number of characters with a minimum of 1
+    const charCount = value?.length || 1;
+    // Use ch units (width of '0' character) with a minimum of 1.5ch
+    const calculatedWidth = `${Math.max(1, charCount + 0.5)}ch`;
+    setInputWidth(calculatedWidth);
+  }, [value]);
 
   // Handle regular input change with min/max constraints
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -101,12 +113,13 @@ export default function NumberInput({ value, onChange, min, max }: NumberInputPr
       onChange={handleInputChange}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
+      style={{ width: inputWidth, transition: 'width 0.1s ease' }}
       className="
         text-xs
         text-gray-500
         bg-transparent 
-        outline-none 
-        w-10 
+        outline-none
+        text-right
         border-none 
         focus:ring-0 
         text-gray-800

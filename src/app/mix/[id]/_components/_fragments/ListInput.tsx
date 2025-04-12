@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
+import { ChevronUp, ChevronDown, X } from 'lucide-react';
 
 interface ListInputProps {
   value: string[];
@@ -84,74 +85,77 @@ export default function ListInput({
     <div className="w-full" ref={listRef}>
       {/* List items */}
       {value.length > 0 && (
-        <div className="border border-zinc-200 rounded-md">
+        <>
           {value.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center border-b border-gray-200 px-2 py-1">
-              {/* Item content - either custom rendered or default */}
-              <div className="flex-grow">
-                {renderItem ? renderItem(item, index) : <div className="text-xs">{item}</div>}
-              </div>
+            <div key={`${item}-${index}`} className="flex items-center ">
+              
               
               {/* Item controls */}
-              <div className="flex items-center space-x-1 border-l border-zinc-200">
-                {/* Move up button */}
-                <button
-                  type="button"
-                  className={`p-1 rounded ${index === 0 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-100'}`}
-                  onClick={() => handleMoveUp(index)}
-                  disabled={index === 0}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="18 15 12 9 6 15"></polyline>
-                  </svg>
-                </button>
-                
-                {/* Move down button */}
-                <button
-                  type="button"
-                  className={`p-1 rounded ${index === value.length - 1 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-100'}`}
-                  onClick={() => handleMoveDown(index)}
-                  disabled={index === value.length - 1}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-                
-                {/* Remove button */}
-                <button
-                  type="button"
-                  className="p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-red-500"
-                  onClick={() => handleRemoveItem(index)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
+              <div className="w-full flex flex-row items-center justify-between">
+                <div className="flex flex-row">
+                  {/* Stacked move up/down buttons */}
+                  <div className="relative w-6 h-6 flex flex-col">
+                    {/* Move up button - top half */}
+                    <button
+                      type="button"
+                      className={`absolute top-0 w-full h-1/2 flex items-center justify-center ${index === 0 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-100'}`}
+                      onClick={() => handleMoveUp(index)}
+                      disabled={index === 0}
+                    >
+                      <ChevronUp size={10} />
+                    </button>
+                    
+                    {/* Move down button - bottom half */}
+                    <button
+                      type="button"
+                      className={`absolute bottom-0 w-full h-1/2 flex items-center justify-center ${index === value.length - 1 ? 'text-gray-300 cursor-default' : 'text-gray-500 hover:bg-gray-100'}`}
+                      onClick={() => handleMoveDown(index)}
+                      disabled={index === value.length - 1}
+                    >
+                      <ChevronDown size={10} />
+                    </button>
+                  </div>
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    className="p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-red-500"
+                    onClick={() => handleRemoveItem(index)}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+
+                {/* Item content - either custom rendered or default */}
+                <div className="">
+                  {renderItem ? renderItem(item, index) : <div className="text-xs">{item}</div>}
+                </div>
+
               </div>
             </div>
           ))}
-        </div>
+
+          {/* Add new item button */}
+          {value.length < max && (
+            <div className="flex w-full">
+              <button
+                ref={addButtonRef}
+                type="button"
+                className="w-full flex items-center justify-center p-1 rounded text-gray-500 hover:bg-gray-100"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <span className="text-xs mr-1">{placeholder}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+          )}
+
+        </>
       )}
       
-      {/* Add new item button */}
-      {value.length < max && (
-        <div className="flex w-full">
-          <button
-            ref={addButtonRef}
-            type="button"
-            className="w-full flex items-center justify-center p-1 rounded text-gray-500 hover:bg-gray-100"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            <span className="text-xs mr-1">{placeholder}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-        </div>
-      )}
+      
       
       {/* Dropdown portal */}
       <Portal

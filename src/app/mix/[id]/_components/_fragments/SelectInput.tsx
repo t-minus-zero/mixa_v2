@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useState, useRef, ReactNode } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
+import { ChevronsUpDown } from 'lucide-react';
 
 interface SelectInputProps {
   value: string;
@@ -62,19 +63,7 @@ export default function SelectInput({
           setIsOpen(!isOpen);
         }}
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="12" 
-          height="12" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        <ChevronsUpDown size={12} />
       </div>
       
       {/* Dropdown options using Portal component */}

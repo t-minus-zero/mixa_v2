@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import HtmlContent from './HtmlContent';
 import { SearchIcon, X, Plus } from 'lucide-react';
 import AccordionWrapper from './_fragments/AccordionWrapper';
+import ResizableSection from './_fragments/ResizableSection';
 import { addClassToElement, addClass, findNodeById } from '../_utils/treeUtils';
 
 // Add Class Button Component
@@ -37,7 +38,7 @@ const AddClassButton = ({ isForSelectedElement }) => {
   return (
     <button 
       onClick={handleAddClass}
-      className="w-full border border-zinc-200 rounded-lg text-zinc-500 hover:bg-zinc-50/50 hover:text-blue-400 py-2 px-4 text-xs transition-colors flex items-center justify-center"
+      className="w-full rounded-xl text-zinc-500 hover:bg-zinc-50/50 hover:text-blue-400 py-2 px-4 text-xs transition-colors flex items-center justify-center"
     >
       <Plus size={16} />
       {isForSelectedElement ? 'Add Class to Selected Element' : 'Add New Class'}
@@ -135,11 +136,11 @@ const ClassesFloater = () => {
   }, [isSearchMode, searchInput]);
 
   return (
-    <div className={`flex flex-col bg-zinc-50/75 backdrop-blur-md rounded-l-xl shadow-sm border border-zinc-200 max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-32'}`}>
+    <div className={`flex flex-col backdrop-blur-md rounded-3xl bg-gray-100/0 w-full max-h-[90vh] overflow-hidden transition-all duration-300 ${isSearchMode || isAccordionOpen ? 'w-64' : 'w-32'}`}>
       
       {/* Header with title or search */}
       <div 
-          className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer border-b border-zinc-200" 
+          className="w-full p-1 flex flex-row items-center justify-start group transition-colors cursor-pointer" 
           onClick={toggleAccordion}
         >
           <div className='flex flex-row items-center flex-grow px-2'>
@@ -211,17 +212,21 @@ const ClassesFloater = () => {
 
 const RightFloater = () => {
   const { selection, updateTree, setSelection } = useMixEditor();
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   return (
     <div 
-      className="h-full w-full w-64 flex flex-col justify-between items-end group/tree">
-      <div className="flex flex-col items-end max-h-[calc(100vh-6rem)] overflow-hidden">
+      className="h-full w-full w-64 flex flex-col rounded-3xl shadow-2xl overflow-hidden justify-between items-end group/tree">
+        <ResizableSection
+        data-main-layer
+        defaultWidth={isAccordionOpen ? 256 : 128}
+        minWidth={128}
+        maxWidth={512}
+        handlePosition="left"
+        className="h-full flex flex-col justify-between group/tree relative right-floater-resizable"
+      >
         <ClassesFloater />
-
-        
-        {/* Add HtmlContent component when an element is selected */}
-        {selection && <HtmlContent />}
-      </div>
+      </ResizableSection>
     </div>
   );
 };

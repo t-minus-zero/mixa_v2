@@ -2,7 +2,7 @@ export const cssDisplaySchema = {
     display: {
       default: "none",
       label: "Display",
-      inputs: { inputType: "selection", options: ["none", "block", "inline", "flex", "grid", "inline-block", "inline-flex", "inline-grid"], default: "none", format: "{value}" },
+      inputs: { inputType: "option", options: ["none", "block", "inline", "flex", "grid", "inline-block", "inline-flex", "inline-grid"], default: "none", format: "{value}" },
       format: "display: {value};"
     },
     flexDirection: {
@@ -37,14 +37,14 @@ export const cssDisplaySchema = {
       requirement: { property: "display", value: "grid" },
       default: "none",  
       label: "Columns",
-      inputs: { inputType: "selection", options: ["{number}","{globalKeyword}", "{trackKeyword}", "{trackList}"], default: "{trackKeyword}", format: "{value}" },
+      inputs: { inputType: "option", options: ["{number}","{globalKeyword}", "{trackKeyword}", "{trackList}"], default: "{trackKeyword}", format: "{value}" },
       format: "grid-template-columns: {value};"
     },
     gridTemplateRows: {
       requirement: { property: "display", value: "grid" },
       default: "none",
       label: "Rows",
-      inputs: { inputType: "selection", options: ["{globalKeyword}", "{trackKeyword}", "{trackList}"], default: "{trackKeyword}", format: "{value}" },
+      inputs: { inputType: "option", options: ["{globalKeyword}", "{trackKeyword}", "{trackList}"], default: "{trackKeyword}", format: "{value}" },
       format: "grid-template-rows: {value};"
     },
     gridGap: {
@@ -106,23 +106,8 @@ export const cssDisplaySchema = {
     backgroundColor: {
       default: "transparent",
       label: "Background Color",
-      inputs: { inputType: "selection", options: ["transparent", "{globalKeyword}", "{colorKeywords}", "{text}"], default: "transparent", format: "{value}" },
+      inputs: { inputType: "option", options: ["transparent", "{globalKeyword}", "{colorKeywords}", "{text}"], default: "transparent", format: "{value}" },
       format: "background-color: {value};"
-    },
-    border: {
-      default: "none",
-      label: "Border",
-      inputs: { 
-        inputType: "selection", 
-        options: [
-          "auto",
-          "{globalKeyword}",
-          "{borderList}"
-        ], 
-        default: "auto", 
-        format: "{value}" 
-      },
-      format: "border: {value};"
     },
     borderWidth: {
       default: "0",
@@ -139,7 +124,7 @@ export const cssDisplaySchema = {
     borderColor: {
       default: "currentColor",
       label: "Border Color",
-      inputs: { inputType: "selection", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}"], default: "currentColor", format: "{value}" },
+      inputs: { inputType: "selection", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}", "{color}"], default: "currentColor", format: "{value}" },
       format: "border-color: {value};"
     },
     borderRadius: {
@@ -168,5 +153,22 @@ export const cssDisplaySchema = {
       label: "Backdrop Filter",
       inputs: { inputType: "selection", default: "{backdropFilterBlur}", format: "{value}" , options: ["none", "{backdropFilterBlur}", "{globalKeyword}"] },
       format: "backdrop-filter: blur({value});"
-    }
+    },
+    // New Types
+    border: {
+      default: "none",
+      label: "Border",
+      inputs: { 
+        inputType: "selection", 
+        options: [
+          "auto",
+          "{globalKeyword}",
+          "{borderList}"
+        ], 
+        default: "auto", 
+        format: "{value}" 
+      },
+      format: "border: {value};"
+    },
+    
 };

@@ -28,10 +28,10 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
           <KeyboardHandler />
           
           <div className="relative w-full h-full overflow-hidden bg-zinc-50 flex items-center justify-center rounded-xl">
-            <div className="absolute left-0 flex flex-col items-center z-20">
+            <div className="absolute left-1 flex flex-col items-center z-20">
               <LeftFloater />
             </div>
-            <div className="absolute right-0 flex flex-col items-center z-20">
+            <div className="absolute right-1 flex flex-col items-center z-20">
               <RightFloater />
             </div>
           </div>

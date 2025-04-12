@@ -47,7 +47,7 @@ export default function CompositeInput({
   }, [dropdownOpen]);
 
   return (
-    <div className="w-full space-y-2" ref={listRef}>
+    <div className="" ref={listRef}>
       {/* List items */}
       {value.length > 0 && (
         <div className="flex flex-row rounded">

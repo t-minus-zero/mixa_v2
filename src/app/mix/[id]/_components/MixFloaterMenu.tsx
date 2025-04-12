@@ -98,7 +98,7 @@ export default function MixFloaterMenu() {
   return (
     <div className="absolute top-2 right-2 z-20">
       <div className="flex items-center gap-2 bg-white/75 backdrop-blur-md px-3 py-2 rounded-lg">
-        <div className="flex items-center pr-2 text-xs text-gray-900">
+        <div className="flex items-center px-1 justify-center text-xs text-gray-900 border-b border-gray-100/0 hover:border-gray-500">
           <TextInput
             value={name}
             onChange={handleNameChange}
@@ -112,8 +112,8 @@ export default function MixFloaterMenu() {
             disabled={isSaving}
             className={`p-1.5 ${
               isSaving 
-                ? 'text-zinc-400 bg-zinc-100' 
-                : 'text-zinc-900 hover:text-green-500 hover:bg-green-50'
+                ? 'text-gray-400 bg-zinc-100' 
+                : 'text-gray-900 hover:text-green-500 hover:bg-green-50'
             } rounded-md transition-colors`}
             title="Save Mix"
           >
@@ -122,14 +122,14 @@ export default function MixFloaterMenu() {
           
           <button
             onClick={() => setCodePageOpen(!codePageOpen)}
-            className={`p-1.5 ${codePageOpen ? 'text-blue-600 bg-blue-50' : 'text-zinc-900 hover:text-blue-600 hover:bg-blue-50'} rounded-md transition-colors`}
+            className={`p-1.5 ${codePageOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-900 hover:text-blue-600 hover:bg-blue-50'} rounded-md transition-colors`}
             title={codePageOpen ? "Hide Code" : "View Code"}
           >
             <Code size={16} strokeWidth={1.5} />
           </button>
           
           <button
-            className="p-1.5 text-zinc-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            className="p-1.5 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
             title="Settings"
           >
             <Bolt size={16} strokeWidth={1.5} />

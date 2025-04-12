@@ -2,7 +2,7 @@ export const cssPositionSchema = {
     position: {
       default: "relative",
       label: "Position",
-      inputs: { inputType: "selection", options: ["static", "relative", "absolute", "fixed", "sticky"], default: "relative", format: "{value}" },
+      inputs: { inputType: "option", options: ["static", "relative", "absolute", "fixed", "sticky"], default: "relative", format: "{value}" },
       format: "position: {value};"
     },
     top: {
@@ -36,13 +36,13 @@ export const cssPositionSchema = {
     width: {
       default: "auto",
       label: "Width",
-      inputs: { inputType: "selection", options: ["auto", "{globalKeyword}", "{dimension}", "fit-content", "max-content", "min-content"], default: "auto", format: "{value}" },
+      inputs: { inputType: "option", options: ["auto", "{globalKeyword}", "{dimension}", "fit-content", "max-content", "min-content"], default: "auto", format: "{value}" },
       format: "width: {value};"
     },
     height: {
       default: "auto",
       label: "Height",
-      inputs: { inputType: "selection", options: ["auto", "{globalKeyword}", "{dimension}", "fit-content", "max-content", "min-content"], default: "auto", format: "{value}" },
+      inputs: { inputType: "option", options: ["auto", "{globalKeyword}", "{dimension}", "fit-content", "max-content", "min-content"], default: "auto", format: "{value}" },
       format: "height: {value};"
     },
     minWidth: {
@@ -91,7 +91,7 @@ export const cssPositionSchema = {
     overflow: {
       default: "visible",
       label: "Overflow",
-      inputs: { inputType: "selection", options: ["visible", "hidden", "scroll", "auto", "{globalKeyword}"], default: "visible", format: "{value}" },
+      inputs: { inputType: "option", options: ["visible", "hidden", "scroll", "auto", "{globalKeyword}"], default: "visible", format: "{value}" },
       format: "overflow: {value};"
     },
     overflowX: {

@@ -20,10 +20,10 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
   const [isVisible, setIsVisible] = useState(true);
   
   return (
-    <div className="w-full px-2 py-1 flex flex-row items-center justify-start group rounded-md cursor-pointer" onClick={onToggle}>
+    <div className="w-full px-2 py-2 flex flex-row items-center justify-start group rounded-md cursor-pointer" onClick={onToggle}>
       
       {/* Renamble name */}
-      <div className='flex flex-row items-center flex-grow ' >
+      <div className='flex flex-row items-center flex-grow pl-2 text-xs font-medium' >
         <div className='cursor-text' onClick={(e) => e.stopPropagation()}>
           <InputClickAndText id={className} initValue={className} updateValue={onChange} />
         </div>
@@ -32,7 +32,7 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
       <div className={`flex flex-row items-center justify-end ${openStatus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
         {/* Eye toggle button */}
         <button 
-          className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-zinc-600"
+          className="w-6 h-6 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             setIsVisible(!isVisible);
@@ -42,13 +42,13 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
         </button>
         
         {/* Copy button - no functionality for now */}
-        <button className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-zinc-600">
+        <button className="w-6 h-6 flex items-center justify-center">
           <CopyIcon size={16} />
         </button>
         
         {/* Delete button - with functionality */}
         <button 
-          className="w-6 h-6 flex items-center justify-center text-zinc-700 hover:text-red-500"
+          className="w-6 h-6 flex items-center justify-center hover:text-red-500"
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
@@ -112,16 +112,16 @@ export default function CssClassElement({ cls }) {
   
   if (!cls) {
     return (
-      <div className="p-2 text-sm text-gray-500">
+      <div className="p-2 text-xs text-gray-500">
         No class found for {cls.name}
       </div>
     );
   }
   
   return (
-    <li className={`w-full rounded-lg  border ${isOpen ? 'border-blue-400 bg-blue-50/50' : 'border-zinc-100 bg-zinc-100/50'}`}>
+    <li className={`w-full rounded-3xl bg-gray-100/50 ${isOpen ? '' : ''}`}>
       <div 
-        className={`relative flex flex-start group ${isOpen ? 'bg-blue-100/50' : 'bg-transparent'}`}
+        className={`relative flex flex-start rounded-lg group hover:bg-white/50 ${isOpen ? '' : 'bg-transparent'}`}
       >
         <TitleWithButtons 
           className={cls.name}
@@ -132,7 +132,7 @@ export default function CssClassElement({ cls }) {
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
-        <div className="border-t border-zinc-200">
+        <div className="rounded-lg">
           {/* Properties list */}
           {cls.properties && Array.isArray(cls.properties) && cls.properties.map((property) => (
             <div key={property.id} className="">

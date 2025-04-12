@@ -9,7 +9,7 @@ const inputStyle = {
     background: 'none',
     backgroundColor: 'transparent',
     outline: 'none',
-    transition: 'all 0.3s ease-in-out',
+    transition: 'all 0s ease-in-out',
 };
 
 const InputClickAndText = ({ id, initValue, updateValue }:{ id:any, initValue:any, updateValue:Function }) =>{
@@ -22,7 +22,7 @@ const InputClickAndText = ({ id, initValue, updateValue }:{ id:any, initValue:an
 
     return(
         <div 
-            className="relative flex items-center justify-center w-12 border-box text-xs"
+            className="relative flex items-center justify-center w-12 border-box"
             style={{...inputStyle, borderColor: mode !== 'rest' ? 'rgba(2,132,199,1)' : 'rgba(2,132,199,0)'}}
         >
             {mode !== 'typing' &&

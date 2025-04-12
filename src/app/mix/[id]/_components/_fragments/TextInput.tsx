@@ -19,7 +19,7 @@ export default function TextInput({
 
   // Handle click to select all text
   const handleClick = () => {
-    inputRef.current?.select();
+    inputRef.current?.focus();
   };
 
   return (

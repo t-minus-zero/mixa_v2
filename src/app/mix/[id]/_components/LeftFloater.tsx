@@ -7,11 +7,11 @@ import { useMixEditor } from '../_contexts/MixEditorContext';
 import { TreeNode } from '../_types/types';
 import { SearchIcon, X } from 'lucide-react';
 
-const renderTree = (node: TreeNode, level = 0) => (
-  <HtmlElement key={node.id} node={node} level={level}>
+const renderTree = (node: TreeNode, level = 0, parentNode: TreeNode | null = null) => (
+  <HtmlElement key={node.id} node={node} level={level} parentNode={parentNode}>
     {node.childrens && node.childrens.length > 0 && (
       <ul>
-        {node.childrens.map((childNode: TreeNode) => renderTree(childNode, level + 1))}
+        {node.childrens.map((childNode: TreeNode) => renderTree(childNode, level + 1, node))}
       </ul>
     )}
   </HtmlElement>
@@ -72,14 +72,14 @@ const LeftFloater = () => {
   
   return (
 
-    <div className="relative flex flex-col bg-white/75 rounded-r-xl overflow-hidden backdrop-blur-md max-h-[100vh] w-full transition-all duration-300">
-      
+    <div className="relative flex flex-col rounded-3xl shadow-lg border-l border-zinc-200 overflow-hidden backdrop-blur-md max-h-[100vh] w-full transition-all duration-300">
       <ResizableSection
         data-main-layer
         defaultWidth={isAccordionOpen ? 256 : 128}
         minWidth={128}
         maxWidth={512}
-        className="h-full flex flex-col justify-between group/tree relative"
+        handlePosition="right"
+        className="h-full flex flex-col justify-between group/tree relative left-floater-resizable"
       >
         {/* Layers section */}
         <div className="relative w-full h-full transition-all duration-300">
@@ -108,7 +108,7 @@ const LeftFloater = () => {
               </div>
             )}
           </div>
-            <div data-main-layer-hover className='flex flex-row items-center justify-end opacity-0 transition-opacity'>
+            <div data-main-layer-hover className='flex flex-row items-center justify-end transition-opacity'>
               {/* Search/Close button */}
               <button 
                 className={`w-6 h-6 flex items-center justify-center ${isSearchMode ? 'text-zinc-400 hover:text-red-500' : 'text-zinc-900 hover:text-zinc-600'}`}

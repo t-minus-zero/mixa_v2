@@ -14,7 +14,7 @@ export default function AccordionWrapper({ children, openStatus, fading=false }:
         style={{
             display : 'grid', 
             gridTemplateRows: isOpen ? '1fr' : '0fr', 
-            transition: 'grid-template-rows 500ms',
+            transition: 'grid-template-rows 200ms',
             width: '100%',
             }}>
         <div 

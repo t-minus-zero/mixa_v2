@@ -4,16 +4,16 @@ export const inputsSchema = {
     text: { 
         label: 'Text', inputType: 'text', format: '{value}', default: '' },
     unit: {
-        label: 'Unit', inputType: 'selection', default: 'px', format: '{value}',
+        label: 'Unit', inputType: 'option', default: 'px', format: '{value}',
         options: ['px', '%', 'rem', 'em', 'vh', 'vw', 'fr'] },
     dimension: { 
-        label: 'Dimension', inputType: 'function', separator: '', options: ['{number}','{unit}'], format: '{value}', default: ['{number}','{unit}'] }, 
+        label: 'Dimension', inputType: 'composite', separator: '', options: ['{number}','{unit}'], format: '{value}', default: ['{number}','{unit}'] }, 
     count: { 
         label: 'Count', inputType: 'number', min: 0, max: null, step: 1, format: '{value}', default: 0 },
     fraction: { 
         label: 'Fraction', inputType: 'number', min: 1, max: 12, step: 1, format: '{value}fr', default: 0 },
     globalKeyword: { 
-        label: 'Global Keyword', inputType: 'selection', default: 'unset', format: '{value}',
+        label: 'Global Keyword', inputType: 'option', default: 'unset', format: '{value}',
         options: ['none', 'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'match-parent', 'auto'],
      },
     trackKeyword: { 
@@ -45,7 +45,7 @@ export const inputsSchema = {
         options: ['{size}'] 
     },
     repeatFx: { 
-        label: 'Repeat (Fx)', inputType: 'function', separator: ', ', format: 'repeat({value})', default: ['auto-fill','{dimension}','{dimension}'],
+        label: 'Repeat (Fx)', inputType: 'text', separator: ', ', format: 'repeat({value})', default: 'repeat()',
         options: ['{repeatType}','{trackSizeList}'] 
     },
     trackList: { 
@@ -56,4 +56,9 @@ export const inputsSchema = {
         label: 'Individual', inputType: 'selection', default: 'normal', format: '{value}',
         options: ['normal', 'stretch', 'center', 'flex-start', 'flex-end', 'start', 'end', 'self-start', 'self-end']
     },
+    //NewTypes
+    flex: { 
+        
+    },
+
 };

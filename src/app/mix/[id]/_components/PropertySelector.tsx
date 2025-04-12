@@ -118,7 +118,7 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
   };
 
   return (
-    <div className="py-2 px-3 border-t border-zinc-200">
+    <div className="py-2 px-3">
       <button
         ref={buttonRef}
         className="w-full py-1 px-2 flex items-center justify-center text-zinc-500 hover:text-blue-500 hover:bg-zinc-100/50 rounded transition-colors"

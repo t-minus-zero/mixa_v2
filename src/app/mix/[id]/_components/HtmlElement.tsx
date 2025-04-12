@@ -11,7 +11,7 @@ import useDragAndDrop from '../_hooks/useDragAndDrop';
 import { moveElement, updateElementTitle, createElement } from '../_utils/treeUtils';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 
-function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: number, children?: React.ReactNode }) {
+function HtmlElement({ node, level = 0, parentNode, children }: { node: TreeNode, level?: number, parentNode?: TreeNode, children?: React.ReactNode }) {
   // Get tree operations from TreeContext
   const {
     selection,
@@ -29,7 +29,7 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
   // Get notification system
   const { addNotification } = useNotifications();
   
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState(null);
 
   // Define drag event handlers to pass to useDragAndDrop
@@ -132,10 +132,10 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
       ref={elementRef}
       className={`
         ${node.childrens && node.childrens.length > 0 && isOpen ? 'border-blue-400' : 'border-blue-400'}
-        ${selectionParent && selectionParent.id === node.id ? 'bg-zinc-100/50 rounded-lg' : ''}
-        ${selection.id === node.id ? 'border-blue-400 bg-blue-200/50 rounded-lg' : 'border-transparent'}
+        ${selectionParent && selectionParent.id === node.id ? 'bg-gray-100/80' : ''}
+        ${selection.id === node.id ? 'bg-gray-900 text-white' : 'text-gray-900 border-transparent'}
         ${getDropIndicatorStyle()}
-        relative 
+        relative rounded-lg
       `}
       style={{ marginLeft: level / 5 + "rem" }}
       draggable="true"
@@ -151,7 +151,7 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
         className={`
           ${selection.id === node.id ? '' : ''}
           ${draggedItem?.id === node.id ? 'opacity-50' : ''}
-          tracking-tight relative group w-full h-full flex flex-row items-center rounded-lg flex-start border border-transparent
+          tracking-tight text-xs relative group w-full h-full flex flex-row items-center rounded-lg flex-start border border-transparent
         `}
       >
         <button
@@ -159,15 +159,15 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
           className={"flex items-center justify-center w-6 hover:bg-zinc-100/50 h-6 rounded-lg"}
         > 
           {node.childrens && node.childrens.length > 0 &&
-            (isOpen ? <ChevronDown size={14} className="text-zinc-700" /> : <ChevronRight size={14} className="text-zinc-700" />)
+            (isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />)
           }
         </button>
         <HtmlTagSelector nodeId={node.id} currentTag={node.tag || 'div'} />
         <InputClickAndText id={node.id} initValue={node.title} updateValue={changeTitle} />
-        <div className="absolute right-1 flex items-center">
+        <div className="absolute right-0 flex items-center">
           {/* Copy Button */}
           <button
-            className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-lg text-zinc-700 hover:text-blue-500 text-xs"
+            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/50 text-xs"
           >
             <Copy size={12} />
           </button>
@@ -175,13 +175,13 @@ function HtmlElement({ node, level = 0, children }: { node: TreeNode, level?: nu
           {/* Add Button - + */}
           <button
             onClick={(e) => { e.preventDefault(); handleAddElement(); }}
-            className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-lg text-zinc-700 hover:text-blue-500"
+            className="hidden group-hover:flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/50"
           >
             <Plus size={12} />
           </button>
         </div>
       </div>
-      <div className={`${selection.id === node.id ? 'bg-white/50 rounded-lg' : ''}`}>
+      <div className={`${selection.id === node.id ? 'bg-white/90 rounded-lg' : ''}`}>
         <AccordionWrapper openStatus={isOpen}>{children}</AccordionWrapper>
       </div>
     </li>
