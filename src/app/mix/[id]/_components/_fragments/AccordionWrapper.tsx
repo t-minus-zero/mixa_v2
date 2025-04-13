@@ -2,7 +2,13 @@
 
 import React, {useState, useEffect} from 'react';
 
-export default function AccordionWrapper({ children, openStatus, fading=false }: { children: React.ReactNode, openStatus: boolean, fading?: boolean }) {
+interface AccordionProps {
+  children: React.ReactNode;
+  openStatus: boolean;
+  fading?: boolean;
+}
+
+export default function AccordionWrapper({ children, openStatus, fading=false }: AccordionProps) {
     const [isOpen, setIsOpen] = useState(openStatus);
 
     useEffect(() => {
@@ -25,6 +31,36 @@ export default function AccordionWrapper({ children, openStatus, fading=false }:
           className="overflow-hidden">
           {children}
         </div>
+    </div>
+  );
+}
+
+// Horizontal version of the accordion wrapper
+export function AccordionWrapperH({ children, openStatus, fading=false }: AccordionProps) {
+  const [isOpen, setIsOpen] = useState(openStatus);
+
+  useEffect(() => {
+    setIsOpen(openStatus);
+  }, [openStatus]);
+
+  return (
+    <div
+      style={{
+        display: 'grid', 
+        gridTemplateColumns: isOpen ? '1fr' : '0fr', 
+        transition: 'grid-template-columns 200ms',
+        height: '100%',
+      }}
+    >
+      <div 
+        style={{
+          opacity: isOpen ? '100%' : '0%',
+          transition: 'opacity 300ms',
+        }}
+        className="overflow-hidden"
+      >
+        {children}
+      </div>
     </div>
   );
 }

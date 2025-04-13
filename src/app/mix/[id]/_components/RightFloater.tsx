@@ -10,7 +10,7 @@ import ResizableSection from './_fragments/ResizableSection';
 import { addClassToElement, addClass, findNodeById } from '../_utils/treeUtils';
 
 // Add Class Button Component
-const AddClassButton = ({ isForSelectedElement }) => {
+const AddClassButton = () => {
   const { tree, updateTree, selection, updateCssTree, cssTree, selectClass } = useMixEditor();
   
   const handleAddClass = async () => {
@@ -22,8 +22,8 @@ const AddClassButton = ({ isForSelectedElement }) => {
       addClass(cssTree, newClassId);
     });
     
-    // If we're in selected element mode, also add the class to the selected element
-    if (isForSelectedElement && selection) {
+    // If we have a selection, add the class to the selected element
+    if (selection) {
       // Small timeout to ensure the CSS tree is updated first
       setTimeout(() => {
         updateTree(tree => {
@@ -37,11 +37,13 @@ const AddClassButton = ({ isForSelectedElement }) => {
   
   return (
     <button 
-      onClick={handleAddClass}
-      className="w-full rounded-xl text-zinc-500 hover:bg-zinc-50/50 hover:text-blue-400 py-2 px-4 text-xs transition-colors flex items-center justify-center"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleAddClass();
+      }}
+      className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition-colors"
     >
-      <Plus size={16} />
-      {isForSelectedElement ? 'Add Class to Selected Element' : 'Add New Class'}
+      <Plus size={16} strokeWidth={1.5} />
     </button>
   );
 };
@@ -163,7 +165,10 @@ const ClassesFloater = () => {
               </div>
             )}
           </div>
-          <div className='flex flex-row items-center justify-end'>
+          <div className='flex flex-row items-center justify-end gap-1'>
+            {/* Add Class button */}
+            <AddClassButton />
+            
             {/* Search/Close button */}
             <button 
               className={`w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isSearchMode ? 'text-zinc-400 hover:text-red-500' : 'text-zinc-400 hover:text-zinc-600'}`}
@@ -200,9 +205,6 @@ const ClassesFloater = () => {
               ))}
             </ul>
           )}
-          <div className="w-full p-2 pt-0">
-            <AddClassButton isForSelectedElement={!showAllClasses} />
-          </div>
         </AccordionWrapper>
       </div>
       
@@ -211,11 +213,12 @@ const ClassesFloater = () => {
 };
 
 const RightFloater = () => {
-  const { selection, updateTree, setSelection } = useMixEditor();
+  const { selection, updateTree, setSelection, rightFloaterRef } = useMixEditor();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   return (
     <div 
+      ref={rightFloaterRef}
       className="h-full w-full w-64 flex flex-col rounded-3xl shadow-2xl overflow-hidden justify-between items-end group/tree">
         <ResizableSection
         data-main-layer

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef, RefObject } from 'react';
 import { produce } from 'immer';
 import { TreeNode } from '../_types/types';
+import { CssTree, CssValueNode } from '../_types/css-types';
 import { useNotifications } from '../../../_contexts/NotificationsContext';
 import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { cssSchema } from '../_schemas/css';
@@ -29,6 +30,32 @@ export const htmlSchemas = {
   inputTypes: inputsSchema
 }
 
+// Define the context type
+export interface MixEditorContextType {
+  tree: TreeNode;
+  updateTree: (newTree: TreeNode) => void;
+  cssTree: CssTree;
+  updateCssTree: (newTree: CssTree) => void;
+  selection: TreeNode;
+  selectionParent: TreeNode;
+  draggedItem: any;
+  dropTarget: any;
+  setSelection: (node: TreeNode) => void;
+  setSelectionParent: (node: TreeNode) => void;
+  selectClass: (className: string) => void;
+  selectedClass: string;
+  selectedProperty: any;
+  setSelectedProperty: (property: any) => void;
+  setDraggedItem: (item: any) => void;
+  setDropTarget: (target: any) => void;
+  htmlSchemas: any;
+  mixMetadata: { id: number; name: string };
+  setMixMetadata: (metadata: { id: number; name: string }) => void;
+  codePageOpen: boolean;
+  setCodePageOpen: (open: boolean) => void;
+  rightFloaterRef: RefObject<HTMLDivElement>;
+}
+
 // Create the context
 const MixEditorContext = createContext<MixEditorContextType | null>(null);
 
@@ -42,6 +69,9 @@ export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const [codePageOpen, setCodePageOpen] = useState(false);
+
+  // Reference to the RightFloater component
+  const rightFloaterRef = useRef<HTMLDivElement | null>(null);
 
   const [tree, setTree] = useState<TreeNode>(defaultTreeNode);
   const [cssTree, setCssTree] = useState(defaultCssTree);
@@ -102,7 +132,8 @@ export const MixEditorProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     mixMetadata,
     setMixMetadata,
     codePageOpen,
-    setCodePageOpen
+    setCodePageOpen,
+    rightFloaterRef
   };
 
   return (

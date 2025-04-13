@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
 import {htmlSchemas } from '../_contexts/MixEditorContext';
+import { Plus } from 'lucide-react';
+import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // Define types for CSS schema
 interface CssPropertySchema {
@@ -25,6 +27,7 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const cssSchemas = htmlSchemas.properties;
+  const {rightFloaterRef} = useMixEditor();
 
   // Handle property selection
   const handleSelectProperty = (propertyType: string) => {
@@ -118,17 +121,17 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
   };
 
   return (
-    <div className="py-2 px-3">
-      <button
-        ref={buttonRef}
-        className="w-full py-1 px-2 flex items-center justify-center text-zinc-500 hover:text-blue-500 hover:bg-zinc-100/50 rounded transition-colors"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-        <span className="text-xs">Add property</span>
-      </button>
+    <div className="">
+
+      <button 
+          className="w-6 h-6 flex items-center justify-center hover:text-blue-500"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+        >
+          <Plus size={16} strokeWidth={1.5}/>
+        </button>
 
       <Portal
         show={isOpen}
@@ -137,8 +140,8 @@ export default function PropertySelector({ className, onAddProperty }: PropertyS
           setFilterText('');
           setSelectedIndex(0);
         }}
-        anchorEl={buttonRef}
-        placement="bottom-start"
+        anchorEl={rightFloaterRef}
+        placement="left"
         offset={5}
         autoAdjust={true}
         maxHeight={300}

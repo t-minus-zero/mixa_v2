@@ -5,7 +5,7 @@ import AccordionWrapper from './_fragments/AccordionWrapper';
 import PropertyElement from './PropertyElement';
 import PropertySelector from './PropertySelector';
 import InputClickAndText from './_fragments/InputClickAndText';
-import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon } from 'lucide-react';
+import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon, Plus } from 'lucide-react';
 import { renameClassesInTree, removeClassFromTreeElements, removeClass, renameClass, addProperty } from '../_utils/treeUtils';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 
@@ -16,7 +16,7 @@ interface CssClassElementProps {
   children?: React.ReactNode;
 }
 
-const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange }) => { 
+const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange, handleAddProperty }) => { 
   const [isVisible, setIsVisible] = useState(true);
   
   return (
@@ -30,6 +30,12 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
       </div>
 
       <div className={`flex flex-row items-center justify-end ${openStatus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+        
+        <PropertySelector
+          className={className}
+          onAddProperty={handleAddProperty}
+        />
+        
         {/* Eye toggle button */}
         <button 
           className="w-6 h-6 flex items-center justify-center"
@@ -38,12 +44,12 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
             setIsVisible(!isVisible);
           }}
         >
-          {isVisible ? <EyeIcon size={16} /> : <EyeClosedIcon size={16} />}
+          {isVisible ? <EyeIcon size={16} strokeWidth={1.5}/> : <EyeClosedIcon size={16} strokeWidth={1.5} />}
         </button>
         
         {/* Copy button - no functionality for now */}
         <button className="w-6 h-6 flex items-center justify-center">
-          <CopyIcon size={16} />
+          <CopyIcon size={16} strokeWidth={1.5}/>
         </button>
         
         {/* Delete button - with functionality */}
@@ -54,8 +60,9 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange 
             onDelete();
           }}
         >
-          <XIcon size={16} />
+          <XIcon size={16} strokeWidth={1.5}/>
         </button>
+
       </div>
     </div>
   )
@@ -119,7 +126,7 @@ export default function CssClassElement({ cls }) {
   }
   
   return (
-    <li className={`w-full rounded-3xl bg-gray-100/50 overflow-hidden ${isOpen ? 'bg-gray-200/50' : ''}`}>
+    <li className={`w-full rounded-3xl overflow-hidden ${isOpen ? 'bg-white/50 border border-zinc-100' : 'bg-gray-100/50'}`}>
       <div 
         className={`relative flex flex-start rounded-lg group`}
       >
@@ -129,6 +136,7 @@ export default function CssClassElement({ cls }) {
           openStatus={isOpen}
           onDelete={handleDeleteClass}
           onChange={handleUpdateClassName}
+          handleAddProperty={handleAddProperty}
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
@@ -142,12 +150,6 @@ export default function CssClassElement({ cls }) {
               />
             </div>
           ))}
-          
-          {/* Property selector */}
-          <PropertySelector
-            className={cls.name}
-            onAddProperty={handleAddProperty}
-          />
         </div>
       </AccordionWrapper>
     </li>
