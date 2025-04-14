@@ -117,7 +117,7 @@ export default function HtmlTagSelector({ className, nodeId, currentTag }: HtmlT
     <div className={`flex items-center ${className || ''}`}>
       <button
         ref={buttonRef}
-        className="px-2 py-1 text-xxs hover:bg-zinc-50/50 rounded transition-colors font-bold tracking-tight uppercase"
+        className="px-2 py-1 text-3xs hover:bg-zinc-50/50 rounded transition-colors font-bold tracking-tight uppercase"
         onClick={() => setIsOpen(!isOpen)}
       >
         {currentTag || 'div'}

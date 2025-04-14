@@ -10,6 +10,8 @@ export default {
       },
       fontSize: {
         'xxs': '0.625rem', // 10px when base is 16px
+        '2xs': '0.625rem', // 10px when base is 16px
+        '3xs': '0.5rem', // 8px when base is 16px
       },
     },
   },

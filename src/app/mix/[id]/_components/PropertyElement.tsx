@@ -9,7 +9,7 @@ import NumberInput from './_fragments/NumberInput';
 import ListInput from './_fragments/ListInput';
 import OptionSelector from './_fragments/OptionSelector';
 import CompositeInput from './_fragments/CompositeInput';
-import { X, Copy, EllipsisVertical, Shapes, ChevronsUpDown, Hexagon, GitCompare } from 'lucide-react';
+import { X, Copy, EllipsisVertical, Ellipsis, Option, ChevronsUpDown, Hexagon, Plus, Orbit, Trash2, EyeOff, Eye } from 'lucide-react';
 import { htmlSchemas } from '../_contexts/MixEditorContext';
 import { formatStyleProperty, updatePropertyValue, removeProperty, getLabelsOfPropertyOptions } from '../_utils/treeUtils';
 import Portal from 'MixaDev/app/_components/portal/Portal';
@@ -23,9 +23,20 @@ export default function PropertyElement({ classId, property }) {
   const properties = htmlSchemas.properties;
   const inputTypes = htmlSchemas.inputTypes;
   const [renderedOutput, setRenderedOutput] = useState(null);
+  const [isVisible, toggleVisibility] = useState(false);
+  const [ismode, setIsMode] = useState(typeof property.value !== 'string');
+
 
   let result = null;
   let complexPropertyValue = null;
+  let modeSelector = null;
+
+  // move to list call
+  const addToList = (item) => {
+    updateCssTree(cssTree => {
+      updatePropertyValue(cssTree, idList, [...currentValues, item]);
+    });
+  };
 
   // Renders the appropriate input component based on the property type and schema
   const renderPropertyInput = (idList, property) => {
@@ -39,9 +50,7 @@ export default function PropertyElement({ classId, property }) {
 
 
   // Now render based on the found schema
-
-      
-      if( propertySchema.inputType === 'number'){
+    if( propertySchema.inputType === 'number'){
           return(
               <NumberInput 
                   value={property.value} 
@@ -123,8 +132,8 @@ export default function PropertyElement({ classId, property }) {
         }
         
         return(
-          <div className={`flex rounded-3xl group ${isList ? 'flex-row items-center' : 'flex-row items-center'} ${depth === 1 || !isString ? 'bg-gray-100' : ''}`}>
-            <div className={'flex justify-center items-center' + (isList ? ' w-full' : 'w-full')}>
+          <div className={`flex rounded-3xl group ${isList ? 'flex-row items-center' : 'flex-row items-center'}`}>
+            {typeof property.value === 'string' &&
               <OptionSelector 
                   onChange={(id) => {
                       updateCssTree(cssTree => {
@@ -133,20 +142,13 @@ export default function PropertyElement({ classId, property }) {
                   }}
                   options={propertySchema.options || []}
               >
-                {/* Check if value is a string */}
-                {typeof property.value === 'string' ? (
                   <div className={'flex flex-row gap-0.5 items-center ' + (depth === 1 ? ' py-2 px-3' : 'py-2 px-1')}>
                     <span className="text-xs">{property.value}</span>
-                    <ChevronsUpDown size={10} className="text-gray-500" />
+                    <ChevronsUpDown size={10} strokeWidth={1.5} className="text-gray-500" />
                   </div>  
-                ) : (
-                  <div className={'transition-all duration-300 w-0 rounded-lg overflow-hidden group-hover:w-6'}>
-                    <div className="w-6 flex items-center justify-center"><GitCompare size={14} className="text-zinc-700" /></div>
-                  </div>
-                )}
               </OptionSelector>
-            </div>
-              {!isList &&
+            }
+            {!isList &&
                   // If value is an object with type and value, render it recursively
                   typeof property.value === 'object' && property.value !== null &&
                       renderPropertyInput([...idList, property.value.id], property.value)
@@ -163,6 +165,7 @@ export default function PropertyElement({ classId, property }) {
                           updatePropertyValue(cssTree, idList, newValues);
                       });
                   }}
+                  onAddItem={addToList}
                   options={propertySchema.options || []}
                   renderItem={(item, index) => {
                       // Render each item based on its type
@@ -180,7 +183,45 @@ export default function PropertyElement({ classId, property }) {
       }
   };
 
-  let propertySchema = properties[property.type]
+
+  const propertyOptions = () => {
+    return (
+      <ul className="flex flex-col w-full px-1 py-1 gap-1">
+        <li className="w-full">
+          <button 
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors text-left" 
+            onClick={() => {}}
+          >
+            <Copy size={14} strokeWidth={1.5} className="text-zinc-600"/>
+            <span className="text-xs text-zinc-800">Copy</span>
+          </button>
+        </li>
+        <li className="w-full">
+          <button 
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors text-left" 
+            onClick={() => {toggleVisibility(!isVisible)}}
+          >
+            {isVisible ? 
+              <Eye size={14} strokeWidth={1.5} className="text-zinc-600" /> : 
+              <EyeOff size={14} strokeWidth={1.5} className="text-zinc-600" />
+            }
+            <span className="text-xs text-zinc-800">{isVisible ? 'Show' : 'Hide'}</span>
+          </button>
+        </li>
+        <li className="w-full">
+          <button 
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors text-left group" 
+            onClick={handleRemoveProperty}
+          >
+            <Trash2 size={14} strokeWidth={1.5} className="text-zinc-600 group-hover:text-red-500" />
+            <span className="text-xs text-zinc-800 group-hover:text-red-500">Remove</span>
+          </button>
+        </li>
+      </ul>
+    )
+  }
+
+  let propertySchema = properties[property.type]?.inputs;
 
   // Handle property removal
   const handleRemoveProperty = (e) => {
@@ -192,7 +233,7 @@ export default function PropertyElement({ classId, property }) {
 
   return (
     <div 
-      className="w-full overflow-hidden rounded-3xl relative"
+      className="w-full overflow-hidden rounded-3xl relative group"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -201,32 +242,42 @@ export default function PropertyElement({ classId, property }) {
       >
 
         <div className="flex flex-row items-center h-full justify-start gap-1">
-          <button
-              className="text-zinc-700 w-2 hover:bg-gray-100/50 transition-colors"
-              onClick={()=>{console.log('Open options')}}
-              aria-label="Open options"
+        <div className="w-6 h-6 flex items-center justify-center rounded-3xl hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+            <OptionSelector 
+              onChange={(option) => {
+                // Only update value if in mode that supports options
+                if (ismode && propertySchema?.options) {
+                  updateCssTree(cssTree => {
+                    updatePropertyValue(cssTree, [property.id], option);
+                  });
+                }
+              }}
+              options={ismode ? (propertySchema?.options || []) : []}
+              portalExtra={propertyOptions}
             >
-            {isHovering &&<EllipsisVertical size={12} />}
-          </button> 
-          <span className="text-xxs font-semibold text-gray-700 uppercase">{propertySchema?.label || property.type}</span>
+              <Ellipsis size={14} strokeWidth={1.5} className="text-zinc-700" />
+            </OptionSelector>
+          </div>
+          <span className="text-3xs font-semibold text-gray-500 uppercase">{propertySchema?.label || property.type}</span>
         </div>
 
-        <div className="flex flex-row justify-end">
-          <div className="flex items-center rounded-lg overflow-hidden">
+        <div className="flex flex-row items-center justify-end rounded-3xl overflow-hidden">
+          <div className="flex items-center rounded-3xl overflow-hidden bg-gray-50">
             {property.value ? (
               renderPropertyInput([property.id], property)
             ) : (
-              <span className="text-xxs text-zinc-400">No value to edit</span>
+              <span className="text-xs text-zinc-400">No value to edit</span>
             )}
             {complexPropertyValue && (
-              <div className="px-3 py-2 flex items-center justify-center bg-gray-100 rounded-3xl" onClick={() => setOpen(!open)}>
+              <div className="px-3 py-2 flex items-center justify-center rounded-3xl" onClick={() => setOpen(!open)}>
                 <span className="text-xs text-gray-900">
                   {complexPropertyValue}
                 </span>
               </div>
             )}
+            
           </div>
-
+          
         </div>
 
       </div>
@@ -242,7 +293,8 @@ export default function PropertyElement({ classId, property }) {
           autoAdjust={true}
           maxHeight={300}
           className="bg-zinc-50/75 backdrop-blur-md rounded-xl shadow-lg border border-zinc-200 w-56 overflow-hidden"
-          zIndex={1000}
+          zIndex={40}
+          ignoreNestedPortals={true}
         >
           <div className="flex flex-col h-full">
             {result}

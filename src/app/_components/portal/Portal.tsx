@@ -26,6 +26,7 @@ interface PortalProps {
   offset?: number; // Distance from the anchor element
   autoAdjust?: boolean; // Whether to adjust to keep within viewport
   maxHeight?: number | string;
+  ignoreNestedPortals?: boolean; // Whether to ignore clicks inside other portals
 }
 
 export default function Portal({
@@ -40,6 +41,7 @@ export default function Portal({
   offset = 4,
   autoAdjust = true,
   maxHeight,
+  ignoreNestedPortals = false,
 }: PortalProps) {
   // Track if component is mounted (client-side only)
   const [mounted, setMounted] = useState(false);
@@ -228,6 +230,30 @@ export default function Portal({
       const anchorElement = anchorEl?.current;
       const target = e.target as Node;
       
+      // Don't close if the click was inside another portal (only if ignoreNestedPortals is true)
+      if (ignoreNestedPortals) {
+        const isInsideAnyPortal = (node: Node | null): boolean => {
+          if (!node) return false;
+          
+          // Check if this is a portal element other than our own
+          if (
+            node instanceof HTMLElement && 
+            node.dataset.portalId === 'mixa-portal' && 
+            node !== portalContent
+          ) {
+            return true;
+          }
+          
+          // Check parent recursively
+          return isInsideAnyPortal(node.parentNode);
+        };
+        
+        // Check if click is inside any other portal
+        if (isInsideAnyPortal(target)) {
+          return;
+        }
+      }
+      
       // Check if click is outside both portal content and anchor element
       if (
         portalContent && 
@@ -258,13 +284,14 @@ export default function Portal({
   return createPortal(
     <div
       ref={portalRef}
-      className={`fixed ${className}`}
+      className={`fixed portal-container ${className}`}
       style={{
         zIndex,
         ...computedPosition,
         visibility: Object.keys(computedPosition).length ? 'visible' : 'hidden',
       }}
       onClick={(e) => e.stopPropagation()}
+      data-portal-id="mixa-portal"
     >
       {children}
     </div>,

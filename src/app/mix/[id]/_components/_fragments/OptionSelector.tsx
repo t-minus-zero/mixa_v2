@@ -10,6 +10,7 @@ interface OptionSelectorProps {
   placeholder?: string;
   className?: string;
   children?: ReactNode;
+  portalExtra?: () => ReactNode; // Function that returns additional content for the portal
 }
 
 export default function OptionSelector({ 
@@ -17,7 +18,8 @@ export default function OptionSelector({
   options,
   placeholder = 'Select an option...',
   className = '',
-  children
+  children,
+  portalExtra
 }: OptionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export default function OptionSelector({
 
   return (
     <div 
-      className={`relative w-full flex items-center rounded-lg overflow-hidden group ${className} ${isOpen ? '' : ''}`} 
+      className={`relative flex items-center rounded-lg overflow-hidden group ${className} ${isOpen ? '' : ''}`} 
       ref={containerRef}
       onClick={() => setIsOpen(!isOpen)}
     >
@@ -79,26 +81,33 @@ export default function OptionSelector({
         placement="bottom-start"
         offset={2}
         autoAdjust={true}
-        maxHeight={200}
-        className="bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto z-50 min-w-[8rem]"
+        maxHeight={240}
+        className="bg-white/95 backdrop-blur-sm border border-zinc-200 rounded-xl shadow-lg overflow-auto z-50 min-w-[8rem]"
         zIndex={50}
       >
-        <div className="">
-          {options.map((option) => (
-            <div 
-              key={option} 
-              className={`
-                px-3 py-2 cursor-pointer text-xs
-                hover:bg-zinc-50
-              `}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectOption(option);
-              }}
-            >
-              {option}
+        <div className="p-1">
+          {/* Regular options */}
+          <div className="overflow-y-auto max-h-[200px]">
+            {options.map((option) => (
+              <div 
+                key={option} 
+                className="px-3 py-1.5 cursor-pointer text-xs text-zinc-800 rounded-md hover:bg-zinc-100 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectOption(option);
+                }}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+          
+          {/* Extra content from portalExtra prop */}
+          {portalExtra && (
+            <div className="border-t border-zinc-100 mt-1 pt-1 w-full">
+              {portalExtra()}
             </div>
-          ))}
+          )}
         </div>
       </Portal>
     </div>
