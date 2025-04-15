@@ -61,7 +61,7 @@ export default function OptionSelector({
       {/* Display the children or placeholder */}
       <div className="flex-grow flex items-center">
         {hasChildren ? (
-          <div className="w-full">{children}</div>
+          <div className="w-full break-words">{children}</div>
         ) : (
           <div className="text-xs text-gray-500">{placeholder}</div>
         )}

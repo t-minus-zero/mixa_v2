@@ -238,11 +238,30 @@ export default function PropertyElement({ classId, property }) {
       onMouseLeave={() => setIsHovering(false)}
     >
       <div 
-        className="w-full flex flex-row items-center justify-between cursor-pointer px-2 py-1 rounded"
+        className="w-full flex flex-row items-center justify-between cursor-pointer px-2 py-2 rounded"
       >
 
         <div className="flex flex-row items-center h-full justify-start gap-1">
-        <div className="w-6 h-6 flex items-center justify-center rounded-3xl hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-3xs font-semibold text-gray-500 uppercase">{propertySchema?.label || property.type}</span>
+        </div>
+
+        <div className="flex flex-row items-center justify-end rounded-3xl overflow-hidden">
+          <div className="flex items-center rounded-3xl overflow-hidden bg-gray-50">
+            {property.value ? (
+              renderPropertyInput([property.id], property)
+            ) : (
+              <span className="text-xs text-zinc-400">No value to edit</span>
+            )}
+            {complexPropertyValue && (
+              <div className="p-2 flex items-center justify-center rounded-3xl" onClick={() => setOpen(!open)}>
+                <span className="text-xs text-gray-900">
+                  {complexPropertyValue}
+                </span>
+              </div>
+            )}
+            
+          </div>
+          <div className="w-6 h-6 flex items-center justify-center rounded-3xl hover:bg-gray-100 opacity-100 group-hover:opacity-100 transition-opacity">
             <OptionSelector 
               onChange={(option) => {
                 // Only update value if in mode that supports options
@@ -258,26 +277,6 @@ export default function PropertyElement({ classId, property }) {
               <Ellipsis size={14} strokeWidth={1.5} className="text-zinc-700" />
             </OptionSelector>
           </div>
-          <span className="text-3xs font-semibold text-gray-500 uppercase">{propertySchema?.label || property.type}</span>
-        </div>
-
-        <div className="flex flex-row items-center justify-end rounded-3xl overflow-hidden">
-          <div className="flex items-center rounded-3xl overflow-hidden bg-gray-50">
-            {property.value ? (
-              renderPropertyInput([property.id], property)
-            ) : (
-              <span className="text-xs text-zinc-400">No value to edit</span>
-            )}
-            {complexPropertyValue && (
-              <div className="px-3 py-2 flex items-center justify-center rounded-3xl" onClick={() => setOpen(!open)}>
-                <span className="text-xs text-gray-900">
-                  {complexPropertyValue}
-                </span>
-              </div>
-            )}
-            
-          </div>
-          
         </div>
 
       </div>
