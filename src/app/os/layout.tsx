@@ -12,9 +12,9 @@ export default function OSLayout({
     // and ContextRegistry for managing child component contexts
     <DashboardProvider>
       <ContextRegistryProvider>
-        <div className="os-layout">
+        <div className="w-screen h-screen">
           {/* Dashboard structure will go here */}
-          <main className="os-main">
+          <main className="w-full h-full">
             {children}
           </main>
         </div>

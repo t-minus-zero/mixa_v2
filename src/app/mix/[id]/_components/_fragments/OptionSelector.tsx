@@ -2,7 +2,8 @@
 
 import { useState, useRef, ReactNode, useEffect } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
-import { ChevronsUpDown } from 'lucide-react';
+import { ChevronDown, ChevronsUp, ChevronsUpDown, ChevronUp } from 'lucide-react';
+import AccordionWrapper from './AccordionWrapper';
 
 interface OptionSelectorProps {
   onChange: (value: string) => void;
@@ -11,17 +12,20 @@ interface OptionSelectorProps {
   className?: string;
   children?: ReactNode;
   portalExtra?: () => ReactNode; // Function that returns additional content for the portal
+  accordionLabel?: string; // If provided, wrap options in accordion with this label
 }
 
 export default function OptionSelector({ 
   onChange, 
   options,
-  placeholder = 'Select an option...',
-  className = '',
+  placeholder,
+  className,
   children,
-  portalExtra
+  portalExtra,
+  accordionLabel
 }: OptionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [accordionOpen, setAccordionOpen] = useState(accordionLabel ? false : true); // Start closed if label provided
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Check if children are provided for display
@@ -86,25 +90,48 @@ export default function OptionSelector({
         zIndex={50}
       >
         <div className="p-1">
-          {/* Regular options */}
-          <div className="overflow-y-auto max-h-[200px]">
-            {options.map((option) => (
-              <div 
-                key={option} 
-                className="px-3 py-1.5 cursor-pointer text-xs text-zinc-800 rounded-md hover:bg-zinc-100 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectOption(option);
-                }}
-              >
-                {option}
+          {/* Conditional accordion button */}
+          {accordionLabel && options.length > 0 && (
+            <button 
+              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors text-left" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setAccordionOpen(!accordionOpen);
+              }}
+            >
+              <div className="flex items-center gap-2">
+                {accordionOpen ? <ChevronUp size={14} strokeWidth={1.5} className="text-zinc-600"/> : <ChevronDown size={14} strokeWidth={1.5} className="text-zinc-600"/>}
+                <span className="text-xs text-zinc-800">{accordionLabel}</span>
               </div>
-            ))}
-          </div>
+            </button>
+          )}
           
+          {/* Options wrapped in accordion */}
+          <AccordionWrapper openStatus={accordionOpen}>
+            <div className="overflow-y-auto max-h-[200px]">
+              {options.map((option) => (
+                <div 
+                  key={option} 
+                  className="px-3 py-1.5 cursor-pointer text-xs text-zinc-800 rounded-md hover:bg-zinc-100 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectOption(option);
+                  }}
+                >
+                  {option}
+                </div>
+              ))}
+            </div>
+          </AccordionWrapper>
+
+          {/* Separator between options and extra content */}
+          {options.length > 0 && portalExtra && (
+            <div className="border-t border-zinc-100 mt-1 mb-1 w-full" />
+          )}
+
           {/* Extra content from portalExtra prop */}
           {portalExtra && (
-            <div className="border-t border-zinc-100 mt-1 pt-1 w-full">
+            <div className="w-full">
               {portalExtra()}
             </div>
           )}

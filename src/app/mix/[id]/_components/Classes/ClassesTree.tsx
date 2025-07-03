@@ -1,64 +1,15 @@
 'use client'
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import CssClassElement from './CssClassElement';
-import { useMixEditor } from '../_contexts/MixEditorContext';
-import { v4 as uuidv4 } from 'uuid';
-import HtmlContent from './HtmlContent';
+import CssClassElement from '../CssClassElement';
+import { useMixEditor } from '../../_contexts/MixEditorContext';
 import { SearchIcon, X, Plus } from 'lucide-react';
-import AccordionWrapper from './_fragments/AccordionWrapper';
-import ResizableSection from './_fragments/ResizableSection';
-import { addClassToElement, addClass, findNodeById } from '../_utils/treeUtils';
+import AccordionWrapper from '../_fragments/AccordionWrapper';
+import {findNodeById } from '../../_utils/treeUtils';
+import AddClassButton from './AddClass';
 
-// Add Class Button Component
-const AddClassButton = () => {
-  const { tree, updateTree, selection, updateCssTree, cssTree, selectClass } = useMixEditor();
-  
-  const handleAddClass = async () => {
-    // Generate a new class ID
-    const newClassId = uuidv4().substring(0, 6);
-    
-    // First update the CSS tree with the new class
-    updateCssTree(cssTree => {
-      addClass(cssTree, newClassId);
-    });
-    
-    // If we have a selection, add the class to the selected element
-    if (selection) {
-      // Small timeout to ensure the CSS tree is updated first
-      setTimeout(() => {
-        updateTree(tree => {
-          addClassToElement(tree, selection.id, newClassId);
-        });
-        
-        console.log(`Added class with id "${newClassId}" to selected element`);
-      }, 0);
-    }
-  };
-  
-  return (
-    <button 
-      onClick={(e) => {
-        e.stopPropagation();
-        handleAddClass();
-      }}
-      className="w-6 h-6 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition-colors"
-    >
-      <Plus size={16} strokeWidth={1.5} />
-    </button>
-  );
-};
 
-// Define interface for ClassesFloater props
-interface ClassesFloaterProps {
-  classesToDisplay: Array<{id: string, name: string}>;
-  showAllClasses: boolean;
-  setShowAllClasses: (show: boolean) => void;
-  searchText: string;
-  setSearchText: (text: string) => void;
-}
-
-const ClassesFloater = () => {
-  const { selection, updateTree, setSelection, updateCssTree, cssTree, addClass, selectClass, tree } = useMixEditor();
+const ClassesTree = () => {
+  const { selection, cssTree, tree } = useMixEditor();
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [showAllClasses, setShowAllClasses] = useState(false);
   const [searchInput, setSearchInput] = useState('');
@@ -212,26 +163,4 @@ const ClassesFloater = () => {
   );
 };
 
-const RightFloater = () => {
-  const { selection, updateTree, setSelection, rightFloaterRef } = useMixEditor();
-  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-
-  return (
-    <div 
-      ref={rightFloaterRef}
-      className="h-full w-full w-64 flex flex-col rounded-3xl shadow-2xl overflow-hidden justify-between items-end group/tree">
-        <ResizableSection
-        data-main-layer
-        defaultWidth={isAccordionOpen ? 256 : 128}
-        minWidth={128}
-        maxWidth={512}
-        handlePosition="left"
-        className="h-full flex flex-col justify-between group/tree relative right-floater-resizable"
-      >
-        <ClassesFloater />
-      </ResizableSection>
-    </div>
-  );
-};
-
-export default RightFloater;
+export default ClassesTree;

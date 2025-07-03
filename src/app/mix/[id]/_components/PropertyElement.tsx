@@ -25,6 +25,7 @@ export default function PropertyElement({ classId, property }) {
   const [renderedOutput, setRenderedOutput] = useState(null);
   const [isVisible, toggleVisibility] = useState(false);
   const [ismode, setIsMode] = useState(typeof property.value !== 'string');
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
 
   let result = null;
@@ -186,7 +187,7 @@ export default function PropertyElement({ classId, property }) {
 
   const propertyOptions = () => {
     return (
-      <ul className="flex flex-col w-full px-1 py-1 gap-1">
+      <ul className="flex flex-col w-full gap-1">
         <li className="w-full">
           <button 
             className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors text-left" 
@@ -271,6 +272,7 @@ export default function PropertyElement({ classId, property }) {
                   });
                 }
               }}
+              accordionLabel="Input Type"
               options={ismode ? (propertySchema?.options || []) : []}
               portalExtra={propertyOptions}
             >

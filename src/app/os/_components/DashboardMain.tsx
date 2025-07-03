@@ -25,14 +25,12 @@ export default function DashboardMain({
         transition: isDragging ? 'none' : 'all 300ms ease-in-out'
       }}
     >
-      <div className="p-6">
         {content || (
           <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-bold">/</h1>
 
           </div>
         )}
-      </div>
     </div>
   );
 }

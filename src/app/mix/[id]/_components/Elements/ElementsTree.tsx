@@ -1,10 +1,10 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import HtmlElement from './HtmlElement';
-import AccordionWrapper from './_fragments/AccordionWrapper';
-import ResizableSection from './_fragments/ResizableSection';
-import { useMixEditor } from '../_contexts/MixEditorContext';
-import { TreeNode } from '../_types/types';
+import HtmlElement from '../HtmlElement';
+import AccordionWrapper from '../_fragments/AccordionWrapper';
+import ResizableSection from '../_fragments/ResizableSection';
+import { useMixEditor } from '../../_contexts/MixEditorContext';
+import { TreeNode } from '../../_types/types';
 import { SearchIcon, X } from 'lucide-react';
 
 const renderTree = (node: TreeNode, level = 0, parentNode: TreeNode | null = null) => (
@@ -17,7 +17,7 @@ const renderTree = (node: TreeNode, level = 0, parentNode: TreeNode | null = nul
   </HtmlElement>
 );
 
-const LeftFloater = () => {
+const ElementsTree = () => {
   // Get tree from MixEditorContext and selection from TreeContext
   const { tree, selection } = useMixEditor();
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -128,9 +128,8 @@ const LeftFloater = () => {
           </div>
           
         </div>
-      </ResizableSection>
     </div>
   );
 }
 
-export default LeftFloater;
+export default ElementsTree;
