@@ -3,6 +3,8 @@ export const inputsSchema = {
         label: 'Number', inputType: 'number', min: null, max: null, step: 1, format: '{value}', default: 0 },
     text: { 
         label: 'Text', inputType: 'text', format: '{value}', default: '' },
+    color: { 
+        label: 'Color', inputType: 'text', format: '{value}', default: '#32a1ce' },
     unit: {
         label: 'Unit', inputType: 'option', default: 'px', format: '{value}',
         options: ['px', '%', 'rem', 'em', 'vh', 'vw', 'fr'] },
@@ -15,6 +17,10 @@ export const inputsSchema = {
     globalKeyword: { 
         label: 'Global Keyword', inputType: 'option', default: 'unset', format: '{value}',
         options: ['none', 'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'match-parent', 'auto'],
+     },
+    colorKeywords: { 
+        label: 'Color Keywords', inputType: 'option', default: 'currentColor', format: '{value}',
+        options: ['currentColor', 'transparent', 'black', 'white', 'red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'black', 'silver', 'gray', 'maroon', 'olive', 'purple', 'teal', 'navy'],
      },
     trackKeyword: { 
         label: 'Track Keyword', inputType: 'option', default: 'max-content', format: '{value}',
@@ -45,7 +51,7 @@ export const inputsSchema = {
         options: ['{size}'] 
     },
     repeatFx: { 
-        label: 'Repeat (Fx)', inputType: 'text', separator: ', ', format: 'repeat({value})', default: 'repeat()',
+        label: 'Repeat (Fx)', inputType: 'composite', separator: ', ', format: 'repeat({value})', default: ['{repeatType}','{trackSizeList}'],
         options: ['{repeatType}','{trackSizeList}'] 
     },
     trackList: { 
@@ -55,6 +61,22 @@ export const inputsSchema = {
     individual: { 
         label: 'Individual', inputType: 'option', default: 'normal', format: '{value}',
         options: ['normal', 'stretch', 'center', 'flex-start', 'flex-end', 'start', 'end', 'self-start', 'self-end']
+    },
+    nth: { 
+        label: 'Nth', inputType: 'option', format: '{value}', default: '2n+1',
+        options: ['odd', 'even', '{number}', '{text}']
+    },
+    borderFx: { 
+        label: 'Border', inputType: 'composite', separator: ' ', format: '{value};', default: ['{dimension}','{lineStyle}', '{colorList}'],
+        options: ['{dimension}', '{lineStyle}', '{colorList}'] 
+    },
+    colorList: { 
+        label: 'Color List', inputType: 'list', separator: ' ', min: 1, max: 4, format: '{value}', default: ['{colorKeywords}','{colorKeywords}'],
+        options: ['{colorKeywords}', '{color}'] 
+    },
+    lineStyle: { 
+        label: 'Line Style', inputType: 'option', default: 'solid', format: '{value}',
+        options: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset']
     },
     //NewTypes
     flex: { 

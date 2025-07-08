@@ -510,9 +510,16 @@ export const formatStyleProperty = (value: CssValue, type: string): any => {
     
     // If value is an array, it should be processed in the context of its parent type
     if (Array.isArray(value)) {
-      // Default separator is space if no type is provided
-      const separator = '';
-      return value.map(item => formatStyleProperty(item.value, item.type)).join(separator);
+      // Get separator and format from the parent type's schema
+      const inputTypeSchema = inputsSchema[type];
+      const separator = inputTypeSchema?.separator || ' '; // Default to space, not empty
+      const formattedValue = value.map(item => formatStyleProperty(item.value, item.type)).join(separator);
+      
+      // Apply format if it exists (e.g., 'repeat({value})' for repeatFx)
+      if (inputTypeSchema?.format) {
+        return inputTypeSchema.format.replace('{value}', formattedValue);
+      }
+      return formattedValue;
     }
     
     // If value is an object with type and value

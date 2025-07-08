@@ -124,7 +124,8 @@ export default function PropertyElement({ classId, property }) {
               </SelectInput>
           )
       }if( propertySchema.inputType === 'option'){
-        const isList = property.value.type === 'trackList'
+        const isList = typeof property.value === 'object' && property.value !== null && 
+                       inputTypes[property.value.type]?.inputType === 'list'
         const isString = typeof property.value === 'string'
         const depth = idList.length;
         if (isList) {
@@ -168,6 +169,7 @@ export default function PropertyElement({ classId, property }) {
                   }}
                   onAddItem={addToList}
                   options={propertySchema.options || []}
+                  max={propertySchema.max || 12}
                   renderItem={(item, index) => {
                       // Render each item based on its type
                       if (typeof item === 'object' && item !== null) {
@@ -239,7 +241,7 @@ export default function PropertyElement({ classId, property }) {
       onMouseLeave={() => setIsHovering(false)}
     >
       <div 
-        className="w-full flex flex-row items-center justify-between cursor-pointer px-2 py-2 rounded"
+        className="w-full flex flex-row items-center justify-between cursor-pointer px-3 py-1 rounded"
       >
 
         <div className="flex flex-row items-center h-full justify-start gap-1">
@@ -262,23 +264,20 @@ export default function PropertyElement({ classId, property }) {
             )}
             
           </div>
-          <div className="w-6 h-6 flex items-center justify-center rounded-3xl hover:bg-gray-100 opacity-100 group-hover:opacity-100 transition-opacity">
-            <OptionSelector 
-              onChange={(option) => {
-                // Only update value if in mode that supports options
-                if (ismode && propertySchema?.options) {
+            <div className="w-6 h-6 flex items-center justify-center rounded-3xl hover:bg-gray-100 opacity-100 group-hover:opacity-100 transition-opacity">
+              <OptionSelector 
+                onChange={(option) => {
                   updateCssTree(cssTree => {
                     updatePropertyValue(cssTree, [property.id], option);
                   });
-                }
-              }}
-              accordionLabel="Input Type"
-              options={ismode ? (propertySchema?.options || []) : []}
-              portalExtra={propertyOptions}
-            >
-              <Ellipsis size={14} strokeWidth={1.5} className="text-zinc-700" />
-            </OptionSelector>
-          </div>
+                }}
+                accordionLabel="Input Type"
+                options={properties[property.type]?.inputs?.options || []}
+                portalExtra={propertyOptions}
+              >
+                <Ellipsis size={14} strokeWidth={1.5} className="text-zinc-700" />
+              </OptionSelector>
+            </div>
         </div>
 
       </div>

@@ -184,13 +184,7 @@ export default function ListInput({
           <div className="py-2 px-3 text-sm text-gray-500">No options available</div>
         )}
       </Portal>
-      
-      {/* Max items reached message */}
-      {value.length >= max && (
-        <div className="text-xs text-gray-400">
-          Maximum of {max} items reached
-        </div>
-      )}
+
     </div>
   );
 }

@@ -116,15 +116,15 @@ export const cssDisplaySchema = {
       format: "border-width: {value};"
     },
     borderStyle: {
-      default: "none",
+      default: "solid",
       label: "Border Style",
-      inputs: { inputType: "option", options: ["none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset", "{globalKeyword}"], default: "none", format: "{value}" },
+      inputs: { inputType: "option", options: ["{globalKeyword}", "{lineStyle}"], default: "{lineStyle}", format: "{value}" },
       format: "border-style: {value};"
     },
     borderColor: {
       default: "currentColor",
       label: "Border Color",
-      inputs: { inputType: "option", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}", "{color}"], default: "currentColor", format: "{value}" },
+      inputs: { inputType: "option", options: ["currentColor", "transparent", "{globalKeyword}", "{colorKeywords}", "{color}", "{colorList}"], default: "{colorKeywords}", format: "{value}" },
       format: "border-color: {value};"
     },
     borderRadius: {
@@ -163,12 +163,12 @@ export const cssDisplaySchema = {
         options: [
           "auto",
           "{globalKeyword}",
-          "{borderList}"
+          "{borderFx}"
         ], 
         default: "auto", 
         format: "{value}" 
       },
-      format: "border: {value};"
+      format: "border: {value}"
     },
     
 };

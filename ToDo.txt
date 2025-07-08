@@ -22,3 +22,48 @@ For /mix we'll have an easter egg page.
 
 
 For certain thing it's a good idea to follow that youtube video that uses stripe to implement sub-seller functionalities etc.
+
+
+---------------------------
+
+[] Implementation of pseudo-classes and screen contraint on css properties
+All the extra properties / contraints / pseudo classes are just added
+inside the class itself under a new property called "categories".
+A category can be of type 'pseudo-class', 'screen' etx. they can have a name 
+and have an id for identification.
+Each type has it's own schema and set up.
+
+When adding a property it jsut gets added to the properties list but is
+then organizedi n the ui depending on it's category sorting them out using
+the category id.
+
+These/categories/sections in the ui should be collapsable, copyable, deletable
+just like the class. Each one will have one or multiple inputs depending on what they need.
+Similar to properties itself.
+Their structure is basically the same of properties.
+The properties inside the class should be movable with drag and drop.
+
+During preview render, the properties that have a certain category are sorted out under
+different css code structures accordingly.
+
+Some categories might depend on others so they need to be nestable.
+Because we can have multiple categories and these can be nested within each other
+we can just add a category property to each category itself. So that when going trough
+them we can just check if the category has a category property and if it does we can 
+go trough it kind of recursively.
+This should solve the issue of having nested categories within each other by having a
+category property which is given the id of it's immediate parent.
+
+Here is an exaple of the data structure to solve the possibility of nestes or combined as well:
+interface CategoryConfig {
+  id: string;
+  name: string;
+  type: 'pseudo-class' | 'screen' | 'print';
+  parentCategoryId?: string; // Your approach
+  combinationType?: 'nested' | 'combined'; // How to merge with parent
+  value?: Record<string, any>; (managed the same way it is for properties)
+}
+
+Hover  Target:[Itself>] [change constraint, copy, delete]
+nth-child Value:['some input'] [Input selection] [change constraint, copy, delete]
+

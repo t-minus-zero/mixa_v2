@@ -36,6 +36,7 @@ export default function TextInput({
         w-32
         border-none 
         focus:ring-0
+        text-xs
       "
     />
   );
