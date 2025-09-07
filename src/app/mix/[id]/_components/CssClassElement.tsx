@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import AccordionWrapper from './_fragments/AccordionWrapper';
 import PropertyElement from './PropertyElement';
 import PropertySelector from './PropertySelector';
+import ConstraintSelector from './ConstraintSelector';
 import InputClickAndText from './_fragments/InputClickAndText';
 import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon, Plus } from 'lucide-react';
 import { renameClassesInTree, removeClassFromTreeElements, removeClass, renameClass, addProperty } from '../_utils/treeUtils';
@@ -16,7 +17,7 @@ interface CssClassElementProps {
   children?: React.ReactNode;
 }
 
-const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange, handleAddProperty }) => { 
+const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange, handleAddProperty, handleAddConstraint }) => { 
   const [isVisible, setIsVisible] = useState(true);
   
   return (
@@ -34,6 +35,11 @@ const TitleWithButtons = ({ className, onToggle, openStatus, onDelete, onChange,
         <PropertySelector
           className={className}
           onAddProperty={handleAddProperty}
+        />
+        
+        <ConstraintSelector
+          className={className}
+          onAddConstraint={handleAddConstraint}
         />
         
         {/* Eye toggle button */}
@@ -117,6 +123,17 @@ export default function CssClassElement({ cls }) {
     }
   };
   
+  // Handle constraint selection from ConstraintSelector (placeholder for now)
+  const handleAddConstraint = (constraintType, category) => {
+    console.log('Adding constraint:', constraintType, 'Category:', category);
+    // TODO: Implement constraint addition logic
+    
+    // Expand the accordion to show the newly added constraint
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+  
   if (!cls) {
     return (
       <div className="p-2 text-xs text-gray-500">
@@ -137,6 +154,7 @@ export default function CssClassElement({ cls }) {
           onDelete={handleDeleteClass}
           onChange={handleUpdateClassName}
           handleAddProperty={handleAddProperty}
+          handleAddConstraint={handleAddConstraint}
         />
       </div>
       <AccordionWrapper openStatus={isOpen}>
