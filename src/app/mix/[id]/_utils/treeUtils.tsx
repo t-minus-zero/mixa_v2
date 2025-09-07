@@ -456,7 +456,8 @@ export const defaultCssTree: CssTree =
               ]
             }
           }
-        ]
+        ],
+        categories: [] // Initialize empty categories array
       }
     ]
   };
@@ -597,7 +598,8 @@ export const addClass = (cssTree: CssTree, classId: string, addToSelected = fals
             type: "display",
             value: 'grid'
           }
-        ]
+        ],
+        categories: [] // Initialize empty categories array
       };
       cssTree.classes.push(newClass);
       return {success: true, message: 'Class added successfully', value: newClass};

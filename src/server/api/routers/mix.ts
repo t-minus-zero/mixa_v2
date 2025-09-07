@@ -11,13 +11,22 @@ const cssValueNodeSchema = z.object({
   name: z.string().optional(), // Made name optional to match the current structure
   value: z.any(),
   type: z.string().optional(),
+  category: z.string().optional(), // Optional category for pseudo-class/screen grouping
+});
+
+// CSS Category Node schema
+const cssCategoryNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  value: z.any(),
 });
 
 // CSS Class schema
 const cssClassSchema = z.object({
   id: z.string(),
   name: z.string(),
-  properties: z.array(cssValueNodeSchema)
+  properties: z.array(cssValueNodeSchema),
+  categories: z.array(cssCategoryNodeSchema), // Array of category nodes
 });
 
 // CSS Tree schema
