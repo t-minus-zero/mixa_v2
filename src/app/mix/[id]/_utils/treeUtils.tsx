@@ -3,7 +3,7 @@ import { htmlTagsSchema, htmlAttributesSchema } from '../_schemas/html';
 import { cssSchema } from '../_schemas/css';
 import { inputsSchema } from '../_schemas/inputs';
 import { NotificationType } from '../../../_contexts/NotificationsContext';
-import { TreeNode, DropPosition, CssTree, CssClass, CssValueNode, CssValue } from '../_types/types';
+import { TreeNode, DropPosition, CssTree, CssClass, CssValueNode, CssValue, CssCategoryNode } from '../_types/types';
 import { v4 as uuidv4 } from 'uuid';
 import { number } from 'zod';
 
@@ -841,3 +841,25 @@ export const getLabelsOfPropertyOptions = (propertyOptions: string[]) => {
 
   return labels;
 }
+
+// Category operations - simplified to only update tree structure
+export const addCategory = (cssTree: CssTree, classId: string, categoryData: CssCategoryNode) => {
+  // Find the class by id
+  const classIndex = findClassById(cssTree, classId);
+  if (classIndex === undefined) {
+    return {success: false, message: 'Class not found'};
+  }
+  const classObj = cssTree.classes[classIndex];
+  
+  if (classObj) {
+    // Initialize categories array if it doesn't exist
+    if (!classObj.categories) {
+      classObj.categories = [];
+    }
+    
+    classObj.categories.push(categoryData);
+    cssTree.classes[classIndex] = classObj;
+  }
+
+  return {success: true, message: 'Category added successfully'};
+};

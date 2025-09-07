@@ -63,6 +63,14 @@ interface CssCategoryNode {
   value?: CssValue; (managed the same way it is for properties)
 }
 
+
+[] ui and logic to add categories to the classes has been implemented
+[] to continue with the implementation of categories we need to extract the inputs rendering and updating logic
+from the property element.
+[] use the drag and drop functionality of the html tree to do the same for properties and categories.
+[] need to implement the addittion of the category id to the property element wehn dragged in the category.
+
+
 Hover  Target:[Itself>] [change constraint, copy, delete]
 nth-child Value:['some input'] [Input selection] [change constraint, copy, delete]
 

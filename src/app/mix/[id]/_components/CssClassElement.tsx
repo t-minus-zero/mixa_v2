@@ -7,7 +7,8 @@ import PropertySelector from './PropertySelector';
 import ConstraintSelector from './ConstraintSelector';
 import InputClickAndText from './_fragments/InputClickAndText';
 import { EyeIcon, EyeClosedIcon, CopyIcon, XIcon, Plus } from 'lucide-react';
-import { renameClassesInTree, removeClassFromTreeElements, removeClass, renameClass, addProperty } from '../_utils/treeUtils';
+import { renameClassesInTree, removeClassFromTreeElements, removeClass, renameClass, addProperty, addCategory } from '../_utils/treeUtils';
+import { v4 as uuidv4 } from 'uuid';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 
 // component for a class in the css tree
@@ -123,10 +124,20 @@ export default function CssClassElement({ cls }) {
     }
   };
   
-  // Handle constraint selection from ConstraintSelector (placeholder for now)
+  // Handle constraint selection from ConstraintSelector
   const handleAddConstraint = (constraintType, category) => {
-    console.log('Adding constraint:', constraintType, 'Category:', category);
-    // TODO: Implement constraint addition logic
+    // Create category data
+    const categoryData = {
+      id: uuidv4(),
+      name: constraintType,
+      type: category,
+      value: '' // Will be set based on constraint inputs
+    };
+    
+    // Add category to CSS tree using the same pattern as addProperty
+    updateCssTree(cssTree => {
+      addCategory(cssTree, cls.id, categoryData);
+    });
     
     // Expand the accordion to show the newly added constraint
     if (!isOpen) {
@@ -165,6 +176,21 @@ export default function CssClassElement({ cls }) {
               <PropertyElement
                 classId={cls.id}
                 property={property}
+              />
+            </div>
+          ))}
+          
+          {/* Categories displayed as properties */}
+          {cls.categories && Array.isArray(cls.categories) && cls.categories.map((category: any) => (
+            <div key={category.id} className="">
+              <PropertyElement
+                classId={cls.id}
+                property={{
+                  id: category.id,
+                  type: category.name,
+                  value: category.value || '',
+                  category: category.type
+                }}
               />
             </div>
           ))}

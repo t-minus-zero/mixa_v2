@@ -2,10 +2,13 @@
 
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Portal from 'MixaDev/app/_components/portal/Portal';
-import { Filter } from 'lucide-react';
+import { Plus, Filter } from 'lucide-react';
 import { useMixEditor } from '../_contexts/MixEditorContext';
 import { pseudoClassesSchema } from '../_schemas/css/pseudoClasses';
 import { screensSchema } from '../_schemas/css/screens';
+import { addCategory } from '../_utils/treeUtils';
+import { CssCategoryNode } from '../_types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define types for constraint schema
 interface ConstraintSchema {
@@ -28,7 +31,7 @@ export default function ConstraintSelector({ className, onAddConstraint }: Const
   const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const { rightFloaterRef } = useMixEditor();
+  const { rightFloaterRef, cssTree, updateCssTree } = useMixEditor();
 
   // Combine both schemas with category information
   const allConstraints = [
@@ -46,9 +49,11 @@ export default function ConstraintSelector({ className, onAddConstraint }: Const
 
   // Handle constraint selection
   const handleSelectConstraint = (constraintType: string, category: 'pseudo-class' | 'screen') => {
+    // Call the callback to let CssClassElement handle the actual addition
     if (onAddConstraint) {
       onAddConstraint(constraintType, category);
     }
+    
     setIsOpen(false);
     setFilterText('');
     setSelectedIndex(0);
