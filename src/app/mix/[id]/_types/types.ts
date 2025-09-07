@@ -30,8 +30,10 @@ export type CssValue = string | number | CssValueNode | CssValueNode[];
 // CSS Category Node (for pseudo-classes, screens, etc.)
 export interface CssCategoryNode {
   id: string;
-  type: string;
-  value: CssValue;
+  name: string;
+  type: 'pseudo-class' | 'screen' | 'print' | 'custom';
+  parentCategoryId?: string;  // For nesting categories
+  value?: CssValue;  // Optional, managed same way as properties
 }
 
 // CSS Class

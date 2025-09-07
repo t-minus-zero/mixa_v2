@@ -55,13 +55,12 @@ This should solve the issue of having nested categories within each other by hav
 category property which is given the id of it's immediate parent.
 
 Here is an exaple of the data structure to solve the possibility of nestes or combined as well:
-interface CategoryConfig {
+interface CssCategoryNode {
   id: string;
   name: string;
   type: 'pseudo-class' | 'screen' | 'print';
-  parentCategoryId?: string; // Your approach
-  combinationType?: 'nested' | 'combined'; // How to merge with parent
-  value?: Record<string, any>; (managed the same way it is for properties)
+  parentCategoryId?: string;
+  value?: CssValue; (managed the same way it is for properties)
 }
 
 Hover  Target:[Itself>] [change constraint, copy, delete]

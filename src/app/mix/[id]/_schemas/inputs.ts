@@ -63,7 +63,7 @@ export const inputsSchema = {
         options: ['normal', 'stretch', 'center', 'flex-start', 'flex-end', 'start', 'end', 'self-start', 'self-end']
     },
     nth: { 
-        label: 'Nth', inputType: 'option', format: '{value}', default: '2n+1',
+        label: 'Nth', inputType: 'option', format: '{value}', default: 'odd',
         options: ['odd', 'even', '{number}', '{text}']
     },
     borderFx: { 

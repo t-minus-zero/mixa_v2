@@ -2,188 +2,215 @@
 export const pseudoClassesSchema = {
   // Interactive pseudo-classes
   hover: {
-    label: 'hover',
+    label: 'Hover',
     type: 'pseudo-class',
     description: 'Applies when element is hovered over',
     target: ['class', 'id'],
-    inputs: {}
+    default: 'hover',
+    inputs: {},
+    format: '&:{value}'
   },
   
   active: {
-    label: 'active',
+    label: 'Active',
     type: 'pseudo-class', 
     description: 'Applies when element is being activated (clicked)',
     target: ['class', 'id'],
-    inputs: {}
+    default: 'active',
+    inputs: {},
+    format: '&:{value}'
   },
   
   focus: {
-    label: 'focus',
+    label: 'Focus',
     type: 'pseudo-class',
     description: 'Applies when element has focus',
     target: ['class', 'id'],
-    inputs: {}
+    default: 'focus',
+    inputs: {},
+    format: '&:{value}'
   },
   
-  'focus-visible': {
-    label: 'focus-visible',
+  focusVisible: {
+    label: 'Focus Visible',
     type: 'pseudo-class',
     description: 'Applies when element has focus and should show focus indicator',
     target: ['class', 'id'],
-    inputs: {}
+    default: 'focus-visible',
+    inputs: {},
+    format: '&:{value}'
   },
   
   visited: {
-    label: 'visited',
+    label: 'Visited',
     type: 'pseudo-class',
     description: 'Applies to visited links',
     target: [],
-    inputs: {}
+    default: 'visited',
+    inputs: {},
+    format: '&:{value}'
   },
   
   // Structural pseudo-classes
-  'first-child': {
-    label: 'first-child',
+  firstChild: {
+    label: 'First Child',
     type: 'pseudo-class',
     description: 'Selects the first child element',
     target: [],
-    inputs: {}
+    default: 'first-child',
+    inputs: {},
+    format: ':{value}'
   },
   
-  'last-child': {
-    label: 'last-child',
+  lastChild: {
+    label: 'Last Child',
     type: 'pseudo-class',
     description: 'Selects the last child element',
     target: [],
-    inputs: {}
+    default: 'last-child',
+    inputs: {},
+    format: ':{value}'
   },
   
-  'nth-child': {
-    label: 'nth-child',
+  nthChild: {
+    label: 'Nth Child',
     type: 'pseudo-class',
     description: 'Selects nth child element based on formula',
     target: [],
-    inputs: {'nth-formula': 'Formula like "2n+1", "odd", "even", or a number'}
+    default: 'odd',
+    inputs: { inputType: 'option', format: '{value}', default: 'odd',
+      options: ['odd', 'even', '{number}', '{text}'] },
+    format: ':nth-child({value})'
   },
   
-  'nth-of-type': {
-    label: 'nth-of-type',
+  nthOfType: {
+    label: 'Nth Of Type',
     type: 'pseudo-class',
     description: 'Selects nth element of its type',
     target: [],
-    inputs: {'nth-formula': 'Formula like "2n+1", "odd", "even", or a number'}
+    default: 'odd',
+    inputs: { inputType: 'option', format: '{value}', default: 'odd',
+      options: ['odd', 'even', '{number}', '{text}'] },
+    format: ':nth-of-type({value})'
   },
   
-  'first-of-type': {
-    label: 'first-of-type',
+  firstOfType: {
+    label: 'First Of Type',
     type: 'pseudo-class',
     description: 'Selects the first element of its type',
     target: [],
-    inputs: {}
+    default: 'first-of-type',
+    inputs: {},
+    format: ':{value}'
   },
   
-  'last-of-type': {
-    label: 'last-of-type',
+  lastOfType: {
+    label: 'Last Of Type',
     type: 'pseudo-class',
     description: 'Selects the last element of its type',
     target: [],
-    inputs: {}
+    default: 'last-of-type',
+    inputs: {},
+    format: ':{value}'
   },
   
   // Form-related pseudo-classes
   checked: {
-    label: 'checked',
+    label: 'Checked',
     type: 'pseudo-class',
     description: 'Applies to checked input elements',
     target: [],
-    inputs: {}
+    default: 'checked',
+    inputs: {},
+    format: ':{value}'
   },
   
   disabled: {
-    label: 'disabled',
+    label: 'Disabled',
     type: 'pseudo-class',
     description: 'Applies to disabled form elements',
     target: [],
-    inputs: {}
+    default: 'disabled',
+    inputs: {},
+    format: ':{value}'
   },
   
   enabled: {
-    label: 'enabled',
+    label: 'Enabled',
     type: 'pseudo-class',
     description: 'Applies to enabled form elements',
     target: [],
-    inputs: {}
+    default: 'enabled',
+    inputs: {},
+    format: ':{value}'
   },
   
   // Pseudo-elements
   before: {
-    label: 'before',
+    label: 'Before',
     type: 'pseudo-element',
     description: 'Creates a pseudo-element before the content',
     target: [],
-    inputs: {}
+    default: 'before',
+    inputs: {},
+    format: '::{value}'
   },
   
   after: {
-    label: 'after',
+    label: 'After',
     type: 'pseudo-element',
     description: 'Creates a pseudo-element after the content',
     target: [],
-    inputs: {}
+    default: 'after',
+    inputs: {},
+    format: '::{value}'
   },
   
-  'first-letter': {
-    label: 'first-letter',
+  firstLetter: {
+    label: 'First Letter',
     type: 'pseudo-element',
     description: 'Selects the first letter of text content',
     target: [],
-    inputs: {}
+    default: 'first-letter',
+    inputs: {},
+    format: '::{value}'
   },
   
-  'first-line': {
-    label: 'first-line',
+  firstLine: {
+    label: 'First Line',
     type: 'pseudo-element',
     description: 'Selects the first line of text content',
     target: [],
-    inputs: {}
+    default: 'first-line',
+    inputs: {},
+    format: '::{value}'
   }
 };
 
-// Type for pseudo-class schema entries
-type PseudoClassSchemaEntry = {
-  label: string;
-  type: 'pseudo-class' | 'pseudo-element';
-  description: string;
-  target: string[];
-  inputs: Record<string, string>;
-};
-
-// Type for the complete schema
-type PseudoClassesSchemaType = Record<string, PseudoClassSchemaEntry>;
 
 // Helper functions for pseudo-class validation and utilities
 export const getPseudoClassesByType = (type: 'pseudo-class' | 'pseudo-element') => {
-  return Object.entries(pseudoClassesSchema as PseudoClassesSchemaType)
+  return Object.entries(pseudoClassesSchema)
     .filter(([_, schema]) => schema.type === type)
     .map(([key, schema]) => ({ key, ...schema }));
 };
 
 export const canPseudoClassTarget = (pseudoClassName: string): boolean => {
-  const schema = (pseudoClassesSchema as PseudoClassesSchemaType)[pseudoClassName];
+  const schema = pseudoClassesSchema[pseudoClassName];
   return schema ? schema.target.length > 0 : false;
 };
 
 export const getPseudoClassTargetTypes = (pseudoClassName: string): string[] => {
-  const schema = (pseudoClassesSchema as PseudoClassesSchemaType)[pseudoClassName];
+  const schema = pseudoClassesSchema[pseudoClassName];
   return schema ? schema.target : [];
 };
 
 export const requiresPseudoClassInput = (pseudoClassName: string): boolean => {
-  const schema = (pseudoClassesSchema as PseudoClassesSchemaType)[pseudoClassName];
-  return schema ? Object.keys(schema.inputs).length > 0 : false;
+  const schema = pseudoClassesSchema[pseudoClassName];
+  return schema ? typeof schema.inputs === 'string' || Object.keys(schema.inputs as object).length > 0 : false;
 };
 
-export const getPseudoClassInputs = (pseudoClassName: string): Record<string, string> => {
-  const schema = (pseudoClassesSchema as PseudoClassesSchemaType)[pseudoClassName];
+export const getPseudoClassInputs = (pseudoClassName: string): string | object => {
+  const schema = pseudoClassesSchema[pseudoClassName];
   return schema ? schema.inputs : {};
 };
